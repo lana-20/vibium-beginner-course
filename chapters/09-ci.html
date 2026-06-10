@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chapter 9: Running in CI — Vibium Course</title>
+  <link rel="icon" type="image/png" href="https://www.daisyladybug.com/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1a2a; --bg-dark: #0a1220; --card: #13243a; --card-dark: #0d1e30;
+      --off-white: #f5f0eb; --coral: #d4552a; --coral-light: #e8785a; --coral-dark: #a83e1e;
+      --mint: #4aa8a5; --mint-light: #9dbfb8; --gold: #b8862a; --gold-light: #d4a85a;
+      --violet: #7455bf; --violet-light: #9e85d4; --steel: #3d6abf; --steel-light: #7298d4;
+      --border: rgba(255,255,255,0.08); --border-mid: rgba(255,255,255,0.14);
+      --fg-2: rgba(245,240,235,0.65); --fg-3: rgba(245,240,235,0.38);
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body: 'Inter', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --r-md: 8px; --r-lg: 12px; --r-xl: 16px; --r-2xl: 24px;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--off-white); font-family: var(--font-body); -webkit-font-smoothing: antialiased; line-height: 1.6; }
+    a { text-decoration: none; color: inherit; }
+    .container { max-width: 760px; margin: 0 auto; padding: 0 32px; }
+
+    nav { border-bottom: 1px solid var(--border); background: rgba(15,26,42,0.92); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 50; }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 14px 32px; max-width: 1100px; margin: 0 auto; }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand img { width: 36px; height: 36px; object-fit: contain; }
+    .brand-text { font-family: var(--font-display); font-size: 17px; letter-spacing: -0.01em; }
+    .brand-text em { font-style: italic; color: var(--coral); }
+    .nav-chapters { display: flex; align-items: center; gap: 4px; }
+    .nav-ch { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); padding: 5px 12px; border-radius: 999px; border: 1px solid transparent; transition: all 150ms; }
+    .nav-ch:hover { color: var(--off-white); border-color: var(--border-mid); }
+    .nav-ch.active { color: var(--coral-light); border-color: rgba(212,85,42,0.3); background: rgba(212,85,42,0.07); }
+
+    .hero { padding: 72px 0 56px; background: radial-gradient(ellipse at 70% 20%, rgba(74,168,165,0.18) 0%, transparent 55%), radial-gradient(ellipse at 15% 80%, rgba(61,106,191,0.12) 0%, transparent 55%), var(--bg-dark); }
+    .hero-inner { max-width: 760px; margin: 0 auto; padding: 0 32px; }
+    .hero-eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.26em; text-transform: uppercase; color: var(--coral-light); margin-bottom: 20px; }
+    .hero-title { font-family: var(--font-display); font-size: clamp(36px, 5vw, 60px); font-weight: 400; line-height: 1.05; letter-spacing: -0.025em; margin-bottom: 20px; }
+    .hero-title em { font-style: italic; color: var(--coral); }
+    .hero-desc { font-size: 16px; color: var(--fg-2); line-height: 1.7; max-width: 560px; margin-bottom: 32px; }
+    .hero-meta { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .meta-item { display: flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-3); }
+    .meta-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--coral); opacity: 0.7; }
+
+    .content { padding: 72px 0 88px; }
+    .section-block { padding: 48px 0; border-bottom: 1px solid var(--border); }
+    .section-block:last-child { border-bottom: none; }
+    .section-eyebrow { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--coral-light); margin-bottom: 14px; }
+    .section-heading { font-family: var(--font-display); font-size: clamp(24px, 3vw, 34px); font-weight: 400; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 24px; }
+    .section-heading em { font-style: italic; color: var(--coral); }
+    p { font-size: 16px; color: var(--fg-2); line-height: 1.75; margin-bottom: 18px; }
+    p:last-child { margin-bottom: 0; }
+    strong { color: var(--off-white); font-weight: 600; }
+    code.inline { font-family: var(--font-mono); font-size: 13px; background: rgba(255,255,255,0.06); border: 1px solid var(--border-mid); border-radius: 4px; padding: 1px 6px; color: var(--mint-light); }
+
+    .shell-panel { background: #060d16; border: 1px solid var(--border); border-radius: var(--r-lg); padding: 16px 20px; margin: 20px 0; overflow-x: auto; }
+    .shell-panel pre { font-family: var(--font-mono); font-size: 13px; line-height: 1.7; color: var(--fg-2); }
+    .shell-panel .out { color: var(--mint-light); }
+
+    .callout { background: rgba(74,168,165,0.07); border: 1px solid rgba(74,168,165,0.22); border-radius: var(--r-lg); padding: 16px 20px; margin: 24px 0; }
+    .callout p { font-size: 14px; color: var(--fg-2); margin: 0; }
+    .callout strong { color: var(--mint-light); }
+
+    .warning { background: rgba(212,85,42,0.06); border: 1px solid rgba(212,85,42,0.22); border-radius: var(--r-lg); padding: 16px 20px; margin: 24px 0; }
+    .warning p { font-size: 14px; color: var(--fg-2); margin: 0; }
+    .warning strong { color: var(--coral-light); }
+
+    .code-panel { background: var(--card); border: 1px solid var(--border-mid); border-radius: var(--r-xl); overflow: hidden; margin: 28px 0; box-shadow: 0 16px 48px rgba(0,0,0,0.35); }
+    .code-bar { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02); }
+    .cd { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
+    .cd.r { background: #ff5f57; } .cd.y { background: #febc2e; } .cd.g { background: #28c840; }
+    .code-file { margin-left: 8px; font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); }
+    .code-file em { color: var(--coral-light); font-style: normal; }
+    .code-body { padding: 20px 22px; overflow-x: auto; }
+    pre { font-family: var(--font-mono); font-size: 13px; line-height: 1.85; white-space: pre; }
+    .k  { color: var(--violet-light); }
+    .s  { color: var(--gold-light); }
+    .c  { color: var(--fg-3); font-style: italic; }
+    .t  { color: var(--mint-light); }
+    .fn { color: var(--coral-light); }
+    .n  { color: var(--steel-light); }
+    .yaml-key { color: var(--steel-light); }
+    .yaml-val { color: var(--gold-light); }
+    .yaml-c { color: var(--fg-3); font-style: italic; }
+
+    .ch-nav { padding: 48px 0; border-top: 1px solid var(--border); background: var(--bg-dark); }
+    .ch-nav-inner { max-width: 760px; margin: 0 auto; padding: 0 32px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .ch-link { display: flex; flex-direction: column; gap: 4px; }
+    .ch-link-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--fg-3); }
+    .ch-link-title { font-family: var(--font-display); font-size: 17px; color: var(--coral-light); letter-spacing: -0.01em; transition: color 150ms; }
+    .ch-link:hover .ch-link-title { color: var(--coral); }
+    .ch-link.next { text-align: right; }
+
+    footer { background: var(--bg-dark); border-top: 1px solid var(--border); padding: 32px 0; }
+    .footer-inner { max-width: 760px; margin: 0 auto; padding: 0 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .footer-brand { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--fg-3); }
+    .footer-brand em { color: var(--coral-light); font-style: normal; }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); transition: color 150ms; }
+    .footer-links a:hover { color: var(--fg-2); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="https://www.daisyladybug.com/" class="brand">
+      <img src="https://www.daisyladybug.com/ldb-logo.webp" alt="Daisy Lady Bug" />
+      <div><div class="brand-text">Vibium <em>Beginner</em></div></div>
+    </a>
+    <div class="nav-chapters">
+      <a class="nav-ch" href="01-landscape.html">Ch 1</a>
+      <a class="nav-ch" href="02-architecture.html">Ch 2</a>
+      <a class="nav-ch" href="03-first-test.html">Ch 3</a>
+      <a class="nav-ch" href="04-forms.html">Ch 4</a>
+      <a class="nav-ch" href="05-assertions-waiting.html">Ch 5</a>
+      <a class="nav-ch" href="06-organizing-tests.html">Ch 6</a>
+      <a class="nav-ch" href="07-captures.html">Ch 7</a>
+      <a class="nav-ch" href="08-network.html">Ch 8</a>
+      <a class="nav-ch active" href="09-ci.html">Ch 9</a>
+      <a class="nav-ch" href="10-mcp.html">Ch 10</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Chapter 9</div>
+    <h1 class="hero-title">Running in <em>CI</em></h1>
+    <p class="hero-desc">Tests that only run on your laptop aren't tests — they're demos. Configure headless mode, exit codes, environment variables, and a complete GitHub Actions workflow.</p>
+    <div class="hero-meta">
+      <span class="meta-item"><span class="meta-dot"></span>DevOps</span>
+      <span class="meta-item"><span class="meta-dot"></span>GitHub Actions</span>
+      <span class="meta-item"><span class="meta-dot"></span>~20 min</span>
+    </div>
+  </div>
+</section>
+
+<main class="content">
+  <div class="container">
+
+    <div class="section-block">
+      <div class="section-eyebrow">9.1</div>
+      <h2 class="section-heading">headless: true <em>in CI</em></h2>
+      <p>CI runners don't have a display server. <code class="inline">headless: false</code> will fail. Read from <code class="inline">process.env.CI</code> — GitHub Actions sets it automatically.</p>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">env-aware headless mode</span></div>
+        <div class="code-body"><pre>
+<span class="c">// headless: false locally, true in CI</span>
+<span class="k">const</span> headless = process.env.CI === <span class="s">'true'</span>
+<span class="k">const</span> browser = <span class="k">await</span> vibium.<span class="fn">start</span>({ headless })</pre></div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">9.2 – 9.3</div>
+      <h2 class="section-heading">Exit Codes and <em>the Daemon</em></h2>
+      <p>A test script must exit with code 1 on failure, or CI won't know the job failed. Vitest handles this automatically. For standalone scripts, the <code class="inline">process.exit(1)</code> pattern from earlier chapters is correct.</p>
+      <p>The Vibium CLI requires a running daemon. Start it before your tests, stop it after — even on failure with <code class="inline">if: always()</code>.</p>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">daemon lifecycle in workflow</span></div>
+        <div class="code-body"><pre>
+<span class="yaml-key">- name:</span> <span class="yaml-val">Start Vibium daemon</span>
+  <span class="yaml-key">run:</span> <span class="yaml-val">vibium daemon start</span>
+
+<span class="yaml-key">- name:</span> <span class="yaml-val">Run tests</span>
+  <span class="yaml-key">run:</span> <span class="yaml-val">npm test</span>
+
+<span class="yaml-key">- name:</span> <span class="yaml-val">Stop Vibium daemon</span>
+  <span class="yaml-key">if:</span> <span class="yaml-val">always()</span>         <span class="yaml-c"># runs even if tests fail</span>
+  <span class="yaml-key">run:</span> <span class="yaml-val">vibium daemon stop</span></pre></div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">9.4</div>
+      <h2 class="section-heading">The GitHub Actions <em>Workflow</em></h2>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file"><em>.github/workflows/</em>tests.yml</span></div>
+        <div class="code-body"><pre>
+<span class="yaml-key">name:</span> <span class="yaml-val">Tests</span>
+
+<span class="yaml-key">on:</span>
+  <span class="yaml-key">push:</span>
+    <span class="yaml-key">branches:</span> <span class="yaml-val">[main]</span>
+  <span class="yaml-key">pull_request:</span>
+    <span class="yaml-key">branches:</span> <span class="yaml-val">[main]</span>
+
+<span class="yaml-key">jobs:</span>
+  <span class="yaml-key">test:</span>
+    <span class="yaml-key">runs-on:</span> <span class="yaml-val">ubuntu-latest</span>
+    <span class="yaml-key">steps:</span>
+      <span class="yaml-key">- uses:</span> <span class="yaml-val">actions/checkout@v4</span>
+      <span class="yaml-key">- uses:</span> <span class="yaml-val">actions/setup-node@v4</span>
+        <span class="yaml-key">with:</span>
+          <span class="yaml-key">node-version:</span> <span class="yaml-val">'20'</span>
+          <span class="yaml-key">cache:</span> <span class="yaml-val">'npm'</span>
+      <span class="yaml-key">- name:</span> <span class="yaml-val">Install dependencies</span>
+        <span class="yaml-key">run:</span> <span class="yaml-val">npm ci</span>
+      <span class="yaml-key">- name:</span> <span class="yaml-val">Install Vibium</span>
+        <span class="yaml-key">run:</span> <span class="yaml-val">npm install -g vibium</span>
+      <span class="yaml-key">- name:</span> <span class="yaml-val">Start Vibium daemon</span>
+        <span class="yaml-key">run:</span> <span class="yaml-val">vibium daemon start</span>
+      <span class="yaml-key">- name:</span> <span class="yaml-val">Run tests</span>
+        <span class="yaml-key">run:</span> <span class="yaml-val">npm test</span>
+        <span class="yaml-key">env:</span>
+          <span class="yaml-key">CI:</span> <span class="yaml-val">true</span>
+          <span class="yaml-key">AUT_BASE_URL:</span> <span class="yaml-val">${{ vars.AUT_BASE_URL }}</span>
+      <span class="yaml-key">- name:</span> <span class="yaml-val">Stop Vibium daemon</span>
+        <span class="yaml-key">if:</span> <span class="yaml-val">always()</span>
+        <span class="yaml-key">run:</span> <span class="yaml-val">vibium daemon stop</span></pre></div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">9.5</div>
+      <h2 class="section-heading">Environment <em>Variables</em></h2>
+      <p>Hard-coding URLs means a different environment requires code changes. Use environment variables instead:</p>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">env-aware AUT URL</span></div>
+        <div class="code-body"><pre>
+<span class="k">const</span> AUT = process.env.AUT_BASE_URL
+  ?? <span class="s">'https://automation-exercise.daisyladybug.com'</span></pre></div>
+      </div>
+      <div class="warning"><p><strong>Secrets vs vars:</strong> Use <code class="inline">secrets.*</code> for API keys and passwords — never <code class="inline">vars.*</code>. GitHub masks secrets in logs; vars are visible.</p></div>
+      <div class="callout"><p><strong>Local .env file:</strong> Add a <code class="inline">.env</code> file to your gitignore and use a package like <code class="inline">dotenv</code> to load it locally. Never commit <code class="inline">.env</code> files.</p></div>
+    </div>
+
+  </div>
+</main>
+
+<div class="ch-nav">
+  <div class="ch-nav-inner">
+    <a class="ch-link" href="08-network.html">
+      <span class="ch-link-label">← Chapter 8</span>
+      <span class="ch-link-title">Network Interception</span>
+    </a>
+    <a class="ch-link next" href="10-mcp.html">
+      <span class="ch-link-label">Chapter 10 →</span>
+      <span class="ch-link-title">Introduction to MCP</span>
+    </a>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">Vibium Beginner Course · <em>A Daisy Lady Bug course</em></div>
+    <div class="footer-links">
+      <a href="https://www.daisyladybug.com/">daisyladybug.com</a>
+      <a href="https://automation-exercise.daisyladybug.com/">AUT</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

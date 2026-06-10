@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chapter 10: Introduction to MCP — Vibium Course</title>
+  <link rel="icon" type="image/png" href="https://www.daisyladybug.com/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1a2a; --bg-dark: #0a1220; --card: #13243a; --card-dark: #0d1e30;
+      --off-white: #f5f0eb; --coral: #d4552a; --coral-light: #e8785a; --coral-dark: #a83e1e;
+      --mint: #4aa8a5; --mint-light: #9dbfb8; --gold: #b8862a; --gold-light: #d4a85a;
+      --violet: #7455bf; --violet-light: #9e85d4; --steel: #3d6abf; --steel-light: #7298d4;
+      --border: rgba(255,255,255,0.08); --border-mid: rgba(255,255,255,0.14);
+      --fg-2: rgba(245,240,235,0.65); --fg-3: rgba(245,240,235,0.38);
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body: 'Inter', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --r-md: 8px; --r-lg: 12px; --r-xl: 16px; --r-2xl: 24px;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--off-white); font-family: var(--font-body); -webkit-font-smoothing: antialiased; line-height: 1.6; }
+    a { text-decoration: none; color: inherit; }
+    .container { max-width: 760px; margin: 0 auto; padding: 0 32px; }
+
+    nav { border-bottom: 1px solid var(--border); background: rgba(15,26,42,0.92); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 50; }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 14px 32px; max-width: 1100px; margin: 0 auto; }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand img { width: 36px; height: 36px; object-fit: contain; }
+    .brand-text { font-family: var(--font-display); font-size: 17px; letter-spacing: -0.01em; }
+    .brand-text em { font-style: italic; color: var(--coral); }
+    .nav-chapters { display: flex; align-items: center; gap: 4px; }
+    .nav-ch { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); padding: 5px 12px; border-radius: 999px; border: 1px solid transparent; transition: all 150ms; }
+    .nav-ch:hover { color: var(--off-white); border-color: var(--border-mid); }
+    .nav-ch.active { color: var(--coral-light); border-color: rgba(212,85,42,0.3); background: rgba(212,85,42,0.07); }
+
+    .hero { padding: 72px 0 56px; background: radial-gradient(ellipse at 70% 20%, rgba(116,85,191,0.22) 0%, transparent 55%), radial-gradient(ellipse at 15% 80%, rgba(212,85,42,0.14) 0%, transparent 55%), var(--bg-dark); }
+    .hero-inner { max-width: 760px; margin: 0 auto; padding: 0 32px; }
+    .hero-eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.26em; text-transform: uppercase; color: var(--coral-light); margin-bottom: 20px; }
+    .hero-title { font-family: var(--font-display); font-size: clamp(36px, 5vw, 60px); font-weight: 400; line-height: 1.05; letter-spacing: -0.025em; margin-bottom: 20px; }
+    .hero-title em { font-style: italic; color: var(--coral); }
+    .hero-desc { font-size: 16px; color: var(--fg-2); line-height: 1.7; max-width: 560px; margin-bottom: 32px; }
+    .hero-meta { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .meta-item { display: flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-3); }
+    .meta-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--coral); opacity: 0.7; }
+
+    .content { padding: 72px 0 88px; }
+    .section-block { padding: 48px 0; border-bottom: 1px solid var(--border); }
+    .section-block:last-child { border-bottom: none; }
+    .section-eyebrow { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--coral-light); margin-bottom: 14px; }
+    .section-heading { font-family: var(--font-display); font-size: clamp(24px, 3vw, 34px); font-weight: 400; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 24px; }
+    .section-heading em { font-style: italic; color: var(--coral); }
+    p { font-size: 16px; color: var(--fg-2); line-height: 1.75; margin-bottom: 18px; }
+    p:last-child { margin-bottom: 0; }
+    strong { color: var(--off-white); font-weight: 600; }
+    code.inline { font-family: var(--font-mono); font-size: 13px; background: rgba(255,255,255,0.06); border: 1px solid var(--border-mid); border-radius: 4px; padding: 1px 6px; color: var(--mint-light); }
+
+    .interface-table { width: 100%; border-collapse: collapse; margin: 24px 0; }
+    .interface-table th { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg-3); padding: 8px 14px; text-align: left; border-bottom: 1px solid var(--border-mid); }
+    .interface-table td { font-size: 14px; color: var(--fg-2); padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .interface-table td:first-child { font-family: var(--font-mono); font-size: 13px; color: var(--coral-light); white-space: nowrap; }
+
+    .when-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 24px 0; }
+    @media (max-width: 560px) { .when-cards { grid-template-columns: 1fr; } }
+    .when-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 16px; }
+    .when-card.ts { border-top: 2px solid var(--mint); }
+    .when-card.mcp { border-top: 2px solid var(--violet); }
+    .when-card-title { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; }
+    .when-card.ts .when-card-title { color: var(--mint-light); }
+    .when-card.mcp .when-card-title { color: var(--violet-light); }
+    .when-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .when-list li { font-size: 13px; color: var(--fg-2); padding-left: 14px; position: relative; }
+    .when-list li::before { content: '—'; position: absolute; left: 0; color: var(--fg-3); }
+
+    .toc-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 28px 0; }
+    @media (max-width: 560px) { .toc-grid { grid-template-columns: 1fr; } }
+    .toc-item { background: var(--card); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start; }
+    .toc-num { font-family: var(--font-mono); font-size: 10px; color: var(--fg-3); background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 4px; padding: 2px 7px; flex-shrink: 0; margin-top: 2px; }
+    .toc-title { font-size: 13px; color: var(--off-white); }
+
+    .callout { background: rgba(116,85,191,0.07); border: 1px solid rgba(116,85,191,0.22); border-radius: var(--r-lg); padding: 16px 20px; margin: 24px 0; }
+    .callout p { font-size: 14px; color: var(--fg-2); margin: 0; }
+    .callout strong { color: var(--violet-light); }
+
+    .code-panel { background: var(--card); border: 1px solid var(--border-mid); border-radius: var(--r-xl); overflow: hidden; margin: 28px 0; box-shadow: 0 16px 48px rgba(0,0,0,0.35); }
+    .code-bar { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02); }
+    .cd { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
+    .cd.r { background: #ff5f57; } .cd.y { background: #febc2e; } .cd.g { background: #28c840; }
+    .code-file { margin-left: 8px; font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); }
+    .code-file em { color: var(--coral-light); font-style: normal; }
+    .code-body { padding: 20px 22px; overflow-x: auto; }
+    pre { font-family: var(--font-mono); font-size: 13px; line-height: 1.85; white-space: pre; }
+    .k  { color: var(--violet-light); }
+    .s  { color: var(--gold-light); }
+    .c  { color: var(--fg-3); font-style: italic; }
+    .t  { color: var(--mint-light); }
+    .fn { color: var(--coral-light); }
+    .n  { color: var(--steel-light); }
+
+    .prompt-panel { background: #060d16; border: 1px solid var(--border); border-left: 3px solid var(--violet); border-radius: var(--r-lg); padding: 16px 20px; margin: 20px 0; }
+    .prompt-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--violet-light); margin-bottom: 8px; }
+    .prompt-text { font-family: var(--font-body); font-size: 14px; color: var(--fg-2); line-height: 1.7; }
+
+    .ch-nav { padding: 48px 0; border-top: 1px solid var(--border); background: var(--bg-dark); }
+    .ch-nav-inner { max-width: 760px; margin: 0 auto; padding: 0 32px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .ch-link { display: flex; flex-direction: column; gap: 4px; }
+    .ch-link-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--fg-3); }
+    .ch-link-title { font-family: var(--font-display); font-size: 17px; color: var(--coral-light); letter-spacing: -0.01em; transition: color 150ms; }
+    .ch-link:hover .ch-link-title { color: var(--coral); }
+
+    footer { background: var(--bg-dark); border-top: 1px solid var(--border); padding: 32px 0; }
+    .footer-inner { max-width: 760px; margin: 0 auto; padding: 0 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .footer-brand { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--fg-3); }
+    .footer-brand em { color: var(--coral-light); font-style: normal; }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); transition: color 150ms; }
+    .footer-links a:hover { color: var(--fg-2); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="https://www.daisyladybug.com/" class="brand">
+      <img src="https://www.daisyladybug.com/ldb-logo.webp" alt="Daisy Lady Bug" />
+      <div><div class="brand-text">Vibium <em>Beginner</em></div></div>
+    </a>
+    <div class="nav-chapters">
+      <a class="nav-ch" href="01-landscape.html">Ch 1</a>
+      <a class="nav-ch" href="02-architecture.html">Ch 2</a>
+      <a class="nav-ch" href="03-first-test.html">Ch 3</a>
+      <a class="nav-ch" href="04-forms.html">Ch 4</a>
+      <a class="nav-ch" href="05-assertions-waiting.html">Ch 5</a>
+      <a class="nav-ch" href="06-organizing-tests.html">Ch 6</a>
+      <a class="nav-ch" href="07-captures.html">Ch 7</a>
+      <a class="nav-ch" href="08-network.html">Ch 8</a>
+      <a class="nav-ch" href="09-ci.html">Ch 9</a>
+      <a class="nav-ch active" href="10-mcp.html">Ch 10</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Chapter 10</div>
+    <h1 class="hero-title">Introduction to <em>MCP</em></h1>
+    <p class="hero-desc">Step beyond scripted tests. Learn how the Model Context Protocol lets an AI agent drive Vibium with natural language — and when that's the right tool versus writing TypeScript.</p>
+    <div class="hero-meta">
+      <span class="meta-item"><span class="meta-dot"></span>Advanced</span>
+      <span class="meta-item"><span class="meta-dot"></span>Agent automation</span>
+      <span class="meta-item"><span class="meta-dot"></span>~20 min</span>
+    </div>
+  </div>
+</section>
+
+<main class="content">
+  <div class="container">
+
+    <div class="section-block">
+      <div class="section-eyebrow">10.1</div>
+      <h2 class="section-heading">Three <em>Interfaces</em></h2>
+      <p>Vibium ships with three interfaces, all talking to the same daemon. Each has a different driver and a different purpose:</p>
+      <table class="interface-table">
+        <thead>
+          <tr>
+            <th>Interface</th>
+            <th>Who drives it</th>
+            <th>Best for</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>CLI</td>
+            <td>You, at a terminal</td>
+            <td>Exploration, one-off checks</td>
+          </tr>
+          <tr>
+            <td>TypeScript client</td>
+            <td>You, in code</td>
+            <td>Deterministic test suites</td>
+          </tr>
+          <tr>
+            <td>MCP server</td>
+            <td>An AI agent</td>
+            <td>Open-ended exploration, test generation</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">10.2 – 10.3</div>
+      <h2 class="section-heading">What MCP Is and <em>How to Start It</em></h2>
+      <p>MCP (Model Context Protocol) is an open standard that defines how AI models connect to tools. When Vibium runs as an MCP server, it exposes navigate, find, click, fill, and screenshot as MCP tool calls that any compatible AI client can invoke.</p>
+      <p>Configure it in Claude Desktop:</p>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">~/Library/Application Support/Claude/claude_desktop_config.json</span></div>
+        <div class="code-body"><pre>
+{
+  <span class="s">"mcpServers"</span>: {
+    <span class="s">"vibium"</span>: {
+      <span class="s">"command"</span>: <span class="s">"vibium"</span>,
+      <span class="s">"args"</span>: [<span class="s">"mcp"</span>]
+    }
+  }
+}</pre></div>
+      </div>
+      <p>After restarting Claude Desktop, you can type natural language commands and Claude will use Vibium's MCP tools against a live browser.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">10.4</div>
+      <h2 class="section-heading">Side-by-Side <em>Comparison</em></h2>
+      <p>The same scenario expressed two ways:</p>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">TypeScript client — deterministic</span></div>
+        <div class="code-body"><pre>
+<span class="k">await</span> page.<span class="fn">go</span>(<span class="s">`${AUT}/products`</span>)
+<span class="k">const</span> select = <span class="k">await</span> page.<span class="fn">find</span>({ css: <span class="s">'select:first-of-type'</span> })
+<span class="k">await</span> select.<span class="fn">select</span>(<span class="s">'Electronics'</span>)
+<span class="k">await</span> page.<span class="fn">waitForText</span>(<span class="s">'SHOWING 3 OF 12 PRODUCTS'</span>)
+<span class="k">const</span> count = <span class="k">await</span> page.<span class="fn">count</span>(<span class="s">'a[href*="/products/prod_"]'</span>)
+assert.<span class="fn">equal</span>(count, <span class="n">3</span>)</pre></div>
+      </div>
+      <div class="prompt-panel">
+        <div class="prompt-label">MCP prompt — agent-driven</div>
+        <div class="prompt-text">Go to automation-exercise.daisyladybug.com/products. Filter by the Electronics category. Tell me how many products are shown and what their names are.</div>
+      </div>
+      <p>The TypeScript version is precise, repeatable, and fast. The MCP version is flexible — you don't need to know the selector or even that there's a <code class="inline">select</code> element. The agent figures it out.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">10.5</div>
+      <h2 class="section-heading">When to Use <em>Each</em></h2>
+      <div class="when-cards">
+        <div class="when-card ts">
+          <div class="when-card-title">TypeScript client</div>
+          <ul class="when-list">
+            <li>Writing a regression test</li>
+            <li>Need deterministic pass/fail</li>
+            <li>Running unattended in CI</li>
+            <li>Cost matters (no LLM calls)</li>
+          </ul>
+        </div>
+        <div class="when-card mcp">
+          <div class="when-card-title">MCP / agent-driven</div>
+          <ul class="when-list">
+            <li>Exploring an unfamiliar page</li>
+            <li>Generating test cases from scenarios</li>
+            <li>Debugging a flaky test</li>
+            <li>Prototyping before writing tests</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout"><p><strong>Workflow tip:</strong> Use MCP to explore and describe a flow, then ask the agent to generate the TypeScript. Review, refine, and commit. Agents for exploration and generation, TypeScript for the final executable tests.</p></div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">Course complete</div>
+      <h2 class="section-heading">What You've <em>Learned</em></h2>
+      <p>You've covered the full arc from the landscape of web testing to running tests in CI and beyond:</p>
+      <div class="toc-grid">
+        <div class="toc-item"><span class="toc-num">Ch 1</span><span class="toc-title">The landscape of web testing tools</span></div>
+        <div class="toc-item"><span class="toc-num">Ch 2</span><span class="toc-title">Vibium architecture — Browser → Page → Element</span></div>
+        <div class="toc-item"><span class="toc-num">Ch 3</span><span class="toc-title">Your first test — navigate, find, assert</span></div>
+        <div class="toc-item"><span class="toc-num">Ch 4</span><span class="toc-title">Working with forms — fill, select, validation</span></div>
+        <div class="toc-item"><span class="toc-num">Ch 5</span><span class="toc-title">Assertions and waiting — state methods, waitForText</span></div>
+        <div class="toc-item"><span class="toc-num">Ch 6</span><span class="toc-title">Organizing tests — Vitest, Page Objects</span></div>
+        <div class="toc-item"><span class="toc-num">Ch 7</span><span class="toc-title">Capturing events — dialogs, console, downloads</span></div>
+        <div class="toc-item"><span class="toc-num">Ch 8</span><span class="toc-title">Network interception — stub, abort, partial</span></div>
+        <div class="toc-item"><span class="toc-num">Ch 9</span><span class="toc-title">Running in CI — headless, exit codes, GitHub Actions</span></div>
+        <div class="toc-item"><span class="toc-num">Ch 10</span><span class="toc-title">Introduction to MCP — agent-driven automation</span></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<div class="ch-nav">
+  <div class="ch-nav-inner">
+    <a class="ch-link" href="09-ci.html">
+      <span class="ch-link-label">← Chapter 9</span>
+      <span class="ch-link-title">Running in CI</span>
+    </a>
+    <div></div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">Vibium Beginner Course · <em>A Daisy Lady Bug course</em></div>
+    <div class="footer-links">
+      <a href="https://www.daisyladybug.com/">daisyladybug.com</a>
+      <a href="https://automation-exercise.daisyladybug.com/">AUT</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,37 @@
+{
+  "name": "vibium-beginner-course",
+  "version": "0.1.0",
+  "description": "Code examples for Vibium: Browser Automation with TypeScript (Udemy)",
+  "type": "module",
+  "scripts": {
+    "ch02:hierarchy": "npx tsx src/ch02-architecture/01-browser-hierarchy.ts",
+    "ch02:interactions": "npx tsx src/ch02-architecture/02-actions-captures-waits.ts",
+    "ch03:read": "npx tsx src/ch03-first-test/01-navigate-and-read.ts",
+    "ch03:assert": "npx tsx src/ch03-first-test/02-first-assertion.ts",
+    "ch03:complete": "npx tsx src/ch03-first-test/03-complete-test.ts",
+    "ch04:search": "npx tsx src/ch04-forms/01-search-filter.ts",
+    "ch04:validation": "npx tsx src/ch04-forms/02-validation-errors.ts",
+    "ch04:checkout": "npx tsx src/ch04-forms/03-checkout-flow.ts",
+    "ch05:state": "npx tsx src/ch05-assertions/01-element-state.ts",
+    "ch05:waits": "npx tsx src/ch05-assertions/02-waits.ts",
+    "ch05:totals": "npx tsx src/ch05-assertions/03-cart-totals.ts",
+    "ch07:dialog": "npx tsx src/ch07-captures/01-dialog.ts",
+    "ch07:console": "npx tsx src/ch07-captures/02-console.ts",
+    "ch07:download": "npx tsx src/ch07-captures/03-download.ts",
+    "ch08:stub": "npx tsx src/ch08-network/01-stub-response.ts",
+    "ch08:abort": "npx tsx src/ch08-network/02-abort.ts",
+    "ch08:partial": "npx tsx src/ch08-network/03-partial-intercept.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ci": "vitest run --reporter=verbose",
+    "ch10:compare": "npx tsx src/ch10-mcp/typescript-vs-mcp.ts"
+  },
+  "dependencies": {
+    "vibium": ">=26.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^2.0.0"
+  }
+}

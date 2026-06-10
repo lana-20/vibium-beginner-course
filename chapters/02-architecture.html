@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chapter 2: Architecture Overview — Vibium Course</title>
+  <link rel="icon" type="image/png" href="https://www.daisyladybug.com/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1a2a; --bg-dark: #0a1220; --card: #13243a; --card-dark: #0d1e30;
+      --off-white: #f5f0eb; --coral: #d4552a; --coral-light: #e8785a; --coral-dark: #a83e1e;
+      --mint: #4aa8a5; --mint-light: #9dbfb8; --gold: #b8862a; --gold-light: #d4a85a;
+      --violet: #7455bf; --violet-light: #9e85d4; --steel: #3d6abf; --steel-light: #7298d4;
+      --border: rgba(255,255,255,0.08); --border-mid: rgba(255,255,255,0.14);
+      --fg-2: rgba(245,240,235,0.65); --fg-3: rgba(245,240,235,0.38);
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body: 'Inter', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --r-md: 8px; --r-lg: 12px; --r-xl: 16px; --r-2xl: 24px;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--off-white); font-family: var(--font-body); -webkit-font-smoothing: antialiased; line-height: 1.6; }
+    a { text-decoration: none; color: inherit; }
+    .container { max-width: 760px; margin: 0 auto; padding: 0 32px; }
+
+    nav { border-bottom: 1px solid var(--border); background: rgba(15,26,42,0.92); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 50; }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 14px 32px; max-width: 1100px; margin: 0 auto; }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand img { width: 36px; height: 36px; object-fit: contain; }
+    .brand-text { font-family: var(--font-display); font-size: 17px; letter-spacing: -0.01em; }
+    .brand-text em { font-style: italic; color: var(--coral); }
+    .nav-chapters { display: flex; align-items: center; gap: 4px; }
+    .nav-ch { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); padding: 5px 12px; border-radius: 999px; border: 1px solid transparent; transition: all 150ms; }
+    .nav-ch:hover { color: var(--off-white); border-color: var(--border-mid); }
+    .nav-ch.active { color: var(--coral-light); border-color: rgba(212,85,42,0.3); background: rgba(212,85,42,0.07); }
+
+    .hero { padding: 72px 0 56px; background: radial-gradient(ellipse at 70% 20%, rgba(212,85,42,0.18) 0%, transparent 55%), radial-gradient(ellipse at 15% 80%, rgba(74,168,165,0.12) 0%, transparent 55%), var(--bg-dark); }
+    .hero-inner { max-width: 760px; margin: 0 auto; padding: 0 32px; }
+    .hero-eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.26em; text-transform: uppercase; color: var(--coral-light); margin-bottom: 20px; }
+    .hero-title { font-family: var(--font-display); font-size: clamp(36px, 5vw, 60px); font-weight: 400; line-height: 1.05; letter-spacing: -0.025em; margin-bottom: 20px; }
+    .hero-title em { font-style: italic; color: var(--coral); }
+    .hero-desc { font-size: 16px; color: var(--fg-2); line-height: 1.7; max-width: 560px; margin-bottom: 32px; }
+    .hero-meta { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .meta-item { display: flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-3); }
+    .meta-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--coral); opacity: 0.7; }
+
+    .content { padding: 72px 0 88px; }
+    .section-block { padding: 48px 0; border-bottom: 1px solid var(--border); }
+    .section-block:last-child { border-bottom: none; }
+    .section-eyebrow { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--coral-light); margin-bottom: 14px; }
+    .section-heading { font-family: var(--font-display); font-size: clamp(24px, 3vw, 34px); font-weight: 400; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 24px; }
+    .section-heading em { font-style: italic; color: var(--coral); }
+    p { font-size: 16px; color: var(--fg-2); line-height: 1.75; margin-bottom: 18px; }
+    p:last-child { margin-bottom: 0; }
+    strong { color: var(--off-white); font-weight: 600; }
+    em.inline { font-style: italic; color: var(--coral-light); }
+    code.inline { font-family: var(--font-mono); font-size: 13px; background: rgba(255,255,255,0.06); border: 1px solid var(--border-mid); border-radius: 4px; padding: 1px 6px; color: var(--mint-light); }
+
+    /* Hierarchy diagram */
+    .hierarchy { display: flex; flex-direction: column; gap: 0; margin: 32px 0; }
+    .hier-row { display: flex; align-items: center; gap: 12px; padding: 14px 20px; background: var(--card); border: 1px solid var(--border); border-bottom: none; }
+    .hier-row:first-child { border-radius: var(--r-lg) var(--r-lg) 0 0; }
+    .hier-row:last-child { border-bottom: 1px solid var(--border); border-radius: 0 0 var(--r-lg) var(--r-lg); }
+    .hier-indent { width: 20px; height: 1px; background: var(--border-mid); flex-shrink: 0; }
+    .hier-num { font-family: var(--font-mono); font-size: 10px; color: var(--fg-3); min-width: 16px; }
+    .hier-name { font-family: var(--font-mono); font-size: 14px; color: var(--coral-light); font-weight: 500; min-width: 160px; }
+    .hier-desc { font-size: 13px; color: var(--fg-2); }
+
+    /* Code panel */
+    .code-panel { background: var(--card); border: 1px solid var(--border-mid); border-radius: var(--r-xl); overflow: hidden; margin: 28px 0; box-shadow: 0 16px 48px rgba(0,0,0,0.35); }
+    .code-bar { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02); }
+    .cd { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
+    .cd.r { background: #ff5f57; } .cd.y { background: #febc2e; } .cd.g { background: #28c840; }
+    .code-file { margin-left: 8px; font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); }
+    .code-file em { color: var(--coral-light); font-style: normal; }
+    .code-body { padding: 20px 22px; overflow-x: auto; }
+    pre { font-family: var(--font-mono); font-size: 13px; line-height: 1.85; white-space: pre; }
+    .k  { color: var(--violet-light); }
+    .s  { color: var(--gold-light); }
+    .c  { color: var(--fg-3); font-style: italic; }
+    .t  { color: var(--mint-light); }
+    .fn { color: var(--coral-light); }
+    .n  { color: var(--steel-light); }
+
+    /* Three-way arch diagram */
+    .arch-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 28px 0; }
+    @media (max-width: 560px) { .arch-grid { grid-template-columns: 1fr; } }
+    .arch-card { background: var(--card); border: 1px solid var(--border); border-top: 3px solid var(--border); border-radius: var(--r-lg); padding: 18px 18px; text-align: center; }
+    .arch-card.cli { border-top-color: var(--steel); }
+    .arch-card.mcp { border-top-color: var(--mint); }
+    .arch-card.ts  { border-top-color: var(--coral); }
+    .arch-label { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 6px; }
+    .arch-card.cli .arch-label { color: var(--steel-light); }
+    .arch-card.mcp .arch-label { color: var(--mint-light); }
+    .arch-card.ts  .arch-label { color: var(--coral-light); }
+    .arch-desc { font-size: 12px; color: var(--fg-3); line-height: 1.5; }
+    .arch-engine { grid-column: 1 / -1; background: rgba(255,255,255,0.03); border: 1px dashed var(--border-mid); border-radius: var(--r-lg); padding: 12px; text-align: center; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg-3); }
+
+    .ch-nav { padding: 48px 0; border-top: 1px solid var(--border); background: var(--bg-dark); }
+    .ch-nav-inner { max-width: 760px; margin: 0 auto; padding: 0 32px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .ch-link { display: flex; flex-direction: column; gap: 4px; }
+    .ch-link-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--fg-3); }
+    .ch-link-title { font-family: var(--font-display); font-size: 17px; color: var(--coral-light); letter-spacing: -0.01em; transition: color 150ms; }
+    .ch-link:hover .ch-link-title { color: var(--coral); }
+    .ch-link.next { text-align: right; }
+
+    footer { background: var(--bg-dark); border-top: 1px solid var(--border); padding: 32px 0; }
+    .footer-inner { max-width: 760px; margin: 0 auto; padding: 0 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .footer-brand { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--fg-3); }
+    .footer-brand em { color: var(--coral-light); font-style: normal; }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); transition: color 150ms; }
+    .footer-links a:hover { color: var(--fg-2); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="https://www.daisyladybug.com/" class="brand">
+      <img src="https://www.daisyladybug.com/ldb-logo.webp" alt="Daisy Lady Bug" />
+      <div><div class="brand-text">Vibium <em>Beginner</em></div></div>
+    </a>
+    <div class="nav-chapters">
+      <a class="nav-ch" href="01-landscape.html">Ch 1</a>
+      <a class="nav-ch active" href="02-architecture.html">Ch 2</a>
+      <a class="nav-ch" href="03-first-test.html">Ch 3</a>
+      <a class="nav-ch" href="04-forms.html">Ch 4</a>
+      <a class="nav-ch" href="05-assertions-waiting.html">Ch 5</a>
+      <a class="nav-ch" href="06-organizing-tests.html">Ch 6</a>
+      <a class="nav-ch" href="07-captures.html">Ch 7</a>
+      <a class="nav-ch" href="08-network.html">Ch 8</a>
+      <a class="nav-ch" href="09-ci.html">Ch 9</a>
+      <a class="nav-ch" href="10-mcp.html">Ch 10</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Chapter 2</div>
+    <h1 class="hero-title">How Vibium Works —<br><em>Architecture Overview</em></h1>
+    <p class="hero-desc">The engine, the three interfaces, the Browser → Context → Page → Element hierarchy, finding elements, and the three interaction modes that underpin every test you'll write.</p>
+    <div class="hero-meta">
+      <span class="meta-item"><span class="meta-dot"></span>TypeScript examples</span>
+      <span class="meta-item"><span class="meta-dot"></span>Concepts</span>
+      <span class="meta-item"><span class="meta-dot"></span>~15 min</span>
+    </div>
+  </div>
+</section>
+
+<main class="content">
+  <div class="container">
+
+    <div class="section-block">
+      <div class="section-eyebrow">2.1</div>
+      <h2 class="section-heading">The Engine and the <em>Interfaces</em></h2>
+      <p>At its core, Vibium is a single automation engine with three different ways to interact with it.</p>
+      <div class="arch-grid">
+        <div class="arch-card cli">
+          <div class="arch-label">CLI</div>
+          <div class="arch-desc">Standalone binary. One command at a time from the terminal. Great for exploration.</div>
+        </div>
+        <div class="arch-card mcp">
+          <div class="arch-label">MCP Server</div>
+          <div class="arch-desc">Implements the Model Context Protocol. AI agents drive the browser without any glue code.</div>
+        </div>
+        <div class="arch-card ts">
+          <div class="arch-label">Client Libraries</div>
+          <div class="arch-desc">TypeScript, Python, Java. Full programmatic API. This is how tests are written.</div>
+        </div>
+        <div class="arch-engine">↑ all three talk to the same underlying engine ↑</div>
+      </div>
+      <p>All three interfaces result in the same browser actions. Skills you develop writing TypeScript tests transfer directly if you later work with the CLI or with an AI agent using MCP.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">2.2</div>
+      <h2 class="section-heading">How a Test Actually Runs</h2>
+      <p>When you call <code class="inline">vibium.start()</code>, Vibium launches a browser process, opens a browser context (a fresh browser profile), and creates a page (a browser tab). Your TypeScript code talks to that page through Vibium's API.</p>
+      <p>The browser runs in two modes. <strong>Headed mode</strong> opens a visible window — use this while writing and debugging tests. <strong>Headless mode</strong> runs the browser invisibly — use this in CI pipelines where there is no display.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">2.3</div>
+      <h2 class="section-heading">The Object <em>Hierarchy</em></h2>
+      <p>Vibium organizes browser automation around four levels:</p>
+      <div class="hierarchy">
+        <div class="hier-row">
+          <span class="hier-num">1</span>
+          <span class="hier-name">Browser</span>
+          <span class="hier-desc">The browser process. One per test run. Start it, use it, close it.</span>
+        </div>
+        <div class="hier-row">
+          <span class="hier-indent"></span>
+          <span class="hier-num">2</span>
+          <span class="hier-name">BrowserContext</span>
+          <span class="hier-desc">Isolated session — own cookies, storage, auth state. Contexts run in parallel without interfering.</span>
+        </div>
+        <div class="hier-row">
+          <span class="hier-indent"></span><span class="hier-indent"></span>
+          <span class="hier-num">3</span>
+          <span class="hier-name">Page</span>
+          <span class="hier-desc">A single browser tab. Most tests work with one page at a time.</span>
+        </div>
+        <div class="hier-row">
+          <span class="hier-indent"></span><span class="hier-indent"></span><span class="hier-indent"></span>
+          <span class="hier-num">4</span>
+          <span class="hier-name">Element</span>
+          <span class="hier-desc">A DOM node: button, input, heading, link. Click it, read it, fill it.</span>
+        </div>
+      </div>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file"><em>ch02/</em>browser-hierarchy.ts</span></div>
+        <div class="code-body"><pre>
+<span class="k">import</span> vibium <span class="k">from</span> <span class="s">'vibium'</span>
+
+<span class="k">const</span> browser = <span class="k">await</span> vibium.<span class="fn">start</span>({ headless: <span class="k">false</span> })
+<span class="k">const</span> context = <span class="k">await</span> browser.<span class="fn">newContext</span>()
+<span class="k">const</span> page    = <span class="k">await</span> context.<span class="fn">newPage</span>()
+
+<span class="k">await</span> page.<span class="fn">go</span>(<span class="s">'https://automation-exercise.daisyladybug.com/'</span>)
+
+<span class="k">const</span> button = <span class="k">await</span> page.<span class="fn">find</span>({ role: <span class="s">'link'</span>, text: <span class="s">'Explore Products'</span> })
+<span class="k">await</span> button.<span class="fn">click</span>()
+
+<span class="k">await</span> browser.<span class="fn">close</span>()</pre></div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">2.4</div>
+      <h2 class="section-heading">Finding Elements</h2>
+      <p>Vibium's primary locator is <code class="inline">page.find()</code>. The most reliable form is <strong>role + text</strong> — it describes what the element is and what it says, staying stable even as HTML structure changes.</p>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">find strategies</span></div>
+        <div class="code-body"><pre>
+<span class="c">// role + text — most robust, use for interactive elements</span>
+<span class="k">const</span> btn = <span class="k">await</span> page.<span class="fn">find</span>({ role: <span class="s">'button'</span>, text: <span class="s">'Add to cart'</span> })
+
+<span class="c">// CSS selector — use when role+text isn't enough</span>
+<span class="k">const</span> input = <span class="k">await</span> page.<span class="fn">find</span>({ css: <span class="s">'#search-input'</span> })
+
+<span class="c">// text only — fine for reading content, returns outermost match</span>
+<span class="k">const</span> heading = <span class="k">await</span> page.<span class="fn">find</span>({ text: <span class="s">'Featured Products'</span> })</pre></div>
+      </div>
+      <p><strong>Important:</strong> <code class="inline">find({ text })</code> matches DOM text, not rendered text. CSS <code class="inline">text-transform</code> is never applied. If the DOM says <code class="inline">"add to cart"</code> but the page renders <code class="inline">"ADD TO CART"</code>, search for <code class="inline">"add to cart"</code>.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">2.5</div>
+      <h2 class="section-heading">Actions, <em>Captures</em>, and Waits</h2>
+      <p>Three categories of operations. Understanding the distinction makes the whole API easier to navigate.</p>
+      <p><strong>Actions</strong> — things you do: navigate, click, fill, scroll. <strong>Captures</strong> — listeners for async browser events: dialogs, console output, downloads. <strong>Waits</strong> — blocks until a condition is true: URL changed, text appeared, element visible.</p>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">captures — the key pattern</span></div>
+        <div class="code-body"><pre>
+<span class="c">// Register the capture BEFORE triggering the action, always.</span>
+<span class="k">const</span> [dialog] = <span class="k">await</span> Promise.<span class="fn">all</span>([
+  page.capture.<span class="fn">dialog</span>(),   <span class="c">// listener registered first</span>
+  button.<span class="fn">click</span>()            <span class="c">// action fires second</span>
+])
+
+console.<span class="fn">log</span>(dialog.message)
+<span class="k">await</span> dialog.<span class="fn">accept</span>()</pre></div>
+      </div>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">waits</span></div>
+        <div class="code-body"><pre>
+<span class="k">await</span> page.<span class="fn">waitForURL</span>(<span class="s">'**/checkout/success'</span>)
+<span class="k">await</span> page.<span class="fn">waitForText</span>(<span class="s">'Order confirmed'</span>)</pre></div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">2.6</div>
+      <h2 class="section-heading">Network Layer</h2>
+      <p>Vibium lets you intercept browser requests and fulfill them with mock responses, modify them, or block them. You won't need this in the early chapters — we'll work with the real app throughout. But it's worth knowing the feature exists for when tests become flaky because of an unstable external API.</p>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">network interception</span></div>
+        <div class="code-body"><pre>
+<span class="k">await</span> page.<span class="fn">route</span>(<span class="s">'**/api/products'</span>, route =&gt; {
+  route.<span class="fn">fulfill</span>({ status: <span class="n">200</span>, body: JSON.<span class="fn">stringify</span>({ products: [] }) })
+})</pre></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<div class="ch-nav">
+  <div class="ch-nav-inner">
+    <a class="ch-link" href="01-landscape.html">
+      <span class="ch-link-label">← Chapter 1</span>
+      <span class="ch-link-title">The Landscape</span>
+    </a>
+    <a class="ch-link next" href="03-first-test.html">
+      <span class="ch-link-label">Next — Chapter 3</span>
+      <span class="ch-link-title">Your First Test →</span>
+    </a>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">Vibium Beginner Course · <em>A Daisy Lady Bug course</em></div>
+    <div class="footer-links">
+      <a href="https://www.daisyladybug.com/">daisyladybug.com</a>
+      <a href="https://automation-exercise.daisyladybug.com/">AUT</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

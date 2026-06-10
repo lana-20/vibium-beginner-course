@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chapter 7: Capturing Events — Vibium Course</title>
+  <link rel="icon" type="image/png" href="https://www.daisyladybug.com/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1a2a; --bg-dark: #0a1220; --card: #13243a; --card-dark: #0d1e30;
+      --off-white: #f5f0eb; --coral: #d4552a; --coral-light: #e8785a; --coral-dark: #a83e1e;
+      --mint: #4aa8a5; --mint-light: #9dbfb8; --gold: #b8862a; --gold-light: #d4a85a;
+      --violet: #7455bf; --violet-light: #9e85d4; --steel: #3d6abf; --steel-light: #7298d4;
+      --border: rgba(255,255,255,0.08); --border-mid: rgba(255,255,255,0.14);
+      --fg-2: rgba(245,240,235,0.65); --fg-3: rgba(245,240,235,0.38);
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body: 'Inter', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --r-md: 8px; --r-lg: 12px; --r-xl: 16px; --r-2xl: 24px;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--off-white); font-family: var(--font-body); -webkit-font-smoothing: antialiased; line-height: 1.6; }
+    a { text-decoration: none; color: inherit; }
+    .container { max-width: 760px; margin: 0 auto; padding: 0 32px; }
+
+    nav { border-bottom: 1px solid var(--border); background: rgba(15,26,42,0.92); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 50; }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 14px 32px; max-width: 1100px; margin: 0 auto; }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand img { width: 36px; height: 36px; object-fit: contain; }
+    .brand-text { font-family: var(--font-display); font-size: 17px; letter-spacing: -0.01em; }
+    .brand-text em { font-style: italic; color: var(--coral); }
+    .nav-chapters { display: flex; align-items: center; gap: 4px; }
+    .nav-ch { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); padding: 5px 12px; border-radius: 999px; border: 1px solid transparent; transition: all 150ms; }
+    .nav-ch:hover { color: var(--off-white); border-color: var(--border-mid); }
+    .nav-ch.active { color: var(--coral-light); border-color: rgba(212,85,42,0.3); background: rgba(212,85,42,0.07); }
+
+    .hero { padding: 72px 0 56px; background: radial-gradient(ellipse at 70% 20%, rgba(184,134,42,0.18) 0%, transparent 55%), radial-gradient(ellipse at 15% 80%, rgba(74,168,165,0.12) 0%, transparent 55%), var(--bg-dark); }
+    .hero-inner { max-width: 760px; margin: 0 auto; padding: 0 32px; }
+    .hero-eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.26em; text-transform: uppercase; color: var(--coral-light); margin-bottom: 20px; }
+    .hero-title { font-family: var(--font-display); font-size: clamp(36px, 5vw, 60px); font-weight: 400; line-height: 1.05; letter-spacing: -0.025em; margin-bottom: 20px; }
+    .hero-title em { font-style: italic; color: var(--coral); }
+    .hero-desc { font-size: 16px; color: var(--fg-2); line-height: 1.7; max-width: 560px; margin-bottom: 32px; }
+    .hero-meta { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .meta-item { display: flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-3); }
+    .meta-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--coral); opacity: 0.7; }
+
+    .content { padding: 72px 0 88px; }
+    .section-block { padding: 48px 0; border-bottom: 1px solid var(--border); }
+    .section-block:last-child { border-bottom: none; }
+    .section-eyebrow { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--coral-light); margin-bottom: 14px; }
+    .section-heading { font-family: var(--font-display); font-size: clamp(24px, 3vw, 34px); font-weight: 400; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 24px; }
+    .section-heading em { font-style: italic; color: var(--coral); }
+    p { font-size: 16px; color: var(--fg-2); line-height: 1.75; margin-bottom: 18px; }
+    p:last-child { margin-bottom: 0; }
+    strong { color: var(--off-white); font-weight: 600; }
+    code.inline { font-family: var(--font-mono); font-size: 13px; background: rgba(255,255,255,0.06); border: 1px solid var(--border-mid); border-radius: 4px; padding: 1px 6px; color: var(--mint-light); }
+
+    .capture-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 24px 0; }
+    @media (max-width: 600px) { .capture-cards { grid-template-columns: 1fr; } }
+    .capture-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 16px; }
+    .capture-card-name { font-family: var(--font-mono); font-size: 12px; color: var(--gold-light); margin-bottom: 6px; }
+    .capture-card-desc { font-size: 13px; color: var(--fg-2); }
+
+    .warning { background: rgba(212,85,42,0.06); border: 1px solid rgba(212,85,42,0.22); border-radius: var(--r-lg); padding: 16px 20px; margin: 24px 0; }
+    .warning p { font-size: 14px; color: var(--fg-2); margin: 0; }
+    .warning strong { color: var(--coral-light); }
+
+    .callout { background: rgba(74,168,165,0.07); border: 1px solid rgba(74,168,165,0.22); border-radius: var(--r-lg); padding: 16px 20px; margin: 24px 0; }
+    .callout p { font-size: 14px; color: var(--fg-2); margin: 0; }
+    .callout strong { color: var(--mint-light); }
+
+    .code-panel { background: var(--card); border: 1px solid var(--border-mid); border-radius: var(--r-xl); overflow: hidden; margin: 28px 0; box-shadow: 0 16px 48px rgba(0,0,0,0.35); }
+    .code-bar { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02); }
+    .cd { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
+    .cd.r { background: #ff5f57; } .cd.y { background: #febc2e; } .cd.g { background: #28c840; }
+    .code-file { margin-left: 8px; font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); }
+    .code-file em { color: var(--coral-light); font-style: normal; }
+    .code-body { padding: 20px 22px; overflow-x: auto; }
+    pre { font-family: var(--font-mono); font-size: 13px; line-height: 1.85; white-space: pre; }
+    .k  { color: var(--violet-light); }
+    .s  { color: var(--gold-light); }
+    .c  { color: var(--fg-3); font-style: italic; }
+    .t  { color: var(--mint-light); }
+    .fn { color: var(--coral-light); }
+    .n  { color: var(--steel-light); }
+
+    .ch-nav { padding: 48px 0; border-top: 1px solid var(--border); background: var(--bg-dark); }
+    .ch-nav-inner { max-width: 760px; margin: 0 auto; padding: 0 32px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .ch-link { display: flex; flex-direction: column; gap: 4px; }
+    .ch-link-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--fg-3); }
+    .ch-link-title { font-family: var(--font-display); font-size: 17px; color: var(--coral-light); letter-spacing: -0.01em; transition: color 150ms; }
+    .ch-link:hover .ch-link-title { color: var(--coral); }
+    .ch-link.next { text-align: right; }
+
+    footer { background: var(--bg-dark); border-top: 1px solid var(--border); padding: 32px 0; }
+    .footer-inner { max-width: 760px; margin: 0 auto; padding: 0 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .footer-brand { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--fg-3); }
+    .footer-brand em { color: var(--coral-light); font-style: normal; }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); transition: color 150ms; }
+    .footer-links a:hover { color: var(--fg-2); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="https://www.daisyladybug.com/" class="brand">
+      <img src="https://www.daisyladybug.com/ldb-logo.webp" alt="Daisy Lady Bug" />
+      <div><div class="brand-text">Vibium <em>Beginner</em></div></div>
+    </a>
+    <div class="nav-chapters">
+      <a class="nav-ch" href="01-landscape.html">Ch 1</a>
+      <a class="nav-ch" href="02-architecture.html">Ch 2</a>
+      <a class="nav-ch" href="03-first-test.html">Ch 3</a>
+      <a class="nav-ch" href="04-forms.html">Ch 4</a>
+      <a class="nav-ch" href="05-assertions-waiting.html">Ch 5</a>
+      <a class="nav-ch" href="06-organizing-tests.html">Ch 6</a>
+      <a class="nav-ch active" href="07-captures.html">Ch 7</a>
+      <a class="nav-ch" href="08-network.html">Ch 8</a>
+      <a class="nav-ch" href="09-ci.html">Ch 9</a>
+      <a class="nav-ch" href="10-mcp.html">Ch 10</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Chapter 7</div>
+    <h1 class="hero-title">Capturing <em>Events</em></h1>
+    <p class="hero-desc">Flip the direction: instead of sending actions to the browser, listen for events it sends back. Intercept native dialogs, collect console messages, and save downloaded files.</p>
+    <div class="hero-meta">
+      <span class="meta-item"><span class="meta-dot"></span>Intermediate</span>
+      <span class="meta-item"><span class="meta-dot"></span>TypeScript</span>
+      <span class="meta-item"><span class="meta-dot"></span>~20 min</span>
+    </div>
+  </div>
+</section>
+
+<main class="content">
+  <div class="container">
+
+    <div class="section-block">
+      <div class="section-eyebrow">7.1</div>
+      <h2 class="section-heading">The Capture <em>Pattern</em></h2>
+      <p>All three captures share the same API shape: set up the listener <em>before</em> the action that triggers the event, then trigger the action — both inside <code class="inline">Promise.all</code>.</p>
+      <div class="capture-cards">
+        <div class="capture-card">
+          <div class="capture-card-name">capture.dialog()</div>
+          <div class="capture-card-desc">Intercepts native alert / confirm / prompt. Returns dialog type and message.</div>
+        </div>
+        <div class="capture-card">
+          <div class="capture-card-name">capture.console()</div>
+          <div class="capture-card-desc">Collects console messages during an action. Returns array of {type, text}.</div>
+        </div>
+        <div class="capture-card">
+          <div class="capture-card-name">capture.download()</div>
+          <div class="capture-card-desc">Intercepts file downloads. Saves file and returns suggestedFilename.</div>
+        </div>
+      </div>
+      <div class="warning"><p><strong>Critical:</strong> If you <code class="inline">await capture.dialog()</code> first, then click, you deadlock. The capture waits for the dialog, the dialog waits for the click. Use <code class="inline">Promise.all</code> so both start concurrently.</p></div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">7.2</div>
+      <h2 class="section-heading">Capturing <em>Dialogs</em></h2>
+      <p>Use <code class="inline">page.setContent()</code> to create a test page with real browser dialogs, since our AUT uses React-rendered UI with no native dialogs.</p>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file"><em>ch07/</em>01-dialog.ts (excerpt)</span></div>
+        <div class="code-body"><pre>
+<span class="c">// set up inline page with alert and confirm</span>
+<span class="k">await</span> page.<span class="fn">setContent</span>(<span class="s">`
+  &lt;button onclick="alert('Hello!')"&gt;Show Alert&lt;/button&gt;
+  &lt;button onclick="confirm('Delete?')"&gt;Show Confirm&lt;/button&gt;
+`</span>)
+
+<span class="c">// capture the alert — fire-and-forget inside Promise.all</span>
+<span class="k">const</span> [result] = <span class="k">await</span> Promise.<span class="fn">all</span>([
+  page.capture.<span class="fn">dialog</span>(<span class="s">'accept'</span>),
+  (<span class="k">async</span> () => {
+    <span class="k">const</span> btn = <span class="k">await</span> page.<span class="fn">find</span>({ role: <span class="s">'button'</span>, text: <span class="s">'Show Alert'</span> })
+    btn.<span class="fn">click</span>()  <span class="c">// no await — intentional</span>
+  })(),
+])
+
+assert.<span class="fn">equal</span>(result.type, <span class="s">'alert'</span>)
+assert.<span class="fn">equal</span>(result.message, <span class="s">'Hello!'</span>)</pre></div>
+      </div>
+      <div class="callout"><p><strong>Why fire-and-forget?</strong> <code class="inline">click()</code> waits for the browser to settle after the click. A dialog blocks the browser from settling — so awaiting click + awaiting capture deadlocks. Firing the click without awaiting lets the dialog appear, the capture handles it, and <code class="inline">Promise.all</code> resolves.</p></div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">7.3</div>
+      <h2 class="section-heading">Capturing <em>Console Messages</em></h2>
+      <p>Verify that your app emits the right logs — or doesn't log unexpected errors — during an action.</p>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file"><em>ch07/</em>02-console.ts (excerpt)</span></div>
+        <div class="code-body"><pre>
+<span class="k">const</span> [messages] = <span class="k">await</span> Promise.<span class="fn">all</span>([
+  page.capture.<span class="fn">console</span>(),
+  (<span class="k">async</span> () => {
+    <span class="k">const</span> btn = <span class="k">await</span> page.<span class="fn">find</span>({ role: <span class="s">'button'</span>, text: <span class="s">'Add Item'</span> })
+    btn.<span class="fn">click</span>()
+  })(),
+])
+
+<span class="k">const</span> logs = messages.<span class="fn">filter</span>((m: <span class="k">any</span>) => m.type === <span class="s">'log'</span>)
+<span class="k">const</span> warns = messages.<span class="fn">filter</span>((m: <span class="k">any</span>) => m.type === <span class="s">'warning'</span>)
+
+assert.<span class="fn">equal</span>(logs[<span class="n">0</span>].text, <span class="s">'item added'</span>)
+assert.<span class="fn">ok</span>(warns[<span class="n">0</span>].text.<span class="fn">includes</span>(<span class="s">'stock low'</span>))</pre></div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">7.4</div>
+      <h2 class="section-heading">Capturing <em>Downloads</em></h2>
+      <p>Intercept a file download triggered by a link or button. The capture saves the file and returns its suggested filename.</p>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file"><em>ch07/</em>03-download.ts (excerpt)</span></div>
+        <div class="code-body"><pre>
+<span class="k">const</span> [download] = <span class="k">await</span> Promise.<span class="fn">all</span>([
+  page.capture.<span class="fn">download</span>(downloadDir),
+  (<span class="k">async</span> () => {
+    <span class="k">const</span> link = <span class="k">await</span> page.<span class="fn">find</span>({ role: <span class="s">'link'</span>, text: <span class="s">'Download CSV'</span> })
+    link.<span class="fn">click</span>()
+  })(),
+])
+
+assert.<span class="fn">equal</span>(download.suggestedFilename, <span class="s">'products.csv'</span>)
+assert.<span class="fn">ok</span>(fs.<span class="fn">existsSync</span>(path.<span class="fn">join</span>(downloadDir, download.suggestedFilename)))</pre></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<div class="ch-nav">
+  <div class="ch-nav-inner">
+    <a class="ch-link" href="06-organizing-tests.html">
+      <span class="ch-link-label">← Chapter 6</span>
+      <span class="ch-link-title">Organizing Tests</span>
+    </a>
+    <a class="ch-link next" href="08-network.html">
+      <span class="ch-link-label">Chapter 8 →</span>
+      <span class="ch-link-title">Network Interception</span>
+    </a>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">Vibium Beginner Course · <em>A Daisy Lady Bug course</em></div>
+    <div class="footer-links">
+      <a href="https://www.daisyladybug.com/">daisyladybug.com</a>
+      <a href="https://automation-exercise.daisyladybug.com/">AUT</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
