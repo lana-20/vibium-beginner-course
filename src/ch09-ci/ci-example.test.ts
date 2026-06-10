@@ -1,5 +1,5 @@
 import { describe, it, beforeEach, afterEach, expect } from 'vitest'
-import vibium from 'vibium'
+import { browser as vibium } from 'vibium'
 
 const AUT = process.env.AUT_BASE_URL ?? 'https://automation-exercise.daisyladybug.com'
 const headless = process.env.CI === 'true'

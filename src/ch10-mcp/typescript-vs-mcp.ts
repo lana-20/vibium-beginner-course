@@ -8,7 +8,7 @@
  *
  * Run:  npx tsx src/ch10-mcp/typescript-vs-mcp.ts
  */
-import vibium from 'vibium'
+import { browser as vibium } from 'vibium'
 
 const AUT = process.env.AUT_BASE_URL ?? 'https://automation-exercise.daisyladybug.com'
 

@@ -1,5 +1,5 @@
 import { describe, it, beforeEach, afterEach, expect } from 'vitest'
-import vibium from 'vibium'
+import { browser as vibium } from 'vibium'
 import { ProductsPage } from '../pages/ProductsPage'
 import { CartPage } from '../pages/CartPage'
 

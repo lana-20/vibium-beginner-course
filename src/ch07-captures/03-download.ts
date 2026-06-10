@@ -1,4 +1,4 @@
-import vibium from 'vibium'
+import { browser as vibium } from 'vibium'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import path from 'node:path'
