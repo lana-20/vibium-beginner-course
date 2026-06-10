@@ -251,6 +251,54 @@ console.<span class="fn">log</span>(<span class="s">'Recording:'</span>, url)
       <p>Click the URL and you get an interactive replay — scrub forward and backward through every step, inspect the DOM at each point, and see which network requests fired. You can identify exactly where things went wrong: was an element present but not visible? Did a <code class="inline">waitForText</code> time out because a request was slow? The recording tells you. No more guessing from stack traces.</p>
     </div>
 
+    <div class="section-block">
+      <div class="section-eyebrow">9.7 — Docker</div>
+      <h2 class="section-heading">Containerizing with <em>Docker</em></h2>
+      <p>Environment differences cause CI-only failures. Your laptop runs Node 22; the CI runner uses Node 20. Docker packages your entire test environment — Node version, dependencies, Vibium — into a reproducible image that runs identically everywhere.</p>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">Dockerfile</span></div>
+        <div class="code-body"><pre>
+<span class="k">FROM</span> node:20-slim
+
+<span class="k">RUN</span> npm install -g vibium
+
+<span class="k">WORKDIR</span> /app
+<span class="k">COPY</span> package*.json ./
+<span class="k">RUN</span> npm ci
+
+<span class="k">COPY</span> . .
+
+<span class="k">ENV</span> CI=true
+<span class="k">CMD</span> ["npm", "test"]</pre></div>
+      </div>
+      <p><code class="inline">ENV CI=true</code> means headless mode is automatic — no display server needed. The <code class="inline">CMD</code> runs the tests. Build and run it locally:</p>
+      <div class="shell-panel"><pre><span class="prompt">$ </span>docker build -t vibium-tests .
+<span class="prompt">$ </span>docker run --rm vibium-tests</pre></div>
+      <p>Exit code 0 on pass, exit code 1 on failure — exactly what CI systems need. In GitHub Actions, replace the daemon lifecycle steps with two Docker steps:</p>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">Docker-based workflow steps</span></div>
+        <div class="code-body"><pre>
+<span class="yaml-key">- name:</span> <span class="yaml-val">Build test image</span>
+  <span class="yaml-key">run:</span> <span class="yaml-val">docker build -t vibium-tests .</span>
+
+<span class="yaml-key">- name:</span> <span class="yaml-val">Run tests in container</span>
+  <span class="yaml-key">run:</span> <span class="yaml-val">docker run --rm vibium-tests</span></pre></div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">9.8 — Demo</div>
+      <h2 class="section-heading">The Hands-On Demo: <em>Push, Watch, Fail, Fix</em></h2>
+      <p>Everything in this chapter becomes concrete once you push the repo to GitHub. The workflow file is already in <code class="inline">.github/workflows/tests.yml</code> — it triggers automatically on every push.</p>
+      <div class="assert-list">
+        <div class="assert-item"><div class="assert-num">1</div><div class="assert-text"><strong>Push the repo.</strong> Open github.com/your-username/vibium-beginner-course → Actions tab → watch the run start.</div></div>
+        <div class="assert-item"><div class="assert-num">2</div><div class="assert-text"><strong>Watch it pass.</strong> Each step gets a green checkmark in real time: checkout → setup → install → daemon → tests → daemon stop.</div></div>
+        <div class="assert-item"><div class="assert-num">3</div><div class="assert-text"><strong>Break a test.</strong> Change one assertion to assert the wrong value. Push. Watch the Actions tab go red.</div></div>
+        <div class="assert-item"><div class="assert-num">4</div><div class="assert-text"><strong>Find the recording URL</strong> in the failing step's log output. Open <strong>player.vibium.dev</strong> — scrub to the assertion failure.</div></div>
+        <div class="assert-item"><div class="assert-num">5</div><div class="assert-text"><strong>Fix it, push again.</strong> Watch it go green. That's the full CI feedback loop.</div></div>
+      </div>
+    </div>
+
   </div>
 </main>
 
