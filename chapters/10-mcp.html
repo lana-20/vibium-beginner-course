@@ -163,6 +163,7 @@
     <div class="section-block">
       <div class="section-eyebrow">10.1</div>
       <h2 class="section-heading">Three <em>Interfaces</em></h2>
+      <p>Every chapter until now has been about writing code that drives the browser. You write the steps, define the selectors, control every action. In this final chapter we look at something fundamentally different: the Model Context Protocol, where you describe what you want in natural language and an AI agent figures out the steps. This isn't replacing what you've learned — it's extending it. The TypeScript client and MCP are two tools in the same toolkit.</p>
       <p>Vibium ships with three interfaces, all talking to the same daemon. Each has a different driver and a different purpose:</p>
       <table class="interface-table">
         <thead>
@@ -195,8 +196,8 @@
     <div class="section-block">
       <div class="section-eyebrow">10.2 – 10.3</div>
       <h2 class="section-heading">What MCP Is and <em>How to Start It</em></h2>
-      <p>MCP (Model Context Protocol) is an open standard that defines how AI models connect to tools. When Vibium runs as an MCP server, it exposes navigate, find, click, fill, and screenshot as MCP tool calls that any compatible AI client can invoke.</p>
-      <p>Configure it in Claude Desktop:</p>
+      <p>The Model Context Protocol is an open standard — similar in purpose to what USB is for hardware. When Vibium runs as an MCP server, it exposes its browser automation capabilities — navigate, find, click, fill, screenshot — as MCP tool calls. Any AI model that speaks MCP can invoke those tools. From your perspective: describe what you want to test, and the agent navigates a real browser, reads the page, takes actions, and reports back.</p>
+      <p>Configure Vibium as an MCP server in Claude Desktop:</p>
       <div class="code-panel">
         <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">~/Library/Application Support/Claude/claude_desktop_config.json</span></div>
         <div class="code-body"><pre>
@@ -209,7 +210,7 @@
   }
 }</pre></div>
       </div>
-      <p>After restarting Claude Desktop, you can type natural language commands and Claude will use Vibium's MCP tools against a live browser.</p>
+      <p>Restart Claude Desktop. You'll see Vibium tools become available — look for the hammer icon in the interface, which indicates active MCP connections. From here, you can interact with a live browser through natural language.</p>
     </div>
 
     <div class="section-block">
@@ -230,7 +231,7 @@ assert.<span class="fn">equal</span>(count, <span class="n">3</span>)</pre></div
         <div class="prompt-label">MCP prompt — agent-driven</div>
         <div class="prompt-text">Go to automation-exercise.daisyladybug.com/products. Filter by the Electronics category. Tell me how many products are shown and what their names are.</div>
       </div>
-      <p>The TypeScript version is precise, repeatable, and fast. The MCP version is flexible — you don't need to know the selector or even that there's a <code class="inline">select</code> element. The agent figures it out.</p>
+      <p>The TypeScript version knows the selector, knows the expected count, and will fail with a clear message if either changes. The MCP version doesn't need to know any of that — Claude finds the dropdown, identifies the correct option, applies the filter, reads the results, and tells you what it found. Neither is better; they're different tools for different moments.</p>
     </div>
 
     <div class="section-block">
@@ -256,13 +257,13 @@ assert.<span class="fn">equal</span>(count, <span class="n">3</span>)</pre></div
           </ul>
         </div>
       </div>
-      <div class="callout"><p><strong>Workflow tip:</strong> Use MCP to explore and describe a flow, then ask the agent to generate the TypeScript. Review, refine, and commit. Agents for exploration and generation, TypeScript for the final executable tests.</p></div>
+      <div class="callout"><p><strong>The generation workflow:</strong> Use MCP to explore a flow — describe the scenario in natural language, watch the agent navigate and discover selectors. Then ask it to generate the TypeScript test. Review it, clean it up, add it to your suite. Agents for exploration and generation; TypeScript for the final executable tests. This workflow is especially powerful for large apps with many pages.</p></div>
     </div>
 
     <div class="section-block">
       <div class="section-eyebrow">Course complete</div>
       <h2 class="section-heading">What You've <em>Learned</em></h2>
-      <p>You've covered the full arc from the landscape of web testing to running tests in CI and beyond:</p>
+      <p>You've covered the full arc of browser test automation with Vibium. The patterns from this course — async/await with <code class="inline">try/finally</code>, <code class="inline">waitFor*</code> before assertions, Page Objects for DRY selectors, <code class="inline">Promise.all</code> for captures, atomic tests with <code class="inline">beforeEach</code>/<code class="inline">afterEach</code>, recordings at <strong>player.vibium.dev</strong> for debugging — these compose directly into production test suites. Here's everything you've built:</p>
       <div class="toc-grid">
         <div class="toc-item"><span class="toc-num">Ch 1</span><span class="toc-title">The landscape of web testing tools</span></div>
         <div class="toc-item"><span class="toc-num">Ch 2</span><span class="toc-title">Vibium architecture — Browser → Page → Element</span></div>

@@ -1,148 +1,152 @@
 # Chapter 4: Working with Forms
 
-Chapter 3 gave you a complete test for the homepage. In this chapter we go deeper into interacting with the app: filling text inputs, working with select dropdowns, asserting on validation errors, and writing a test that covers a real form submission flow. By the end you'll have tests for both the product search form and the checkout form.
+In Chapter 3 you wrote a test that reads and asserts on a page. Now we're going to interact with it. Forms are where the majority of real-world test automation work happens — search fields, dropdowns, checkouts, login screens, registration flows. In this chapter you'll fill text inputs, drive select dropdowns, assert that validation errors appear on an invalid submit, and finally walk through the complete checkout flow of our app from first search to order confirmation.
 
 ---
 
-## 4.1 The Forms We'll Work With
+## The forms in our app
 
-The automation-exercise app has forms in two places:
+Let's start by mapping out what we're working with. Our app has forms in two places.
 
-**Products page** (`/products`) — a search bar and two dropdowns:
-- A text input for searching by product name
-- A `<select>` for filtering by category (All, Electronics, Apparel, Home, Books)
-- A `<select>` for sorting (Popular, Price: Low to High, Price: High to Low)
+On the `/products` page there's a **search and filter bar**: a text input for searching by product name, a category dropdown with options for All, Electronics, Apparel, Home, and Books, and a sort dropdown for Popular, Price Low to High, and Price High to Low.
 
-**Checkout page** (`/checkout`) — a 12-field form split into billing address and payment information:
-- Billing: First Name, Last Name, Email, Phone, Address, City, State, ZIP
-- Payment: Cardholder Name, Card Number, Expiry, CVC
-- Submit button: "Place Order"
+On the `/checkout` page there's a **12-field order form**: first name, last name, email, phone, address, city, state, ZIP code, card name, card number, card expiry, and card CVC. Every field is required, and the form validates on submit.
 
-The checkout form has required-field validation. If you submit with empty fields you get inline error messages like "✗ First name required" and "✗ Valid email required".
+We'll test both.
 
 ---
 
-## 4.2 Filling Text Inputs
+## Filling text inputs
 
-You already used `element.fill()` in Chapter 3 for assertions. Here it drives actual user input.
+The method for filling a text input is `element.fill(text)`. It clears whatever is in the field first, then types the new value. Let's try it on the search bar.
 
-Locate the search input by its placeholder, then fill it:
+The search input has a placeholder of "Search products..." — we can use that as a CSS attribute selector to target it precisely:
 
 ```typescript
-await page.go('https://automation-exercise.daisyladybug.com/products')
+await page.go(`${AUT}/products`)
 
 const search = await page.find({ css: "input[placeholder='Search products...']" })
 await search.fill('headphones')
 ```
 
-After `fill()`, the products list filters in real time. Assert that the expected product appears and others disappear:
+As you type, the product list filters in real time. After filling, we can assert that the right product appears and unrelated ones don't:
 
 ```typescript
 const result = await page.find({ text: 'Wireless Headphones' })
 assert.ok(await result.isVisible(), 'search result visible')
-
-const other = await page.find({ text: 'Premium T-Shirt' })
-assert.ok(!await other.isVisible(), 'unrelated product hidden')
 ```
 
-`fill()` clears the field before typing. If you need to append text instead, use `element.type()`.
+Two methods worth distinguishing here: `fill()` clears the field first, then types. `type()` appends without clearing. Use `fill()` when you're entering a new value. Use `type()` when you want to add to what's already there — for example, simulating a user who typed something and then keeps going.
 
 ---
 
-## 4.3 Working with Select Dropdowns
+## Driving select dropdowns
 
-The category and sort dropdowns are standard `<select>` elements. Use `element.select()` with the visible option text:
+Standard `<select>` elements are driven with `element.select()`. Pass the visible option text — the string the user would see in the dropdown:
 
 ```typescript
+// Filter to Electronics
 const category = await page.find({ css: 'select:first-of-type' })
 await category.select('Electronics')
-```
 
-After selecting, assert the page reflects the filter. The heading updates to show the active category:
-
-```typescript
-const heading = await page.find({ text: 'Electronics' })
-assert.ok(await heading.isVisible(), 'Electronics filter active')
-```
-
-The sort dropdown works the same way:
-
-```typescript
+// Change sort order
 const sort = await page.find({ css: 'select:last-of-type' })
 await sort.select('Price: Low to High')
 ```
 
----
-
-## 4.4 Filling the Checkout Form
-
-The checkout inputs all have `name` attributes, which makes them easy to locate precisely:
-
-```typescript
-const fields = {
-  firstName:   await page.find({ css: 'input[name=firstName]' }),
-  lastName:    await page.find({ css: 'input[name=lastName]' }),
-  email:       await page.find({ css: 'input[name=email]' }),
-  phone:       await page.find({ css: 'input[name=phone]' }),
-  address:     await page.find({ css: 'input[name=address]' }),
-  city:        await page.find({ css: 'input[name=city]' }),
-  state:       await page.find({ css: 'input[name=state]' }),
-  zipCode:     await page.find({ css: 'input[name=zipCode]' }),
-  cardName:    await page.find({ css: 'input[name=cardName]' }),
-  cardNumber:  await page.find({ css: 'input[name=cardNumber]' }),
-  cardExpiry:  await page.find({ css: 'input[name=cardExpiry]' }),
-  cardCvc:     await page.find({ css: 'input[name=cardCvc]' }),
-}
-
-await fields.firstName.fill('Jane')
-await fields.lastName.fill('Smith')
-await fields.email.fill('jane@test.com')
-await fields.phone.fill('5551234567')
-await fields.address.fill('456 Oak Ave')
-await fields.city.fill('Portland')
-await fields.state.fill('OR')
-await fields.zipCode.fill('97201')
-await fields.cardName.fill('Jane Smith')
-await fields.cardNumber.fill('4111111111111111')
-await fields.cardExpiry.fill('12/26')
-await fields.cardCvc.fill('999')
-```
-
-After filling, you can read a field's current value back with `element.value()`:
-
-```typescript
-const emailValue = await fields.email.value()
-assert.equal(emailValue, 'jane@test.com', 'email field value')
-```
+After selecting a category, a label updates to show the active filter. We'll learn in Chapter 5 how to properly wait for that update before asserting on it. For now, let's focus on the form mechanics.
 
 ---
 
-## 4.5 Asserting Validation Errors
+## Asserting validation errors
 
-To test that the form validates correctly, submit it empty and assert that the error messages appear.
+Before we test the happy path, let's test what happens when things go wrong. Submitting an empty form should show validation errors for every required field. Testing this is important — a form that accepts empty data is a bug.
 
-The form shows messages like "✗ First name required" and "✗ Valid email required" after a failed submission:
+The approach: navigate to checkout with something in the cart (the page redirects if the cart is empty), then click "Place Order" without filling anything, then assert that the expected error messages appear.
+
+Our checkout form shows 12 error messages for 12 required fields. Here's the pattern:
 
 ```typescript
-await page.go('https://automation-exercise.daisyladybug.com/checkout')
-
 const submit = await page.find({ role: 'button', text: 'Place Order' })
 await submit.click()
 
-const firstNameError = await page.find({ text: '✗ First name required' })
-assert.ok(await firstNameError.isVisible(), 'first name error shown')
+const errors = [
+  '✗ First name required',
+  '✗ Last name required',
+  '✗ Valid email required',
+  '✗ Valid phone required',
+  '✗ Address required',
+  '✗ City required',
+  '✗ State required',
+  '✗ Valid ZIP required',
+  '✗ Cardholder name required',
+  '✗ Valid card number required',
+  '✗ Format MM/YY',
+  '✗ Valid CVC required',
+]
 
-const emailError = await page.find({ text: '✗ Valid email required' })
-assert.ok(await emailError.isVisible(), 'email error shown')
+for (const message of errors) {
+  const el = await page.find({ text: message })
+  assert.ok(await el.isVisible(), `error visible: ${message}`)
+}
 ```
 
-This tests the validation layer independently from the happy path — an important distinction. You want a separate test that confirms valid data passes, and a separate test that confirms invalid data fails with the right messages.
+A quick note on test design: this validation test and the happy-path checkout test are *separate* tests. Each one is **atomic** — it does one thing, sets up its own state, and doesn't depend on the other. If we combined them into one long script, a failure in the validation step would prevent the checkout from being tested at all. Keep tests focused. One test per scenario.
 
 ---
 
-## 4.6 A Complete Form Test
+## Filling the complete checkout form
 
-Here's a full test that covers the search filter and checkout submission:
+For the happy path, we need to first add an item to the cart, then navigate to checkout and fill all 12 fields.
+
+The checkout form uses `name` attributes on every input — `firstName`, `lastName`, `email`, and so on. Targeting by `input[name=...]` is reliable and readable, and it matches how the form is semantically structured. Let's use a `fieldMap` object to store all the test data in one place, and then loop over it to fill each field:
+
+```typescript
+const fieldMap: Record<string, string> = {
+  firstName:  'Jane',
+  lastName:   'Smith',
+  email:      'jane@test.com',
+  phone:      '5551234567',
+  address:    '456 Oak Ave',
+  city:       'Portland',
+  state:      'OR',
+  zipCode:    '97201',
+  cardName:   'Jane Smith',
+  cardNumber: '4111111111111111',
+  cardExpiry: '12/26',
+  cardCvc:    '999',
+}
+
+for (const [name, value] of Object.entries(fieldMap)) {
+  const field = await page.find({ css: `input[name=${name}]` })
+  await field.fill(value)
+}
+```
+
+This `fieldMap` pattern is worth adopting as a habit. The data lives in one object at the top, the filling logic is generic and reads cleanly, and swapping in a different test user means changing only the data object.
+
+After filling, we can verify a specific field's value using `element.value()`:
+
+```typescript
+const emailField = await page.find({ css: 'input[name=email]' })
+assert.equal(await emailField.value(), 'jane@test.com', 'email field value')
+```
+
+Then submit and wait for the confirmation page:
+
+```typescript
+const submit = await page.find({ role: 'button', text: 'Place Order' })
+await submit.click()
+await page.waitForURL('**/confirmation')
+```
+
+`waitForURL` blocks until the URL matches the pattern. This is the right way to handle navigation triggered by a form submit — you don't know exactly when the app will finish processing and change the URL, so you wait for the outcome rather than sleeping for an arbitrary duration.
+
+---
+
+## The complete checkout test
+
+Here's the full flow in one test, using the `fieldMap` pattern:
 
 ```typescript
 import vibium from 'vibium'
@@ -150,73 +154,58 @@ import assert from 'node:assert/strict'
 
 const AUT = 'https://automation-exercise.daisyladybug.com'
 
-async function testSearchAndCheckout() {
+const fieldMap: Record<string, string> = {
+  firstName: 'Jane', lastName: 'Smith', email: 'jane@test.com',
+  phone: '5551234567', address: '456 Oak Ave', city: 'Portland',
+  state: 'OR', zipCode: '97201', cardName: 'Jane Smith',
+  cardNumber: '4111111111111111', cardExpiry: '12/26', cardCvc: '999',
+}
+
+async function testCheckoutFlow() {
   const browser = await vibium.start({ headless: false })
   const context = await browser.newContext()
   const page = await context.newPage()
 
   try {
-    // ── Search filter ──────────────────────────────────────
-    await page.go(`${AUT}/products`)
-
-    const search = await page.find({ css: "input[placeholder='Search products...']" })
-    await search.fill('headphones')
-    assert.ok(
-      await (await page.find({ text: 'Wireless Headphones' })).isVisible(),
-      'search result visible'
-    )
-
-    const category = await page.find({ css: 'select:first-of-type' })
-    await category.select('Electronics')
-    assert.ok(
-      await (await page.find({ text: 'Electronics' })).isVisible(),
-      'Electronics filter active'
-    )
-
-    // ── Checkout form ──────────────────────────────────────
-    // Navigate to a product and add it to the cart first
+    // Add a product to cart first
     await page.go(`${AUT}/products/prod_001`)
     const addToCart = await page.find({ role: 'button', text: 'Add to Cart' })
     await addToCart.click()
 
+    // Navigate to checkout
     await page.go(`${AUT}/checkout`)
 
-    const fieldMap: Record<string, string> = {
-      firstName:  'Jane',
-      lastName:   'Smith',
-      email:      'jane@test.com',
-      phone:      '5551234567',
-      address:    '456 Oak Ave',
-      city:       'Portland',
-      state:      'OR',
-      zipCode:    '97201',
-      cardName:   'Jane Smith',
-      cardNumber: '4111111111111111',
-      cardExpiry: '12/26',
-      cardCvc:    '999',
-    }
-
+    // Fill all 12 fields
     for (const [name, value] of Object.entries(fieldMap)) {
       const field = await page.find({ css: `input[name=${name}]` })
       await field.fill(value)
     }
 
+    // Submit
     const submit = await page.find({ role: 'button', text: 'Place Order' })
     await submit.click()
-    await page.waitForURL('**/confirmation')
 
-    console.log('All assertions passed.')
+    // Wait for confirmation
+    await page.waitForURL('**/confirmation')
+    assert.ok(
+      (await page.url()).includes('/confirmation'),
+      'reached confirmation page'
+    )
+
+    console.log('Checkout flow passed.')
   } finally {
     await browser.close()
   }
 }
 
-testSearchAndCheckout().catch(err => {
+testCheckoutFlow().catch(err => {
   console.error('Test failed:', err.message)
   process.exit(1)
 })
 ```
 
-The loop over `fieldMap` is a concise pattern for filling many fields: you define the data separately from the fill logic, which makes the test data easy to swap out for different scenarios later.
+Walk through this test and you should feel comfortable with every line. We start by adding a product — not because adding to cart is what we're testing, but because the checkout page won't show the form without it. We then navigate directly to checkout rather than going through the cart page, fill all fields, submit, and assert that we land on the confirmation URL.
 
-Note that the test navigates to the product page and clicks "Add to Cart" before going to checkout. The app requires items in the cart for the checkout page to render the form — if the cart is empty, it shows an empty-cart message instead.
+This is an **integration test** — it's testing a real user flow from end to end. It touches multiple pages, real DOM interactions, and real navigation. It's also atomic: it sets up its own cart state, doesn't depend on any other test, and cleans up the browser in `finally`.
+
+In the next chapter, we'll look much more closely at assertions and waiting — specifically how to assert on dynamic state like cart totals that update after you interact with the page.

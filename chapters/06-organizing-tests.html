@@ -146,14 +146,14 @@
     <div class="section-block">
       <div class="section-eyebrow">6.1</div>
       <h2 class="section-heading">From Scripts to <em>a Suite</em></h2>
-      <p>The standalone script pattern works for learning, but breaks down at scale. The problems:</p>
+      <p>Every chapter so far has been standalone scripts — one file, one function, one <code class="inline">async function main()</code>. That's the right way to learn. But as your test suite grows, standalone scripts create real problems. Here's what breaks:</p>
       <div class="problem-list">
         <div class="problem-item"><span class="problem-bullet">1</span>Each file manages its own browser lifecycle — boilerplate in every file</div>
         <div class="problem-item"><span class="problem-bullet">2</span>No built-in pass/fail reporting</div>
         <div class="problem-item"><span class="problem-bullet">3</span>Running all tests means running each file manually</div>
         <div class="problem-item"><span class="problem-bullet">4</span>No way to run only the tests for a specific feature</div>
       </div>
-      <p>Vitest solves all four: it discovers test files automatically, runs them, reports results, and exposes <code class="inline">describe</code>/<code class="inline">it</code>/<code class="inline">beforeEach</code>/<code class="inline">afterEach</code> for structured suites.</p>
+      <p>Vitest solves all four: it discovers test files automatically, runs them in parallel, reports results, and exposes <code class="inline">describe</code>/<code class="inline">it</code>/<code class="inline">beforeEach</code>/<code class="inline">afterEach</code> for structured suites. More importantly, it enforces structure that makes atomic tests easy to write correctly.</p>
     </div>
 
     <div class="section-block">
@@ -187,7 +187,7 @@
     <div class="section-block">
       <div class="section-eyebrow">6.3</div>
       <h2 class="section-heading">beforeEach and <em>afterEach</em></h2>
-      <p>Use lifecycle hooks to manage the browser. Each test gets a fresh browser instance — tests can't share state accidentally.</p>
+      <p>Use lifecycle hooks to manage the browser. Each test gets a fresh browser context — tests can't share state accidentally. This is what <strong>atomic tests</strong> look like structurally: <code class="inline">beforeEach</code> creates a clean context, <code class="inline">afterEach</code> closes it regardless of whether the test passed or failed. If <code class="inline">afterEach</code> runs even when a test throws, you never leak browser processes.</p>
       <div class="code-panel">
         <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">browser lifecycle in a suite</span></div>
         <div class="code-body"><pre>
@@ -217,7 +217,8 @@
     <div class="section-block">
       <div class="section-eyebrow">6.4</div>
       <h2 class="section-heading">The Page <em>Object Pattern</em></h2>
-      <p>Wrap a page's interactions in a class. Tests read like plain English, and selector changes live in one file.</p>
+      <p>The Page Object Pattern is one of the most important ideas in professional test automation. It applies OOP directly to test organization: a class bundles related state and behavior together. The selectors for the products page belong together — they change together when the page changes. The actions on the products page belong together. The Page Object encapsulates this, exposing a clean interface. Tests call its methods. Tests never touch selectors directly.</p>
+      <p>This maps to the <strong>Single Responsibility Principle</strong>: the <code class="inline">ProductsPage</code> class has one job — representing the products page. Tests have one job — asserting on outcomes. A selector change in the products page means one edit in one file. Every test that uses <code class="inline">filterByCategory()</code> benefits automatically.</p>
       <div class="code-panel">
         <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file"><em>pages/</em>ProductsPage.ts</span></div>
         <div class="code-body"><pre>
@@ -258,6 +259,38 @@
 })</pre></div>
       </div>
       <div class="callout"><p><strong>Rule of thumb:</strong> If a selector appears in more than two tests, it belongs in a Page Object. If it appears once, keep it inline.</p></div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">6.5 — Bonus</div>
+      <h2 class="section-heading">Parallel Contexts — Multiple Tabs, <em>One Browser</em></h2>
+      <p>Playwright runs tests in parallel across multiple worker processes, each with their own browser instance. Vibium can achieve a similar result within a single browser process using multiple <code class="inline">BrowserContext</code> objects. Each context is fully isolated — its own cookies, storage, and auth state — and can run a <code class="inline">Page</code> independently.</p>
+      <p>Here's what that looks like — two users interacting with the app simultaneously, in the same browser process, without interfering with each other:</p>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">parallel contexts — two independent sessions</span></div>
+        <div class="code-body"><pre>
+<span class="k">const</span> browser = <span class="k">await</span> vibium.<span class="fn">start</span>({ headless: <span class="k">true</span> })
+
+<span class="c">// two isolated contexts — like two incognito windows</span>
+<span class="k">const</span> [ctx1, ctx2] = <span class="k">await</span> Promise.<span class="fn">all</span>([
+  browser.<span class="fn">newContext</span>(),
+  browser.<span class="fn">newContext</span>(),
+])
+
+<span class="k">const</span> [page1, page2] = <span class="k">await</span> Promise.<span class="fn">all</span>([
+  ctx1.<span class="fn">newPage</span>(),
+  ctx2.<span class="fn">newPage</span>(),
+])
+
+<span class="c">// run both in parallel — they don't share any state</span>
+<span class="k">await</span> Promise.<span class="fn">all</span>([
+  page1.<span class="fn">go</span>(<span class="s">`${AUT}/products`</span>),
+  page2.<span class="fn">go</span>(<span class="s">`${AUT}/cart`</span>),
+])
+
+<span class="k">await</span> browser.<span class="fn">close</span>()</pre></div>
+      </div>
+      <p>Within a single Vitest suite, Vitest's parallel test runner handles this for you automatically — each test in the suite gets its own <code class="inline">beforeEach</code>-created context, and Vitest runs them concurrently. But if you need to orchestrate multiple browser sessions within a single test (for example, testing a real-time chat feature where two users must be active simultaneously), the multi-context pattern above is the right approach.</p>
     </div>
 
   </div>

@@ -153,7 +153,7 @@
     <div class="section-block">
       <div class="section-eyebrow">5.1</div>
       <h2 class="section-heading">Why <em>Waiting Matters</em></h2>
-      <p>The browser is asynchronous. After you click a button, the page might update instantly or it might wait for a render cycle or state update. If your assertion runs before the update lands, it fails — not because the feature is broken, but because your test didn't wait.</p>
+      <p>Here's the thing about browser automation that trips up almost everyone at first: the browser is asynchronous. After you click a button, the app might update the DOM in the same frame, or it might need to process a state update, run a reducer, re-render a React component, and <em class="inline">then</em> update the DOM. If your assertion runs before the update lands, it fails — not because the feature is broken, but because your test was faster than the page. This is a race condition, and race conditions are the worst kind of test failures — they erode trust in your test suite.</p>
       <div class="bad-good">
         <div class="bg-panel bad">
           <div class="bg-label">Race condition</div>
@@ -174,13 +174,13 @@ const total = await page.find(
 assert.ok(await total.isVisible())</pre>
         </div>
       </div>
-      <p>Vibium's actions (<code class="inline">click</code>, <code class="inline">fill</code>, <code class="inline">select</code>) auto-wait for the target to be interactive. But state that appears <em>after</em> an action — new text, a new URL — needs an explicit wait before you assert.</p>
+      <p>Vibium's actions (<code class="inline">click</code>, <code class="inline">fill</code>, <code class="inline">select</code>) auto-wait for the target to be interactive. But state that appears <em class="inline">after</em> an action — new text in the DOM, a new URL — needs an explicit <code class="inline">waitForText</code> or <code class="inline">waitForURL</code> call before you assert. <code class="inline">waitForText</code> blocks your script until that exact string appears somewhere on the page. Once it does, you know the DOM has settled and your assertion is safe.</p>
     </div>
 
     <div class="section-block">
       <div class="section-eyebrow">5.2</div>
       <h2 class="section-heading">Element <em>State Methods</em></h2>
-      <p>Once you have an element from <code class="inline">page.find()</code>, six methods tell you about its current state:</p>
+      <p>Once you have an element from <code class="inline">page.find()</code>, six state methods are available. Let me walk through each one and when to reach for it:</p>
       <div class="method-grid">
         <div class="method-card">
           <div class="method-name">isVisible()</div>
@@ -265,7 +265,7 @@ assert.<span class="fn">ok</span>(href?.<span class="fn">includes</span>(<span c
     <div class="section-block">
       <div class="section-eyebrow">5.5</div>
       <h2 class="section-heading">A Complete <em>State Test</em></h2>
-      <p>This test adds Wireless Headphones to the cart, increases quantity to 2, and asserts that subtotal and total update correctly. The <code class="inline">waitForText</code> calls after the click are the critical pattern.</p>
+      <p>This test adds Wireless Headphones to the cart, increases the quantity to 2, and asserts that three separate DOM values update correctly. We call <code class="inline">waitForText</code> twice after the click — once for the count label and once for the subtotal — because the DOM updates for each value may not happen in the same render cycle. Don't assert until you've confirmed the page has settled on the specific values you're checking.</p>
       <div class="code-panel">
         <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file"><em>ch05/</em>03-cart-totals.ts</span></div>
         <div class="code-body"><pre>

@@ -1,31 +1,49 @@
 # Chapter 7: Capturing Events
 
-So far we've controlled the browser: navigate, click, fill, assert. In this chapter we flip the direction — instead of sending actions to the browser, we *listen* for events the browser sends to us. Vibium provides three capture primitives: `capture.dialog()`, `capture.console()`, and `capture.download()`.
+Every chapter so far has been about sending commands to the browser: navigate here, click this, fill that. In this chapter we flip the direction. Instead of telling the browser what to do, we *listen* for events the browser fires at us. Vibium calls these captures, and there are three of them: `capture.dialog()` intercepts native browser dialogs, `capture.console()` collects console output, and `capture.download()` intercepts file downloads.
+
+Captures are one of the trickier concepts in Vibium, because they require a different timing pattern than everything else we've done. Let me explain that pattern clearly before we write any code.
 
 ---
 
-## 7.1 The Capture Pattern
+## The capture pattern: why Promise.all matters
 
-All three captures share the same API shape. You set up a listener *before* the action that triggers the event, then trigger the action:
+When you use any capture, you have to set up the listener *before* the action that triggers the event. That's the key rule. If you set up the listener after, you miss the event.
+
+Here's the natural but incorrect approach:
 
 ```typescript
-const [dialogResult] = await Promise.all([
-  capture.dialog('accept'),   // 1. set up listener first
-  button.click(),             // 2. trigger the event
+// WRONG: this deadlocks
+await page.capture.dialog('accept')  // waits for a dialog
+await button.click()                  // dialog fires here... but nobody receives it
+```
+
+If you await the capture first, it blocks, waiting for a dialog. The dialog won't come until the button is clicked. But you haven't clicked the button yet. You've deadlocked.
+
+The correct pattern is `Promise.all`:
+
+```typescript
+// CORRECT: both start at the same time
+await Promise.all([
+  page.capture.dialog('accept'),   // starts listening
+  (async () => {
+    const btn = await page.find({ role: 'button', text: 'Delete' })
+    btn.click()                    // triggers the dialog — fire-and-forget, no await
+  })(),
 ])
 ```
 
-The `Promise.all` is critical. If you `await capture.dialog()` first and *then* click, you deadlock: the capture is waiting for a dialog, the dialog is waiting for your click, and nothing moves. With `Promise.all`, both sides start concurrently.
+`Promise.all` starts both sides concurrently. The capture is listening when the button fires the dialog, so the event is caught. Notice that `btn.click()` is *not* awaited. That's intentional and important: Vibium's `click()` doesn't return until any resulting navigation settles. But a dialog blocks settlement. If you await the click, it waits for the browser to settle; the browser waits for the dialog to be handled; you've deadlocked again from the other side. Fire the click without awaiting — let the dialog appear, let the capture handle it, then the whole `Promise.all` resolves.
 
-The inner function inside `capture.dialog` — if it fires a click — must fire-and-forget (not awaited). See section 7.2.
+This fire-and-forget pattern for click inside a capture is a rule. It applies to all three capture types.
 
 ---
 
-## 7.2 Capturing Dialogs
+## Capturing dialogs
 
-`capture.dialog(action)` intercepts the next native browser dialog (alert, confirm, prompt) and handles it automatically. The action is either `'accept'` or `'dismiss'`.
+`page.capture.dialog(action)` intercepts the next native browser dialog — alert, confirm, or prompt — and handles it automatically. The action is `'accept'` or `'dismiss'`. The result tells you the dialog's type and message.
 
-Since our AUT (automation-exercise.daisyladybug.com) uses React-rendered UI and doesn't trigger native browser dialogs, we create a minimal inline page to demonstrate the pattern:
+Our app at automation-exercise uses React for all its modals, so native browser dialogs don't appear there. We'll use `page.setContent()` to inject a minimal HTML page that triggers real native dialogs:
 
 ```typescript
 import vibium from 'vibium'
@@ -46,18 +64,20 @@ async function testDialogCapture() {
       <div id="result"></div>
     `)
 
-    // --- alert ---
+    // Capture the alert
     const [alertResult] = await Promise.all([
       page.capture.dialog('accept'),
       (async () => {
         const btn = await page.find({ role: 'button', text: 'Show Alert' })
-        btn.click()  // fire-and-forget: don't await inside capture.dialog
+        btn.click()  // fire-and-forget
       })(),
     ])
-    assert.equal(alertResult.type, 'alert')
-    assert.equal(alertResult.message, 'Hello from alert!')
 
-    // --- confirm: accept ---
+    assert.equal(alertResult.type, 'alert', 'dialog type is alert')
+    assert.equal(alertResult.message, 'Hello from alert!', 'alert message')
+    console.log('✓ alert captured')
+
+    // Capture the confirm dialog and accept it
     await Promise.all([
       page.capture.dialog('accept'),
       (async () => {
@@ -65,30 +85,15 @@ async function testDialogCapture() {
         btn.click()
       })(),
     ])
+
     await page.waitForText('confirmed')
     assert.ok(
       await (await page.find({ text: 'confirmed' })).isVisible(),
-      'confirm accepted'
+      'confirm was accepted'
     )
+    console.log('✓ confirm accepted')
 
-    // --- confirm: dismiss ---
-    await page.find({ css: '#result' })
-    await page.evaluate("document.getElementById('result').textContent = ''")
-
-    await Promise.all([
-      page.capture.dialog('dismiss'),
-      (async () => {
-        const btn = await page.find({ role: 'button', text: 'Show Confirm' })
-        btn.click()
-      })(),
-    ])
-    await page.waitForText('cancelled')
-    assert.ok(
-      await (await page.find({ text: 'cancelled' })).isVisible(),
-      'confirm dismissed'
-    )
-
-    console.log('Dialog capture assertions passed.')
+    console.log('All dialog assertions passed.')
   } finally {
     await browser.close()
   }
@@ -100,11 +105,13 @@ testDialogCapture().catch(err => {
 })
 ```
 
+After the first capture, `alertResult` has a `type` property (`'alert'`, `'confirm'`, or `'prompt'`) and a `message` property with the text the dialog showed. After the second capture, we use `waitForText` to confirm the DOM updated to "confirmed" — meaning the app correctly received the dialog's outcome.
+
 ---
 
-## 7.3 Capturing Console Messages
+## Capturing console messages
 
-`capture.console()` collects console output emitted during a block of actions. Useful when verifying that app code logs the right messages (or doesn't log errors):
+`page.capture.console()` collects all console output emitted during a block of browser actions. This is useful for verifying that your app logs the right messages in response to user actions — or, just as importantly, that it *doesn't* log errors it shouldn't.
 
 ```typescript
 import vibium from 'vibium'
@@ -131,11 +138,11 @@ async function testConsoleCapture() {
       })(),
     ])
 
-    const logMessages = messages.filter((m: any) => m.type === 'log')
-    const warnMessages = messages.filter((m: any) => m.type === 'warning')
+    const logs  = messages.filter((m: any) => m.type === 'log')
+    const warns = messages.filter((m: any) => m.type === 'warning')
 
-    assert.equal(logMessages[0].text, 'item added')
-    assert.ok(warnMessages[0].text.includes('stock low'))
+    assert.equal(logs[0].text, 'item added', 'log message matches')
+    assert.ok(warns[0].text.includes('stock low'), 'warning contains expected text')
 
     console.log('Console capture assertions passed.')
   } finally {
@@ -149,11 +156,13 @@ testConsoleCapture().catch(err => {
 })
 ```
 
+Each message in the returned array has a `type` (matching the console method used: `'log'`, `'warning'`, `'error'`, `'info'`) and a `text` property. You can filter by type and assert on specific messages. This is particularly useful when you suspect an error is being silently swallowed — add a console capture and assert there are no messages of type `'error'`.
+
 ---
 
-## 7.4 Capturing Downloads
+## Capturing downloads
 
-`capture.download()` intercepts a file download triggered by a link or button click. You provide a directory to save the file:
+`page.capture.download()` intercepts a file download triggered by a link or button click. You pass a directory where the file should be saved. The result gives you the filename and the saved path.
 
 ```typescript
 import vibium from 'vibium'
@@ -183,12 +192,11 @@ async function testDownloadCapture() {
       })(),
     ])
 
-    assert.equal(download.suggestedFilename, 'products.csv')
+    assert.equal(download.suggestedFilename, 'products.csv', 'correct filename')
     assert.ok(
       fs.existsSync(path.join(downloadDir, download.suggestedFilename)),
       'file saved to disk'
     )
-
     console.log('Download capture assertions passed.')
   } finally {
     await browser.close()
@@ -201,21 +209,37 @@ testDownloadCapture().catch(err => {
 })
 ```
 
-The `Promise.all` pattern is identical to dialogs. The click fires, the browser triggers the download, `capture.download()` intercepts it and saves it, then returns a download descriptor with `suggestedFilename` and the path where it was saved.
+The pattern is identical to dialogs and console — `Promise.all`, fire-and-forget click inside. The download descriptor has `suggestedFilename` (the name the browser assigned) and the full path to the saved file. You can also read the file content from disk to verify its structure.
 
 ---
 
-## 7.5 Why fire-and-forget inside capture.dialog?
+## Quick reference: all three captures
 
-When you write:
+Here's the shape of each one side by side:
 
 ```typescript
-Promise.all([
-  capture.dialog('accept'),
-  (async () => {
-    btn.click()   // no await
-  })(),
+// Dialog — intercept and handle
+const [result] = await Promise.all([
+  page.capture.dialog('accept'),  // or 'dismiss'
+  (async () => { trigger.click() })(),
 ])
+// result.type, result.message
+
+// Console — collect messages
+const [messages] = await Promise.all([
+  page.capture.console(),
+  (async () => { trigger.click() })(),
+])
+// messages[].type, messages[].text
+
+// Download — save file
+const [download] = await Promise.all([
+  page.capture.download('/tmp/downloads'),
+  (async () => { trigger.click() })(),
+])
+// download.suggestedFilename, download.path
 ```
 
-The `btn.click()` is intentionally not awaited. Vibium's `click()` doesn't return until the browser acknowledges the click *and* any resulting navigation settles. But a dialog blocks the browser from settling. So `await click()` would hang waiting for the browser, and `capture.dialog()` would wait for the dialog, creating a deadlock. Firing the click without awaiting lets the dialog appear, the capture handles it, and then the whole `Promise.all` resolves.
+One mental model for remembering the rule: captures are *subscriptions*. You subscribe to an event channel before the event fires. If you subscribe after the event, you've already missed it. `Promise.all` is the mechanism that lets you subscribe and fire at the same time.
+
+In the next chapter we go one level deeper — intercepting HTTP requests before they reach the server, returning synthetic data, and simulating error conditions. Network interception is how you write tests that are fast, reliable, and don't depend on external services being available.

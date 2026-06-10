@@ -162,7 +162,7 @@
     <div class="section-block">
       <div class="section-eyebrow">4.1</div>
       <h2 class="section-heading">The Forms We'll <em>Work With</em></h2>
-      <p>The app has forms in two places. Here's a quick map before we start writing code.</p>
+      <p>In Chapter 3 you wrote a test that reads and asserts on a page. Now we're going to interact with it. Forms are where the majority of real-world test automation work happens — search fields, dropdowns, checkouts, registration flows. Let's start by mapping out what we're working with. The app has forms in two places:</p>
       <div class="form-map">
         <div class="form-card search">
           <div class="form-card-title">/products — Search &amp; Filter</div>
@@ -190,7 +190,7 @@
     <div class="section-block">
       <div class="section-eyebrow">4.2</div>
       <h2 class="section-heading">Filling Text <em>Inputs</em></h2>
-      <p>Locate the search input by its placeholder text, then call <code class="inline">fill()</code>. The products list filters in real time — assert that the expected product appears and unrelated ones disappear.</p>
+      <p>The method for filling a text input is <code class="inline">element.fill(text)</code>. It clears whatever is in the field first, then types the new value. The search input has a placeholder of "Search products..." — we can use that as a CSS attribute selector to target it precisely. After filling, the product list filters in real time:</p>
       <div class="code-panel">
         <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file"><em>ch04/</em>01-search-filter.ts (excerpt)</span></div>
         <div class="code-body"><pre>
@@ -265,7 +265,7 @@ assert.<span class="fn">equal</span>(<span class="k">await</span> emailField.<sp
     <div class="section-block">
       <div class="section-eyebrow">4.5</div>
       <h2 class="section-heading">Asserting <em>Validation Errors</em></h2>
-      <p>Submit the empty form and assert that the correct error messages appear. Test validation separately from the happy path — a form that accepts empty data is a bug.</p>
+      <p>Before we test the happy path, let's test what happens when things go wrong. Submitting an empty form should show validation errors for every required field. Testing this matters — a form that accepts empty data is a bug. And notice: this validation test and the happy-path checkout test are <strong>separate</strong> tests. Each is atomic — it does one thing, sets up its own state, and doesn't depend on the other. If we combined them, a failure in validation would prevent checkout from being tested at all.</p>
       <div class="error-list">
         <div class="error-item">✗ First name required</div>
         <div class="error-item">✗ Last name required</div>
@@ -303,7 +303,7 @@ assert.<span class="fn">equal</span>(<span class="k">await</span> emailField.<sp
     <div class="section-block">
       <div class="section-eyebrow">4.6</div>
       <h2 class="section-heading">A Complete <em>Form Test</em></h2>
-      <p>The full test covers search, category filtering, adding to cart, filling checkout, and asserting the confirmation URL. The cart must have items before checkout renders the form — the test navigates to a product and clicks "Add to Cart" first.</p>
+      <p>Here's the full checkout flow: add a product, navigate to checkout, fill all 12 fields using the <code class="inline">fieldMap</code> loop, submit, and assert we land on the confirmation URL. The cart must have items before the checkout form renders — we navigate to a product and click "Add to Cart" first. This is an <strong>integration test</strong>: it tests a real end-to-end user flow, touches multiple pages, and is still atomic — it sets up its own cart state and doesn't depend on any prior test.</p>
       <div class="code-panel">
         <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file"><em>ch04/</em>03-checkout-flow.ts</span></div>
         <div class="code-body"><pre>

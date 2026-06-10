@@ -1,143 +1,180 @@
 # Chapter 2: How Vibium Works — Architecture Overview
 
-Now that you have a sense of the testing landscape, let's look at how Vibium itself is designed. Understanding the architecture before writing your first test will save you a lot of confusion later. You don't need to understand every internal detail — but you do need a clear mental model of the moving parts.
+In Chapter 1 we talked about *what* Vibium is — one of several browser automation tools, with a distinctive three-interface design. In this chapter I want to show you *how* it works. We're going to look at the object hierarchy that everything in this course builds on, walk through a live browser session from start to finish, and touch on the three categories of things you can do with a Vibium page. Understanding this architecture will make every chapter that follows much easier to reason about.
 
 ---
 
-## 2.1 The Engine and the Interfaces
+## The three interfaces
 
-At its core, Vibium is a single automation engine with three different ways to interact with it.
+Let me start by making the three-interface story concrete, because it comes up constantly.
 
-The **CLI** is a standalone binary you run from the terminal. You give it commands directly — "navigate to this URL," "click this button," "take a screenshot" — and it executes them one at a time. This is great for quick tasks and for understanding what Vibium can do, but it's not how you write automated test suites.
+When you install Vibium, you get access to the same browser engine through three different surfaces:
 
-The **MCP server** implements the Model Context Protocol, an open standard originally developed by Anthropic for connecting AI assistants to tools. When Vibium runs as an MCP server, any AI agent that speaks MCP can use it to drive a browser without you writing any glue code. This is the interface that makes Vibium particularly well-suited to agent-driven automation — something we'll revisit toward the end of this course.
+The **CLI** lets you drive a browser from your terminal, one command at a time. You type `vibium go https://example.com` and a real browser navigates there. You type `vibium find text "Sign in"` and it tells you what element it found. This is enormously useful for exploration — when you're investigating a new page and want to quickly check what elements exist before writing any code.
 
-The **client libraries** — available for TypeScript, Python, and Java — give you a full programmatic API. You import Vibium, write code that calls its methods, and run that code directly. This is how most automated test suites are built, and this is the interface we'll be using throughout this course.
+The **MCP server** makes Vibium available to AI agents. When you configure Vibium as an MCP server in something like Claude Desktop, an AI assistant can navigate, click, fill forms, and read the page on your behalf, just from a natural language description of what you want. We'll look at this properly in Chapter 10.
 
-All three interfaces talk to the same underlying engine. The CLI, the MCP server, and the TypeScript client all result in the same browser actions. Skills you develop writing TypeScript tests will transfer directly if you later work with the CLI for quick checks or with an AI agent using MCP.
+The **TypeScript client** is what we use in this course. It gives you a full programmatic API that you control line by line. This is the right choice for writing tests — reproducible, version-controlled, CI-friendly.
 
----
-
-## 2.2 How a Test Actually Runs
-
-When you call `vibium.start()` in TypeScript, several things happen in sequence. Vibium launches a browser process on your machine — by default, a Chromium-based browser. It opens a browser context, which you can think of as a fresh browser profile. Inside that context, it creates a page, which corresponds to a single browser tab. Your TypeScript code then talks to that page through Vibium's API.
-
-The browser can run in two modes. In **headed mode**, a visible browser window opens on your screen and you can watch your test execute in real time. This is very useful when you're writing or debugging tests. In **headless mode**, the browser runs invisibly in the background — no window appears, but the browser is fully functional. Headless mode is what you'll typically use in CI/CD pipelines where there's no display to render to.
-
-Throughout a test run, your code sends instructions to Vibium, Vibium forwards them to the browser, the browser executes them, and results come back. This back-and-forth happens fast enough that from your code's perspective it feels like direct control, but Vibium is handling the communication protocol for you.
+All three interfaces talk to the same underlying browser engine and share the same behavior. What you learn about finding elements, filling forms, and waiting for page changes applies equally across all three.
 
 ---
 
-## 2.3 The Object Hierarchy
+## The object hierarchy: Browser → Context → Page → Element
 
-Vibium organizes browser automation around four levels, from outermost to innermost: `Browser`, `BrowserContext`, `Page`, and `Element`.
+Every interaction with Vibium follows the same four-level hierarchy. Let me walk through each level.
 
-The **Browser** is the browser process itself. In most tests you'll deal with exactly one browser per test run. You start it, use it, and close it.
+**Browser** is the top-level object. You create it by calling `vibium.start()`. This starts the browser process — think of it as the application itself before any tabs are open.
 
-The **BrowserContext** is an isolated session within that browser. Think of it as a private browsing window — each context has its own cookies, local storage, and authentication state. Contexts are completely isolated from each other. This matters when you're writing tests that need to run in parallel: you can spin up multiple contexts within one browser process and run them simultaneously without interference. Each context sees a clean, independent state.
+**BrowserContext** is an isolated session within the browser. Each context has its own cookies, storage, and authentication state. Contexts don't share anything with each other. This is important for tests: if you create two contexts, they're completely isolated — like two different users in separate incognito windows. You create a context by calling `browser.newContext()`.
 
-The **Page** is a single browser tab within a context. Most tests work with one page at a time, though some scenarios — like testing a flow that opens a new tab — require managing multiple pages.
+**Page** represents a single tab. You navigate it to a URL, interact with its elements, and assert on its state. Create one with `context.newPage()`.
 
-The **Element** is a specific DOM node on the page: a button, an input field, a heading, a link. Once Vibium finds an element, you can interact with it — click it, read its text, fill it if it's a form field, check whether it's visible or enabled.
+**Element** is what you get back from `page.find()`. It represents a specific DOM node — a button, a heading, an input. Elements have methods like `click()`, `fill()`, `text()`, and `isVisible()`.
 
-In TypeScript, you'll see this hierarchy reflected directly in the API:
+In code, that hierarchy looks like this:
 
 ```typescript
-const browser = await vibium.start()
-const context = await browser.newContext()
-const page = await context.newPage()
-await page.go('https://automation-exercise.daisyladybug.com/')
-const button = await page.find({ role: 'button', text: 'Shop Now' })
-await button.click()
-await browser.close()
+import vibium from 'vibium'
+
+async function main() {
+  const browser = await vibium.start({ headless: false })   // Browser
+  const context = await browser.newContext()                 // BrowserContext
+  const page = await context.newPage()                       // Page
+
+  await page.go('https://automation-exercise.daisyladybug.com/')
+
+  const heading = await page.find({ role: 'heading', text: 'automation-exercise' })  // Element
+  console.log(await heading.text())
+
+  await browser.close()
+}
+
+main()
 ```
 
-You don't always have to create the context and page manually — Vibium provides convenience methods that handle the common case of one context and one page — but it's important to understand what those shortcuts are doing under the hood.
+Notice every step down the hierarchy is an `await`. Each call returns a promise you resolve before moving to the next level. Once you hold a `page`, most things you do are `await page.something()`. Once you hold an element, it's `await element.something()`.
 
 ---
 
-## 2.4 Finding Elements
+## Finding elements: the locator approach
 
-Before you can interact with anything on a page, you have to locate it. This is one of the most important — and most error-prone — parts of browser automation, and Vibium's approach is worth understanding carefully.
+`page.find()` is the most important method in Vibium's API. It locates a single element on the page and returns an Element object you can interact with.
 
-Vibium's primary method for locating elements is `page.find()`. You pass it a descriptor that describes what you're looking for, and Vibium searches the DOM for a matching element.
-
-The most reliable form is `{ role, text }`:
+The key design decision is *how* you describe the element you want. Vibium uses a locator object — a plain JavaScript object with properties that describe the element. The two most common approaches:
 
 ```typescript
+// By role + text — the preferred approach
 const button = await page.find({ role: 'button', text: 'Add to Cart' })
+
+// By CSS selector — when you need structural precision
+const input = await page.find({ css: 'input[name=email]' })
 ```
 
-This finds an element that has the ARIA role `button` and visible text matching `'Add to Cart'`. Role-plus-text selectors are robust because they describe what the element *is* and what it *says* — two things that stay stable even as a page's HTML structure changes.
+The role-plus-text approach describes what the element *means*, not what it *looks like*. "Button" refers to the semantic role — it doesn't matter whether the HTML is a `<button>`, an `<a>` styled as a button, or a `<div role="button">`. The text narrows it to the specific one. CSS selectors are a fallback for form inputs or elements where semantic targeting isn't precise enough.
 
-You can also find by CSS selector:
-
-```typescript
-const input = await page.find({ css: '#search-input' })
-```
-
-And by text alone:
-
-```typescript
-const heading = await page.find({ text: 'Featured Products' })
-```
-
-Text-only searches return the outermost element that contains that text. This is fine for reading content but can be surprising when you're targeting interactive elements. For buttons, inputs, and links, always use `{ role, text }`.
-
-One more thing to know: `find()` matches against the actual DOM text content, not rendered text. CSS properties like `text-transform: uppercase` don't affect what `find()` sees. If the DOM contains `"add to cart"` and the page renders it as `"ADD TO CART"`, you search for `"add to cart"`.
+One important detail: `page.find({ text: 'something' })` without a role returns the *outermost* DOM element containing that text. For interactive elements — buttons, links, checkboxes — always include the role.
 
 ---
 
-## 2.5 Actions, Captures, and Waits
+## The three categories of operations
 
-Vibium's API divides into three categories of operations. Understanding the distinction makes the whole API much easier to navigate.
+Everything you do with a Vibium page falls into one of three categories: **actions**, **captures**, and **waits**. This mental model organizes every chapter from here on.
 
-**Actions** are things you do to the page: navigating to a URL, clicking an element, typing into an input, scrolling, hovering. These are the verbs of your test.
+**Actions** are things you do *to* the page:
+- `page.go(url)` — navigate
+- `element.click()` — click
+- `element.fill(text)` — clear a field and type
+- `element.select(value)` — choose a dropdown option
 
-```typescript
-await page.go('https://automation-exercise.daisyladybug.com/')
-await button.click()
-await input.fill('running shoes')
-```
+**Captures** are events the browser sends *to* you:
+- `page.capture.dialog()` — intercept an alert or confirm
+- `page.capture.console()` — collect console messages
+- `page.capture.download()` — intercept a file download
 
-**Captures** are ways of listening for browser events that happen asynchronously. The most common example is a dialog. When your test clicks a button that triggers a `window.alert()`, you need to be listening for that alert *before* the click happens — otherwise the dialog will block and your test will hang. Vibium's `capture.dialog()` handles this:
+**Waits** block your script until a condition is true:
+- `page.waitForText(text)` — wait until text appears
+- `page.waitForURL(pattern)` — wait until the URL matches
 
-```typescript
-const [dialog] = await Promise.all([
-  page.capture.dialog(),
-  button.click()
-])
-console.log(dialog.message)
-await dialog.accept()
-```
-
-Notice the pattern: you set up the capture and trigger the action at the same time, inside a `Promise.all`. The capture registers the listener first, then the click fires. This is a pattern you'll use repeatedly throughout the course.
-
-Other captures include `capture.console()` for listening to `console.log` output, and `capture.download()` for intercepting file downloads.
-
-**Waits** let you pause test execution until a specific condition is true. Vibium automatically waits for elements to be ready before most actions — you won't usually need explicit waits just to click a button. But sometimes you need to wait for something specific: a URL change after a form submission, a piece of text to appear after an API call returns, a loading spinner to disappear.
-
-```typescript
-await page.waitForURL('**/checkout/success')
-await page.waitForText('Order confirmed')
-```
-
-Waits are different from captures: a wait blocks until a condition is met, while a capture registers a listener for a future event. Both deal with the asynchronous nature of the browser, but they're used in different situations.
+The pattern you'll use constantly: trigger an action, wait for the DOM to settle, then assert. We'll dig into that in Chapter 5.
 
 ---
 
-## 2.6 Network Layer
+## OOP in Vibium: why the object model matters
 
-Vibium includes a network interception API that lets you intercept browser requests and either modify them, block them, or substitute a mock response. This is useful in advanced scenarios — returning a controlled API response without hitting a real server, or blocking third-party scripts to reduce test noise.
+You might notice that Vibium's API is object-oriented — you call methods on objects (`page.find()`, `element.click()`) rather than passing everything as arguments to standalone functions. This is intentional, and it matters for how you write good tests.
+
+Each object in the hierarchy carries context. A `Page` object knows which browser context it belongs to. An `Element` object knows which page it came from, which DOM node it represents, and whether that node is still attached. When you call `element.click()`, Vibium doesn't re-query the DOM — it already has a reference to the exact node.
+
+This OOP model is also the foundation for the **Page Object Pattern** in Chapter 6. When you wrap a page's interactions in a class, each method on that class translates directly to one or more Vibium calls. The `ProductsPage` class you'll build has a `filterByCategory()` method that internally calls `page.find()` and `element.select()`. The test doesn't know or care about the selector — it just calls `products.filterByCategory('Electronics')`. That's OOP applied to test organization.
+
+---
+
+## Atomic tests
+
+Before we get to writing code, there's one more concept worth introducing: atomic tests. An atomic test does one thing and one thing only. It sets up its own state, performs its action, asserts the outcome, and tears down cleanly. It doesn't depend on another test having run before it. It doesn't leave side effects for the next test.
+
+Why does this matter? Because if Test B depends on Test A having run first, and Test A fails, now both tests fail — but only one of them is actually broken. Debugging becomes harder. Tests become order-dependent, which means you can't run them in parallel. And over time the test suite accumulates implicit dependencies that nobody can fully map.
+
+In Vibium, atomicity means: every test gets its own browser context, navigates to its own starting URL, and closes the browser in `finally`. No shared state, no leftover cookies, no assumptions about what the previous test did. This is exactly what `beforeEach` and `afterEach` in Chapter 6 enforce structurally.
+
+---
+
+## Network interception
+
+One more architecture-level capability: `page.route()`. This lets you intercept HTTP requests before they leave the browser and respond with synthetic data or simulate failures.
 
 ```typescript
-await page.route('**/api/products', route => {
-  route.fulfill({ status: 200, body: JSON.stringify({ products: [] }) })
+await page.route('**/api/products', async route => {
+  await route.fulfill({
+    status: 200,
+    body: JSON.stringify([{ id: 'prod_001', name: 'Test Product' }]),
+  })
 })
 ```
 
-You won't need this for the exercises in this course — we'll work with real pages and real network calls on the automation-exercise app. But knowing the feature exists is useful context. If you ever encounter flaky tests caused by an unstable external API, network interception is often the cleanest solution.
+We'll use this in Chapter 8. For now, just know it lives at the page level and it's one of the most powerful tools for writing tests that don't depend on a live backend.
 
 ---
 
-With this mental model in place — engine, object hierarchy, finding elements, and the three interaction modes — you have everything you need to start writing real tests. That's what we'll do in Chapter 3.
+## A live session
+
+Here's a complete example that touches most of what we just covered. This is close to what you'll write in Chapter 3, but I want you to see the full shape now:
+
+```typescript
+import vibium from 'vibium'
+
+const AUT = 'https://automation-exercise.daisyladybug.com/'
+
+async function exploreApp() {
+  const browser = await vibium.start({ headless: false })
+  const context = await browser.newContext()
+  const page = await context.newPage()
+
+  try {
+    await page.go(AUT)
+
+    const title = await page.title()
+    console.log('Title:', title)
+
+    const hero = await page.find({ role: 'heading', text: 'automation-exercise' })
+    console.log('Hero text:', await hero.text())
+
+    const productsLink = await page.find({ role: 'link', text: 'Products' })
+    await productsLink.click()
+
+    // Wait for URL to update after the click
+    await page.waitForURL('**/products')
+    console.log('Now at:', await page.url())
+
+  } finally {
+    await browser.close()  // always runs, even if something threw
+  }
+}
+
+exploreApp()
+```
+
+Run this and you'll see the browser open, navigate home, then click through to the products page. The `try/finally` pattern is something you'll write in every test in this course. `browser.close()` in `finally` means the browser always cleans up — whether the test passed, failed, or threw an unexpected error.
+
+In the next chapter, we turn this foundation into a real test with assertions, proper failure handling, and a structure you can run reliably in CI. Let's go write it.

@@ -136,9 +136,10 @@
   <div class="container">
 
     <div class="section-block">
-      <div class="section-eyebrow">1.1</div>
-      <h2 class="section-heading">A Note on Scope</h2>
-      <p>My focus here is on free and open-source tools. There are dozens of commercial testing platforms — some excellent, some not — but the real action in web automation has always been in the open-source world. The tools below are the ones you'll encounter most often in job postings, team discussions, and the wider testing community.</p>
+      <div class="section-eyebrow">Introduction</div>
+      <h2 class="section-heading">Welcome to the Course</h2>
+      <p>Before we write a single line of code, I want to give you some context — where browser automation came from, what the major tools look like today, and why we're using Vibium specifically. By the end of this chapter you'll have a clear mental map of the ecosystem, and you'll understand exactly where Vibium fits in.</p>
+      <p>I'm focusing on free, open-source tools. There are plenty of commercial testing platforms out there — some of them are excellent — but the real depth and innovation in browser automation has always happened in the open-source world. These are the tools you'll encounter constantly in job postings, engineering blogs, and team conversations.</p>
     </div>
 
     <div class="section-block">
@@ -172,40 +173,40 @@
     <div class="section-block">
       <div class="section-eyebrow">1.2</div>
       <h2 class="section-heading">Selenium and <em>WebDriver BiDi</em></h2>
-      <p>Selenium is the original browser automation tool, and it remains the most widely deployed in enterprise environments. It works by using an official W3C standard called the <strong>WebDriver Protocol</strong> — a REST-like API that all major browsers expose natively. Because it is a real standard and not a vendor extension, tests written with Selenium run against Chrome, Firefox, Safari, and Edge with no special treatment required for each.</p>
-      <p>The limitation of classic WebDriver is that it is inherently one-directional and synchronous: you send a command, the browser responds, you send the next command. This makes real-time observation of browser events — console logs, network activity, DOM mutations as they happen — awkward or impossible.</p>
-      <p>That gap is what <strong>WebDriver BiDi</strong> was designed to fill. BiDi (bidirectional) is a newer W3C standard that adds a persistent, event-driven channel on top of classic WebDriver. Instead of polling, your test code can subscribe to browser events as they fire. Selenium 4 introduced BiDi support, and all major browsers are now implementing it.</p>
+      <p>Selenium is where browser automation started, and it's still the most widely deployed tool in enterprise environments. It drives the browser through the <strong>WebDriver Protocol</strong> — a real W3C standard that all major browsers implement natively. Because it's a standard and not a vendor-specific hack, tests written with Selenium are genuinely portable across Chrome, Firefox, Safari, and Edge without you doing anything special.</p>
+      <p>Here's the limitation of classic WebDriver: the protocol is one-directional and synchronous. You send a command, the browser executes it, you send the next command. That works fine for click-and-check tests, but it makes real-time observation difficult. Want to listen for console errors as your test runs? Want to intercept a network request before it fires? With classic WebDriver, that's awkward at best.</p>
+      <p>That's the problem <strong>WebDriver BiDi</strong> was built to solve. BiDi stands for bidirectional. It's a newer W3C spec that adds a persistent, event-driven communication channel on top of classic WebDriver. Instead of sending commands and waiting for responses one at a time, your test code can subscribe to browser events as they happen in real time. Selenium 4 added BiDi support, and all major browsers are actively implementing it. So if you've heard that "Selenium is old and slow" — that was earned by earlier versions. Modern BiDi-enabled Selenium is genuinely capable.</p>
     </div>
 
     <div class="section-block">
       <div class="section-eyebrow">1.3</div>
       <h2 class="section-heading">Playwright</h2>
-      <p>Playwright was created by Microsoft, built in part by engineers who previously worked on Google's Puppeteer project. It uses the Chrome DevTools Protocol (CDP) for Chromium-based browsers, and patches Firefox and WebKit with equivalent hooks, giving you consistent automation across all three engine families.</p>
-      <p>Playwright supports TypeScript, JavaScript, Python, Java, and .NET. It's known for reliable auto-waiting behavior — rather than requiring you to write explicit sleep statements or polling loops, Playwright waits for elements to be ready before interacting with them. It supports parallel test execution out of the box and ships with its own test runner.</p>
-      <p>The tradeoff is that Playwright's cross-browser support works through unofficial browser patches. CDP itself is not a W3C standard. In practice this has not caused problems, but it's worth knowing architecturally.</p>
+      <p>Playwright was created by Microsoft, built by a team that includes engineers who previously worked on Google's Puppeteer. It uses the Chrome DevTools Protocol for Chromium-based browsers and applies equivalent patches to Firefox and WebKit, giving you cross-browser automation across all three major rendering engines.</p>
+      <p>Playwright's most important design decision is its auto-waiting behavior. Before it interacts with an element, it automatically waits for that element to be visible, attached to the DOM, and ready to receive input. That alone makes tests dramatically less flaky compared to older tools. Playwright supports TypeScript, JavaScript, Python, Java, and .NET, comes with its own test runner, and supports parallel execution out of the box.</p>
+      <p>The architectural caveat: Playwright's cross-browser support relies on unofficial browser patches. The Chrome DevTools Protocol is not a W3C standard. In practice this hasn't caused problems — the Playwright team moves fast — but it's worth understanding.</p>
     </div>
 
     <div class="section-block">
       <div class="section-eyebrow">1.4</div>
       <h2 class="section-heading">Cypress</h2>
-      <p>Cypress takes a fundamentally different approach: rather than driving the browser from the outside, it runs <em class="inline">inside</em> the browser alongside your app. Tests are injected as JavaScript into the page itself, which gives Cypress excellent visibility into application state and very fast feedback during development.</p>
-      <p>The cost of this architecture is a set of hard constraints. Cypress only supports JavaScript and TypeScript. Tests must live in the same environment as the application code — a good fit for frontend teams, but awkward for organizations where testing is a separate concern. Cypress also uses a proxy server to intercept network requests, which introduces complexity when testing apps that rely on multiple origins, iframes, or browser extensions.</p>
+      <p>Cypress takes a fundamentally different approach from both Selenium and Playwright. Rather than controlling the browser from the outside, it runs <em class="inline">inside</em> the browser alongside your application. Your tests are injected as JavaScript directly into the page. This gives Cypress extraordinary visibility into application state and a very tight feedback loop during development.</p>
+      <p>That architecture comes with hard constraints. Cypress only supports JavaScript and TypeScript. Since tests run in the same environment as the application, they can't easily test scenarios that cross multiple origins, use iframes, or involve browser extensions. For frontend developers building and testing their own application, Cypress often feels like the most natural tool. For QA engineers testing a wider range of applications, the constraints become more limiting.</p>
     </div>
 
     <div class="section-block">
       <div class="section-eyebrow">1.5</div>
       <h2 class="section-heading">Vibium</h2>
-      <p>Vibium is a newer browser automation tool built with a different design philosophy than any of the above. It was created with agent-driven and AI-assisted testing in mind from the start, rather than being adapted to that use case after the fact.</p>
-      <p>Vibium exposes its functionality in three distinct forms. The <strong>CLI</strong> is a standalone command-line binary. The <strong>MCP server</strong> implements the Model Context Protocol — an open standard for connecting AI assistants to tools — which means any AI agent that speaks MCP can use Vibium to automate browsers without you writing any code at all. The <strong>client libraries</strong> — available for TypeScript, Python, and Java — give you a full programmatic API.</p>
-      <p>In this course, we are using the <strong>TypeScript client</strong>. TypeScript is the most natural fit for web automation because the web is a JavaScript environment, and TypeScript's static typing makes working with complex browser APIs much safer and more productive.</p>
+      <p>Vibium is the newest tool in this group, and it's the one that's genuinely designed for where the industry is going rather than where it's been. The first thing that makes Vibium unusual is that it exposes the same underlying browser engine through <strong>three distinct interfaces</strong>.</p>
+      <p>The <strong>CLI</strong> is a standalone binary — you can drive a real browser from your terminal without writing any code. The <strong>MCP server</strong> implements the Model Context Protocol, an open standard for connecting AI assistants to tools — so any AI agent that speaks MCP can use Vibium to automate browsers. And the <strong>client libraries</strong> — for TypeScript, Python, and Java — give you a full programmatic API for writing tests.</p>
+      <p>In this course we're using the TypeScript client. TypeScript is the natural choice: the web is a JavaScript environment, and TypeScript's static typing makes working with browser automation APIs much safer and more productive. You get autocomplete, you catch mistakes at compile time, and your intent is much clearer on the page.</p>
     </div>
 
     <div class="section-block">
       <div class="section-eyebrow">1.6</div>
       <h2 class="section-heading">Why <em>Vibium</em> for This Course?</h2>
-      <p>There will never be one right answer to the question of which tool to use. Playwright is an excellent choice for teams that want a mature, well-documented, multi-language option. Selenium with WebDriver BiDi is the right call when W3C standard alignment and broad enterprise compatibility are top priorities. Cypress serves frontend development teams who want testing tightly integrated into their build workflow.</p>
-      <p>We are focusing on Vibium because it sits at a genuinely new point in the landscape: it is designed for the way testing work is evolving, where automation scripts are written by humans <em class="inline">and</em> by AI agents, and where the gap between "running a test" and "running an agent that can test" is collapsing. Understanding Vibium well gives you both a capable testing tool and a foundation for agent-driven automation — a direction the whole industry is moving toward.</p>
-      <p>Let's start building.</p>
+      <p>There isn't one right tool for all situations, and I want to be honest about that. Playwright is an excellent, mature choice for teams that want broad language support and a well-established ecosystem. Selenium with BiDi is the right call when W3C standard compliance and enterprise compatibility are non-negotiable. Cypress serves frontend teams who want testing deeply integrated into their development workflow.</p>
+      <p>We're using Vibium because it sits at a genuinely new point in the landscape — designed for a world where automation scripts are written by both humans and AI agents, and where the boundary between "running a test" and "running an agent that can test" is blurring. Understanding Vibium gives you both a capable, practical testing tool for today and a foundation for where the whole industry is heading.</p>
+      <p>In the next chapter, we'll open up the hood and look at how Vibium actually works — the object model, the three interfaces, and the core patterns you'll use throughout every chapter in this course. Let's get into it.</p>
     </div>
 
   </div>

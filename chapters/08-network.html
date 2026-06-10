@@ -147,7 +147,7 @@
     <div class="section-block">
       <div class="section-eyebrow">8.1</div>
       <h2 class="section-heading">page.route() — <em>Two Methods</em></h2>
-      <p><code class="inline">page.route(pattern, handler)</code> registers an intercept. The pattern is a glob string matched against the full request URL. The handler receives a <code class="inline">Route</code> object.</p>
+      <p>Any test that calls a real API inherits the instability of that API — slow responses, rate limits, flaky connections, data you can't predict. <code class="inline">page.route(pattern, handler)</code> breaks that dependency. You register an intercept before navigating — the pattern is a glob string matched against the full request URL, and the handler receives a <code class="inline">Route</code> object. Once registered, every matching request goes through your handler instead of hitting the network:</p>
       <div class="route-methods">
         <div class="route-method">
           <div class="route-method-name">route.fulfill(response)</div>
@@ -171,7 +171,7 @@
     <div class="section-block">
       <div class="section-eyebrow">8.2</div>
       <h2 class="section-heading">Stubbing a <em>Successful Response</em></h2>
-      <p>Intercept the products API and return exactly two products. The test is fast (no real API call), deterministic (you control the data), and isolated (passes even if the server is down).</p>
+      <p>Let's stub the products endpoint to return exactly two items, then verify the UI renders them. The test is fast — no real HTTP request leaves the browser. It always returns the same data, so assertions are deterministic. And it passes even when the real server is down.</p>
       <div class="benefit-row"><span class="benefit-icon">fast</span><span class="benefit-text">No real network call — milliseconds, not seconds</span></div>
       <div class="benefit-row"><span class="benefit-icon">stable</span><span class="benefit-text">Your stub can't return rate-limit errors or unexpected data</span></div>
       <div class="benefit-row"><span class="benefit-icon">isolated</span><span class="benefit-text">Passes in CI even when the real API is down for maintenance</span></div>
@@ -198,7 +198,7 @@ assert.<span class="fn">equal</span>(count, <span class="n">2</span>, <span clas
     <div class="section-block">
       <div class="section-eyebrow">8.3 – 8.5</div>
       <h2 class="section-heading">Errors, Status Codes, <em>and Partial Intercepts</em></h2>
-      <p>Use <code class="inline">route.abort()</code> to simulate a connection failure and verify graceful error handling. Use <code class="inline">status: 500</code> in <code class="inline">fulfill()</code> for a more realistic server error.</p>
+      <p>Use <code class="inline">route.abort()</code> to simulate a connection-level failure — what happens when a request times out or DNS fails. Use <code class="inline">status: 500</code> in <code class="inline">fulfill()</code> for a more realistic server error — the network worked, but the server responded with failure. Both scenarios are real; both are worth testing. The distinction matters: a 500 tests error handling over a working connection; an abort tests what happens when the connection itself is lost.</p>
       <div class="code-panel">
         <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">abort + partial intercept patterns</span></div>
         <div class="code-body"><pre>

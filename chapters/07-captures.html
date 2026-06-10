@@ -147,7 +147,7 @@
     <div class="section-block">
       <div class="section-eyebrow">7.1</div>
       <h2 class="section-heading">The Capture <em>Pattern</em></h2>
-      <p>All three captures share the same API shape: set up the listener <em>before</em> the action that triggers the event, then trigger the action — both inside <code class="inline">Promise.all</code>.</p>
+      <p>Every chapter so far has been about sending commands to the browser. In this chapter we flip the direction — instead of telling the browser what to do, we <em class="inline">listen</em> for events the browser fires at us. All three captures share the same API shape: set up the listener <em class="inline">before</em> the action that triggers the event, then trigger the action — both inside <code class="inline">Promise.all</code>. If you try to await the capture first and then click, you deadlock. Captures are subscriptions — you must subscribe before the event fires.</p>
       <div class="capture-cards">
         <div class="capture-card">
           <div class="capture-card-name">capture.dialog()</div>
@@ -168,7 +168,7 @@
     <div class="section-block">
       <div class="section-eyebrow">7.2</div>
       <h2 class="section-heading">Capturing <em>Dialogs</em></h2>
-      <p>Use <code class="inline">page.setContent()</code> to create a test page with real browser dialogs, since our AUT uses React-rendered UI with no native dialogs.</p>
+      <p><code class="inline">page.capture.dialog(action)</code> intercepts the next native browser dialog and handles it automatically — pass <code class="inline">'accept'</code> or <code class="inline">'dismiss'</code>. Our AUT uses React-rendered modals, not native dialogs, so we use <code class="inline">page.setContent()</code> to inject a minimal HTML page with real native dialogs for this example:</p>
       <div class="code-panel">
         <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file"><em>ch07/</em>01-dialog.ts (excerpt)</span></div>
         <div class="code-body"><pre>
@@ -196,7 +196,7 @@ assert.<span class="fn">equal</span>(result.message, <span class="s">'Hello!'</s
     <div class="section-block">
       <div class="section-eyebrow">7.3</div>
       <h2 class="section-heading">Capturing <em>Console Messages</em></h2>
-      <p>Verify that your app emits the right logs — or doesn't log unexpected errors — during an action.</p>
+      <p><code class="inline">page.capture.console()</code> collects all console output emitted during a block of browser actions. Use this to verify your app logs the right messages in response to user actions — or, just as importantly, that it <em class="inline">doesn't</em> log errors it shouldn't. Each message in the returned array has a <code class="inline">type</code> matching the console method (<code class="inline">'log'</code>, <code class="inline">'warning'</code>, <code class="inline">'error'</code>) and a <code class="inline">text</code> property.</p>
       <div class="code-panel">
         <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file"><em>ch07/</em>02-console.ts (excerpt)</span></div>
         <div class="code-body"><pre>
@@ -219,7 +219,7 @@ assert.<span class="fn">ok</span>(warns[<span class="n">0</span>].text.<span cla
     <div class="section-block">
       <div class="section-eyebrow">7.4</div>
       <h2 class="section-heading">Capturing <em>Downloads</em></h2>
-      <p>Intercept a file download triggered by a link or button. The capture saves the file and returns its suggested filename.</p>
+      <p><code class="inline">page.capture.download(dir)</code> intercepts a file download triggered by a link or button click. Pass a directory where the file should be saved. The same <code class="inline">Promise.all</code> pattern applies — register the capture before triggering the download, fire the click without awaiting. The download descriptor has <code class="inline">suggestedFilename</code> and a path to the saved file.</p>
       <div class="code-panel">
         <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file"><em>ch07/</em>03-download.ts (excerpt)</span></div>
         <div class="code-body"><pre>

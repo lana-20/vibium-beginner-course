@@ -159,7 +159,8 @@
     <div class="section-block">
       <div class="section-eyebrow">2.1</div>
       <h2 class="section-heading">The Engine and the <em>Interfaces</em></h2>
-      <p>At its core, Vibium is a single automation engine with three different ways to interact with it.</p>
+      <p>In Chapter 1 we talked about what Vibium is. In this chapter I want to show you how it works. We're going to look at the object hierarchy that everything in this course builds on, walk through a live browser session from start to finish, and touch on the three categories of things you can do with a Vibium page. Understanding this architecture will make every chapter that follows much easier to reason about.</p>
+      <p>Let me start by making the three-interface story concrete. When you install Vibium, you get access to the same browser engine through three different surfaces:</p>
       <div class="arch-grid">
         <div class="arch-card cli">
           <div class="arch-label">CLI</div>
@@ -175,14 +176,14 @@
         </div>
         <div class="arch-engine">↑ all three talk to the same underlying engine ↑</div>
       </div>
-      <p>All three interfaces result in the same browser actions. Skills you develop writing TypeScript tests transfer directly if you later work with the CLI or with an AI agent using MCP.</p>
+      <p>All three interfaces talk to the same underlying browser engine and share the same behavior. What you learn about finding elements, filling forms, and waiting for page changes applies equally across all three.</p>
     </div>
 
     <div class="section-block">
       <div class="section-eyebrow">2.2</div>
       <h2 class="section-heading">How a Test Actually Runs</h2>
-      <p>When you call <code class="inline">vibium.start()</code>, Vibium launches a browser process, opens a browser context (a fresh browser profile), and creates a page (a browser tab). Your TypeScript code talks to that page through Vibium's API.</p>
-      <p>The browser runs in two modes. <strong>Headed mode</strong> opens a visible window — use this while writing and debugging tests. <strong>Headless mode</strong> runs the browser invisibly — use this in CI pipelines where there is no display.</p>
+      <p>Every interaction with Vibium follows the same four-level hierarchy. <strong>Browser</strong> is the top-level object — think of it as the application itself before any tabs are open. <strong>BrowserContext</strong> is an isolated session with its own cookies, storage, and authentication state. This is important for tests: two contexts can't share state, like two users in separate incognito windows. <strong>Page</strong> represents a single tab. <strong>Element</strong> is what you get back from <code class="inline">page.find()</code> — a specific DOM node you can interact with.</p>
+      <p>Notice every step is an <code class="inline">await</code>. Each call returns a promise you resolve before moving to the next level. Once you hold a <code class="inline">page</code>, most things you do are <code class="inline">await page.something()</code>. Once you hold an element, it's <code class="inline">await element.something()</code>.</p>
     </div>
 
     <div class="section-block">
@@ -235,7 +236,8 @@
     <div class="section-block">
       <div class="section-eyebrow">2.4</div>
       <h2 class="section-heading">Finding Elements</h2>
-      <p>Vibium's primary locator is <code class="inline">page.find()</code>. The most reliable form is <strong>role + text</strong> — it describes what the element is and what it says, staying stable even as HTML structure changes.</p>
+      <p><code class="inline">page.find()</code> is the most important method in Vibium's API. It locates a single element and returns an object you can interact with. The key design decision is <em class="inline">how</em> you describe the element you want.</p>
+      <p>The role-plus-text approach describes what the element <em class="inline">means</em>, not what it looks like. "Button" refers to the semantic role — it doesn't matter whether the HTML is a <code class="inline">&lt;button&gt;</code>, an <code class="inline">&lt;a&gt;</code> styled as a button, or a <code class="inline">&lt;div role="button"&gt;</code>. The text narrows it to the specific one. CSS selectors are a fallback for form inputs or elements where semantic targeting isn't precise enough.</p>
       <div class="code-panel">
         <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">find strategies</span></div>
         <div class="code-body"><pre>
@@ -254,8 +256,8 @@
     <div class="section-block">
       <div class="section-eyebrow">2.5</div>
       <h2 class="section-heading">Actions, <em>Captures</em>, and Waits</h2>
-      <p>Three categories of operations. Understanding the distinction makes the whole API easier to navigate.</p>
-      <p><strong>Actions</strong> — things you do: navigate, click, fill, scroll. <strong>Captures</strong> — listeners for async browser events: dialogs, console output, downloads. <strong>Waits</strong> — blocks until a condition is true: URL changed, text appeared, element visible.</p>
+      <p>Everything you do with a Vibium page falls into one of three categories. Understanding this mental model organizes every chapter from here on.</p>
+      <p><strong>Actions</strong> are things you do <em class="inline">to</em> the page: navigate, click, fill, select. <strong>Captures</strong> are events the browser sends <em class="inline">to you</em>: dialogs, console messages, file downloads — set up the listener before triggering the action, always using <code class="inline">Promise.all</code>. <strong>Waits</strong> block your script until a condition is true: text appears, URL changes. The pattern you'll use constantly: trigger an action, wait for the DOM to settle, then assert.</p>
       <div class="code-panel">
         <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">captures — the key pattern</span></div>
         <div class="code-body"><pre>
@@ -278,6 +280,22 @@ console.<span class="fn">log</span>(dialog.message)
 
     <div class="section-block">
       <div class="section-eyebrow">2.6</div>
+      <h2 class="section-heading">OOP: Why the <em>Object Model</em> Matters</h2>
+      <p>You might notice that Vibium's API is object-oriented — you call methods on objects (<code class="inline">page.find()</code>, <code class="inline">element.click()</code>) rather than passing everything as arguments to standalone functions. This is intentional, and it matters for how you write good tests.</p>
+      <p>Each object in the hierarchy carries context. A <code class="inline">Page</code> knows which browser context it belongs to. An <code class="inline">Element</code> knows which page it came from and which DOM node it represents. When you call <code class="inline">element.click()</code>, Vibium doesn't re-query the DOM — it already has a reference to the exact node.</p>
+      <p>This OOP model is also the foundation for the <strong>Page Object Pattern</strong> in Chapter 6. When you wrap a page's interactions in a class, each method translates directly to one or more Vibium calls. The test doesn't know or care about selectors — it calls <code class="inline">products.filterByCategory('Electronics')</code>. That's OOP applied to test organization: changes in one place propagate everywhere automatically.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">2.7</div>
+      <h2 class="section-heading">Atomic Tests</h2>
+      <p>An atomic test does one thing and one thing only. It sets up its own state, performs its action, asserts the outcome, and tears down cleanly. It doesn't depend on another test having run before it. It doesn't leave side effects for the next test.</p>
+      <p>Why does this matter? Because if Test B depends on Test A having run first, and Test A fails, now both tests fail — but only one is actually broken. Debugging becomes harder. Tests become order-dependent, which means you can't run them in parallel. Over time the suite accumulates implicit dependencies that nobody can fully map.</p>
+      <p>In Vibium, atomicity means: every test gets its own browser context, navigates to its own starting URL, and closes the browser in <code class="inline">finally</code>. No shared state, no leftover cookies, no assumptions about what the previous test did. This is exactly what <code class="inline">beforeEach</code> and <code class="inline">afterEach</code> in Chapter 6 enforce structurally.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">2.8</div>
       <h2 class="section-heading">Network Layer</h2>
       <p>Vibium lets you intercept browser requests and fulfill them with mock responses, modify them, or block them. You won't need this in the early chapters — we'll work with the real app throughout. But it's worth knowing the feature exists for when tests become flaky because of an unstable external API.</p>
       <div class="code-panel">

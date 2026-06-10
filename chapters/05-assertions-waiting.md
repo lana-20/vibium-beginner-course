@@ -1,109 +1,78 @@
 # Chapter 5: Assertions and Waiting
 
-In Chapter 3 you used `assert.ok(await element.isVisible())` to check whether something was on the page. In this chapter we go deeper: all the element state methods Vibium provides, how to assert on attributes and counts, and how to wait for specific page states before asserting. By the end you'll write a test that verifies the cart's running totals after a quantity change.
+In Chapter 3 you wrote your first assertions using `assert.ok` and `assert.equal`. In this chapter we're going to go deeper — covering all the element state methods Vibium provides, how to assert on attributes and element counts, and most importantly, how to wait for the page to settle before asserting on it. We'll close by writing a test that verifies cart totals update correctly after changing a quantity. That involves timing, dynamic DOM updates, and careful assertion ordering — all real challenges you'll face constantly.
 
 ---
 
-## 5.1 Why Waiting Matters
+## Why waiting matters so much
 
-The browser is asynchronous. After you click a button, the page might update instantly or it might wait for a render cycle, a state update, or a network response. If your assertion runs before the update lands, it fails — not because the feature is broken, but because your test didn't wait long enough.
+Here's the thing about browser automation that trips up almost everyone at first: the browser is asynchronous. When you click a button, the app might update the DOM in the same frame, or it might need to process a state update, run a reducer, re-render a React component, and *then* update the DOM. That could take anywhere from 5ms to 500ms depending on what the action triggers.
 
-Vibium's approach: most actions (`click`, `fill`, `select`) automatically wait for the target element to be interactive before proceeding. But when you need to assert on something that appears *after* an action, you need to tell Vibium what to wait for.
+If your assertion runs before the update lands, the test fails. Not because the feature is broken — because your test was faster than the page.
 
-The wrong approach:
-
-```typescript
-await button.click()
-// BAD: may assert before the DOM updates
-const total = await page.find({ text: '$159.98' })
-assert.ok(await total.isVisible())
-```
-
-The right approach:
+Here's what the wrong approach looks like:
 
 ```typescript
-await button.click()
-await page.waitForText('$159.98')  // blocks until the text appears
+await increase.click()
+// asserting immediately — DOM may not have updated yet
 const total = await page.find({ text: '$159.98' })
-assert.ok(await total.isVisible())
+assert.ok(await total.isVisible(), 'total updated')
 ```
+
+This test is a race condition. It'll pass most of the time and fail occasionally for no apparent reason. Those are the worst kind of failures — they erode trust in your test suite.
+
+Here's the correct approach:
+
+```typescript
+await increase.click()
+await page.waitForText('$159.98')  // block until the text is in the DOM
+const total = await page.find({ text: '$159.98' })
+assert.ok(await total.isVisible(), 'total updated')
+```
+
+`waitForText` blocks your script until that exact string appears somewhere on the page. Once it does, you know the DOM has settled and your assertion is safe to run. This is the pattern you'll use after *every* action that causes a dynamic update.
 
 ---
 
-## 5.2 Element State Methods
+## Element state methods
 
-Once you have an element from `page.find()`, these methods tell you about its current state:
+Once you have an element from `page.find()`, you have six state methods available. Let me show you each one and when to reach for it.
 
-```typescript
-const element = await page.find({ role: 'button', text: 'Add to Cart' })
-
-await element.isVisible()   // → true/false — is it rendered on screen?
-await element.isEnabled()   // → true/false — is it clickable? (not disabled)
-await element.isChecked()   // → true/false — for checkboxes and radio buttons
-
-await element.text()        // → the element's visible text content
-await element.value()       // → the current value of an input field
-await element.attr('href')  // → the value of any HTML attribute
-```
-
-Using them in assertions:
+`isVisible()` returns true if the element is currently rendered on screen — not hidden with `display: none`, not outside the viewport, not covered by an overlay. This is the most useful check in all of UI testing:
 
 ```typescript
-await page.go('https://automation-exercise.daisyladybug.com/products/prod_001')
-
-const price = await page.find({ text: '$79.99' })
-assert.ok(await price.isVisible(), 'price visible')
-
 const addToCart = await page.find({ role: 'button', text: 'Add to Cart' })
+assert.ok(await addToCart.isVisible(), 'Add to Cart button visible')
+```
+
+`isEnabled()` returns true if the element is interactive — not `disabled`, not in a loading state. This matters for buttons that get disabled while a form is submitting, or submit buttons that disable after the first click:
+
+```typescript
 assert.ok(await addToCart.isEnabled(), 'Add to Cart button enabled')
-
-const rating = await page.find({ text: '★★★★☆' })
-assert.ok(await rating.isVisible(), 'rating stars visible')
 ```
 
----
-
-## 5.3 waitForText and waitForURL
-
-`page.waitForText(text)` blocks until the given string appears anywhere on the page. `page.waitForURL(pattern)` blocks until the current URL matches the pattern. Both accept a timeout option; the default is 30 seconds.
+`isChecked()` is for checkboxes and radio buttons. Returns true if the element is currently checked. Use this to verify checkbox state after a click:
 
 ```typescript
-// wait for text after a dynamic update
-await page.waitForText('SHOWING 3 OF 12 PRODUCTS')
-
-// wait for URL after navigation triggered by a click
-await page.waitForURL('**/products/prod_001')
-
-// with explicit timeout
-await page.waitForText('Order confirmed', { timeout: 10_000 })
+const terms = await page.find({ role: 'checkbox', text: 'I agree to the terms' })
+assert.ok(await terms.isChecked(), 'terms checkbox is checked')
 ```
 
-A pattern you'll use often: trigger an action, then wait before asserting.
+`text()` returns the visible text content of the element. Use this when you need to assert the exact text value, not just presence:
 
 ```typescript
-const category = await page.find({ css: 'select:first-of-type' })
-await category.select('Electronics')
-await page.waitForText('SHOWING 3 OF 12 PRODUCTS')
-
-const heading = await page.find({ text: 'SHOWING 3 OF 12 PRODUCTS' })
-assert.ok(await heading.isVisible(), 'filter result count visible')
+const price = await page.find({ css: '.product-price' })
+assert.equal(await price.text(), '$79.99', 'price is correct')
 ```
 
----
-
-## 5.4 Asserting on Counts and Attributes
-
-Sometimes you need to assert that a certain number of elements exist, or that an element has a specific attribute value.
-
-For counts, use `page.count()` with a CSS selector:
+`value()` returns the current value of an input field — what's typed in it. This is different from `text()`, which reads the rendered text content. For inputs, always use `value()`:
 
 ```typescript
-await page.go('https://automation-exercise.daisyladybug.com/products')
-const productCount = await page.count('a[href*="/products/prod_"]')
-assert.equal(productCount, 12, '12 products on the catalog page')
+const email = await page.find({ css: 'input[name=email]' })
+assert.equal(await email.value(), 'jane@test.com', 'email filled correctly')
 ```
 
-For attributes, use `element.attr()`:
+`attr(name)` reads any HTML attribute. The most common use is checking `href` on links and `src` on images:
 
 ```typescript
 const link = await page.find({ role: 'link', text: 'Products' })
@@ -113,9 +82,62 @@ assert.ok(href?.includes('/products'), 'nav link points to products page')
 
 ---
 
-## 5.5 A Complete State Test
+## waitForText and waitForURL
 
-This test adds an item to the cart, increases the quantity, and asserts that the subtotal and total update correctly:
+These two methods are the backbone of timing in Vibium tests. You'll use them constantly.
+
+`page.waitForText(text)` blocks until the given string appears anywhere on the page. Both take an optional `timeout` in milliseconds — the default is 30 seconds, which is usually fine for local development:
+
+```typescript
+// After a category filter click, wait for the count label to update
+await page.waitForText('SHOWING 3 OF 12 PRODUCTS')
+
+// You can set a tighter timeout if the update should be fast
+await page.waitForText('Order confirmed', { timeout: 10_000 })
+```
+
+`page.waitForURL(pattern)` blocks until the current URL matches a glob pattern. Use this after actions that trigger navigation — form submits, link clicks, button clicks that route to a new page:
+
+```typescript
+// After clicking Place Order
+await page.waitForURL('**/confirmation')
+
+// After clicking a product card
+await page.waitForURL('**/products/prod_001')
+```
+
+The pattern uses `**` as a wildcard for any path prefix, so `'**/confirmation'` matches `https://automation-exercise.daisyladybug.com/confirmation` regardless of the base URL.
+
+---
+
+## Asserting on counts
+
+Sometimes the right assertion isn't about a specific element — it's about how many elements of a certain type are present. `page.count()` takes a CSS selector and returns the number of matching elements:
+
+```typescript
+await page.go(`${AUT}/products`)
+const productCount = await page.count('a[href*="/products/prod_"]')
+assert.equal(productCount, 12, '12 products on catalog page')
+```
+
+This is particularly useful for testing filter behavior — you can assert that the count changed:
+
+```typescript
+const category = await page.find({ css: 'select:first-of-type' })
+await category.select('Electronics')
+await page.waitForText('SHOWING 3 OF 12 PRODUCTS')
+
+const filtered = await page.count('a[href*="/products/prod_"]')
+assert.equal(filtered, 3, '3 products after Electronics filter')
+```
+
+---
+
+## The complete cart totals test
+
+Now let's put all of this together in a test that covers real dynamic behavior. Our app has a cart page where you can increment item quantities. When you click the increment button, the quantity updates, the subtotal updates, and the total updates. That's three separate DOM values that all change after one click.
+
+Here's how to test it correctly:
 
 ```typescript
 import vibium from 'vibium'
@@ -129,14 +151,13 @@ async function testCartTotals() {
   const page = await context.newPage()
 
   try {
-    // add Wireless Headphones ($79.99) to cart
+    // Start: add Wireless Headphones ($79.99) to cart
     await page.go(`${AUT}/products/prod_001`)
     const addToCart = await page.find({ role: 'button', text: 'Add to Cart' })
     await addToCart.click()
-
     await page.go(`${AUT}/cart`)
 
-    // initial state: qty 1, subtotal $79.99
+    // Verify initial state
     assert.ok(
       await (await page.find({ text: '1 ITEM · 1 PRODUCT' })).isVisible(),
       'cart shows 1 item'
@@ -146,15 +167,18 @@ async function testCartTotals() {
       'unit price visible'
     )
 
-    // increase quantity to 2
-    const increase = await page.find({ role: 'button', text: 'Increase Wireless Headphones quantity' })
+    // Click the increment button
+    const increase = await page.find({
+      role: 'button',
+      text: 'Increase Wireless Headphones quantity'
+    })
     await increase.click()
 
-    // wait for DOM to update
+    // Wait for all three values to update before asserting
     await page.waitForText('2 ITEMS · 1 PRODUCT')
     await page.waitForText('$159.98')
 
-    // assert updated totals
+    // Now assert on the settled state
     assert.ok(
       await (await page.find({ text: '2 ITEMS · 1 PRODUCT' })).isVisible(),
       'cart shows 2 items'
@@ -180,4 +204,16 @@ testCartTotals().catch(err => {
 })
 ```
 
-The two `waitForText` calls after the click are the critical pattern: don't assert until the page reflects the new state. Without them the test would be racing the React re-render.
+Let me point out the key decision: we call `waitForText` twice — once for the count label and once for the subtotal. You might wonder why. Because the DOM update that changes the count label might complete a few milliseconds before the subtotal recalculates. By waiting for both values explicitly, we know the page is fully settled before we assert on any of them.
+
+The total `$175.98` includes a $16 shipping fee. We don't wait for that separately because by the time both `waitForText` calls resolve, that value is already in the DOM too.
+
+---
+
+## Debugging with recordings
+
+One last thing for this chapter. When you're chasing a timing-related failure — your assertion fails intermittently and you can't reproduce it locally — this is exactly when `vibium.record()` pays off. Swap your `vibium.start()` for `vibium.record()`, run the test, and open the recording URL at `player.vibium.dev`. Scrub through the timeline to the moment the assertion fires and look at exactly what was in the DOM. You'll immediately see whether your `waitForText` resolved too early.
+
+We'll see this again in Chapter 9 when we talk about CI observability.
+
+In the next chapter, we're going to organize everything we've built so far into a real test suite — introducing Vitest, page objects, and the framework patterns that make a test codebase maintainable as it grows.

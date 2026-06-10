@@ -148,7 +148,7 @@
     <div class="section-block">
       <div class="section-eyebrow">9.1</div>
       <h2 class="section-heading">headless: true <em>in CI</em></h2>
-      <p>CI runners don't have a display server. <code class="inline">headless: false</code> will fail. Read from <code class="inline">process.env.CI</code> — GitHub Actions sets it automatically.</p>
+      <p>A test suite that only runs on your laptop is not a test suite — it's a demo. The whole point of automated testing is that the machine runs the checks every time someone pushes code. CI runners don't have a display server, so <code class="inline">headless: false</code> will fail immediately. The solution: read from <code class="inline">process.env.CI</code>. GitHub Actions sets it automatically for every job. Locally it's unset, so the browser opens visibly. In CI, it's <code class="inline">'true'</code> and the browser runs headlessly.</p>
       <div class="code-panel">
         <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">env-aware headless mode</span></div>
         <div class="code-body"><pre>
@@ -161,8 +161,8 @@
     <div class="section-block">
       <div class="section-eyebrow">9.2 – 9.3</div>
       <h2 class="section-heading">Exit Codes and <em>the Daemon</em></h2>
-      <p>A test script must exit with code 1 on failure, or CI won't know the job failed. Vitest handles this automatically. For standalone scripts, the <code class="inline">process.exit(1)</code> pattern from earlier chapters is correct.</p>
-      <p>The Vibium CLI requires a running daemon. Start it before your tests, stop it after — even on failure with <code class="inline">if: always()</code>.</p>
+      <p>CI systems determine whether a job passed or failed by the process exit code. If your test fails but the process exits with 0, CI thinks everything is fine. Vitest handles exit codes automatically. For standalone scripts, the <code class="inline">.catch(err => { process.exit(1) })</code> pattern from earlier chapters is why it's there.</p>
+      <p>The Vibium TypeScript client communicates with a local daemon process. That daemon must be running before your tests start. Start it before tests, stop it after — and use <code class="inline">if: always()</code> on the stop step so the daemon is cleaned up even when tests fail. This is the YAML equivalent of <code class="inline">finally</code> in TypeScript.</p>
       <div class="code-panel">
         <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">daemon lifecycle in workflow</span></div>
         <div class="code-body"><pre>
@@ -221,7 +221,7 @@
     <div class="section-block">
       <div class="section-eyebrow">9.5</div>
       <h2 class="section-heading">Environment <em>Variables</em></h2>
-      <p>Hard-coding URLs means a different environment requires code changes. Use environment variables instead:</p>
+      <p>Hard-coding URLs in test code creates a problem: running tests against a staging environment or a preview deployment requires code changes. Use environment variables instead. The <code class="inline">??</code> operator means: use the env var if it's set, fall back to the default URL otherwise.</p>
       <div class="code-panel">
         <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">env-aware AUT URL</span></div>
         <div class="code-body"><pre>
@@ -230,6 +230,25 @@
       </div>
       <div class="warning"><p><strong>Secrets vs vars:</strong> Use <code class="inline">secrets.*</code> for API keys and passwords — never <code class="inline">vars.*</code>. GitHub masks secrets in logs; vars are visible.</p></div>
       <div class="callout"><p><strong>Local .env file:</strong> Add a <code class="inline">.env</code> file to your gitignore and use a package like <code class="inline">dotenv</code> to load it locally. Never commit <code class="inline">.env</code> files.</p></div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">9.6 — Observability</div>
+      <h2 class="section-heading">Debugging CI Failures with <em>Recordings</em></h2>
+      <p>There's a class of failure that's very frustrating: the test passes locally every time but fails in CI. This is where <code class="inline">vibium.record()</code> becomes essential. Add it to your CI test run — <code class="inline">stop()</code> returns a URL at <strong>player.vibium.dev</strong> that appears in your workflow logs.</p>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">adding a recording to a CI test</span></div>
+        <div class="code-body"><pre>
+<span class="k">const</span> { browser, stop } = <span class="k">await</span> vibium.<span class="fn">record</span>({
+  headless: process.env.CI === <span class="s">'true'</span>,
+})
+<span class="c">// ... test logic ...</span>
+<span class="k">await</span> browser.<span class="fn">close</span>()
+<span class="k">const</span> url = <span class="k">await</span> <span class="fn">stop</span>()
+console.<span class="fn">log</span>(<span class="s">'Recording:'</span>, url)
+<span class="c">// → https://player.vibium.dev/session/abc123</span></pre></div>
+      </div>
+      <p>Click the URL and you get an interactive replay — scrub forward and backward through every step, inspect the DOM at each point, and see which network requests fired. You can identify exactly where things went wrong: was an element present but not visible? Did a <code class="inline">waitForText</code> time out because a request was slow? The recording tells you. No more guessing from stack traces.</p>
     </div>
 
   </div>

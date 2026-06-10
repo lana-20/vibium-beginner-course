@@ -174,7 +174,7 @@
     <div class="section-block">
       <div class="section-eyebrow">3.2</div>
       <h2 class="section-heading">Your First <em>Navigation</em></h2>
-      <p>Create <code class="inline">navigate.ts</code> and add the following. Run it with <code class="inline">npx tsx navigate.ts</code> — a browser window will open, navigate to the app, and close.</p>
+      <p>Let's make sure everything works. Create a file at <code class="inline">src/ch03-first-test/01-navigate-and-read.ts</code> and run it with <code class="inline">npx tsx</code>. A browser window will open, navigate to the app, and close. That's all this does — but it confirms your setup is working.</p>
       <div class="code-panel">
         <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file"><em>ch03/</em>navigate.ts</span></div>
         <div class="code-body"><pre>
@@ -195,13 +195,13 @@
 
 <span class="fn">main</span>()</pre></div>
       </div>
-      <p>Use <strong>headless: false</strong> while learning so you can watch the browser. Switch to <code class="inline">headless: true</code> later for CI speed.</p>
+      <p>The key option to notice is <code class="inline">headless: false</code>. During development and learning, always keep this — you want to see what the browser is doing. Once your tests are solid, switch to <code class="inline">headless: true</code> for CI speed, which we'll cover in Chapter 9.</p>
     </div>
 
     <div class="section-block">
       <div class="section-eyebrow">3.3</div>
       <h2 class="section-heading">Reading the Page</h2>
-      <p><code class="inline">page.title()</code> returns the document title. <code class="inline">page.find()</code> locates an element you can inspect. Both return data you can log or assert against.</p>
+      <p>Navigating is a start, but tests need to read the page to know what's there. <code class="inline">page.title()</code> returns the document title — the text you see in the browser tab. <code class="inline">page.find()</code> locates an element and gives you an object you can inspect and interact with. We're using <code class="inline">{ role, text }</code> rather than CSS selectors here — role-plus-text locators stay stable when the page's structure changes.</p>
       <div class="code-panel">
         <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file"><em>ch03/</em>01-navigate-and-read.ts</span></div>
         <div class="code-body"><pre>
@@ -224,7 +224,7 @@ console.<span class="fn">log</span>(<span class="k">await</span> featured.<span 
     <div class="section-block">
       <div class="section-eyebrow">3.4</div>
       <h2 class="section-heading">Your First <em>Assertion</em></h2>
-      <p>Node.js ships with a built-in <code class="inline">assert</code> module — no testing framework needed yet. The <code class="inline">/strict</code> import makes failed assertions throw errors with clear, readable messages.</p>
+      <p>Reading the page is useful for debugging. But the whole point of a test is to <em class="inline">verify</em> that what you see matches what you expect. Node.js ships with a built-in <code class="inline">assert</code> module — no testing framework needed yet. The <code class="inline">/strict</code> import means all comparisons use strict equality and failed assertions throw with helpful messages. Always provide a label as the third argument — it appears in the error output and tells you exactly which assertion failed.</p>
       <div class="code-panel">
         <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file"><em>ch03/</em>02-first-assertion.ts</span></div>
         <div class="code-body"><pre>
@@ -245,7 +245,7 @@ console.<span class="fn">log</span>(<span class="s">'✓ hero heading visible'</
     <div class="section-block">
       <div class="section-eyebrow">3.5</div>
       <h2 class="section-heading">A <em>Complete</em> Test</h2>
-      <p>Put everything together. The <code class="inline">try/finally</code> ensures the browser always closes. <code class="inline">process.exit(1)</code> on failure signals a non-zero exit code for CI. The third argument to each assertion is a label that appears in error output.</p>
+      <p>Now let's put everything together. Three habits to establish right from the start: use <code class="inline">try/finally</code> so the browser always closes even on failure, call <code class="inline">process.exit(1)</code> on error so CI knows the test failed, and label every assertion. Here's the complete test with five assertions — each one checking something different about the homepage:</p>
       <div class="code-panel">
         <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file"><em>ch03/</em>03-complete-test.ts</span></div>
         <div class="code-body"><pre>
@@ -307,13 +307,31 @@ console.<span class="fn">log</span>(<span class="s">'✓ hero heading visible'</
       <p>Add a script to <code class="inline">package.json</code> and run it:</p>
       <div class="shell-panel"><pre><span class="prompt">$ </span>npm run ch03:complete
 <span class="out">All assertions passed.</span></pre></div>
-      <p>To see what a failure looks like, temporarily change the expected title to something wrong. The output will show you exactly what went wrong:</p>
+      <p>Now I want you to see what a failure looks like, because reading test failures is a skill. Temporarily change the expected title to something wrong. The output will show you exactly what went wrong:</p>
       <div class="shell-panel"><pre><span class="err">Test failed: Expected values to be strictly equal:
 + actual - expected
 
 + 'automation-exercise | E-commerce Testing Sandbox'
 - 'wrong title'</span></pre></div>
-      <p>The <code class="inline">+</code> line is what you got. The <code class="inline">-</code> line is what you expected. Revert the change, confirm it passes cleanly, and move on to Chapter 4.</p>
+      <p>The <code class="inline">+</code> line is what you got. The <code class="inline">-</code> line is what you expected. The assertion label tells you which check failed. Revert the change, confirm it passes cleanly, and move on.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">3.7 — Bonus</div>
+      <h2 class="section-heading">Recording Your Test for <em>Review</em></h2>
+      <p>There's one more tool worth introducing: Vibium's built-in test recorder. When you wrap your test in <code class="inline">vibium.record()</code> instead of <code class="inline">vibium.start()</code>, it captures every browser action, DOM state, and network event as the test runs.</p>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">recording a test run</span></div>
+        <div class="code-body"><pre>
+<span class="k">const</span> { browser, stop } = <span class="k">await</span> vibium.<span class="fn">record</span>({ headless: <span class="k">false</span> })
+<span class="c">// ... your test logic ...</span>
+<span class="k">await</span> browser.<span class="fn">close</span>()
+<span class="k">const</span> url = <span class="k">await</span> <span class="fn">stop</span>()
+console.<span class="fn">log</span>(<span class="s">'Recording:'</span>, url)
+<span class="c">// → https://player.vibium.dev/session/abc123</span></pre></div>
+      </div>
+      <p><code class="inline">stop()</code> returns a URL at <strong>player.vibium.dev</strong>. Open it in any browser and you get an interactive replay — scrub forward and backward through every step, inspect the DOM at each point, and see which network requests fired. Think of it as a time machine for your test run.</p>
+      <p>This is similar in spirit to Playwright's trace recorder, but built directly into the API. The most valuable use case is debugging CI failures: when a test passes locally but fails in CI, add <code class="inline">vibium.record()</code> to the CI run, get the URL from the logs, and replay exactly what happened. We'll revisit this in Chapter 9.</p>
     </div>
 
   </div>

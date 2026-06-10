@@ -1,34 +1,38 @@
 # Chapter 10: Introduction to MCP
 
-Every chapter until now has used Vibium's TypeScript client: you write the steps, you define the assertions, you control every action. This chapter introduces a different mode — Model Context Protocol (MCP) — where an AI agent drives the browser on your behalf.
+Every chapter until now has been about writing code that drives the browser. You write the steps. You define the selectors. You control every action. In this final chapter we look at something fundamentally different: the Model Context Protocol, where you describe what you want in natural language and an AI agent figures out the steps.
+
+This isn't replacing what you've learned — it's extending it. The TypeScript client and MCP are two tools in the same toolkit, and understanding when to reach for each one is the skill we're building here.
 
 ---
 
-## 10.1 Three Ways to Use Vibium
+## Three interfaces, one daemon
 
-Vibium ships with three interfaces, all talking to the same daemon:
+Let me refresh the picture from Chapter 2. Vibium exposes its browser engine through three distinct interfaces, all talking to the same daemon:
 
 | Interface | Who drives it | Best for |
 |-----------|--------------|----------|
-| CLI (`vibium find text "..."`) | You, at a terminal | Exploration, one-off checks |
-| TypeScript/Python/Java client | You, in code | Deterministic test suites |
-| MCP server | An AI agent | Open-ended exploration, test generation |
+| CLI | You, in a terminal | Exploration and quick one-off checks |
+| TypeScript / Python / Java client | You, in code | Deterministic test suites that run in CI |
+| MCP server | An AI agent | Open-ended exploration, test generation, debugging |
 
-The TypeScript client you've used throughout this course is the right tool for regression tests: predictable, fast, composable. MCP is the right tool when you want to describe a scenario in natural language and let the agent figure out the steps.
+You've been using the TypeScript client throughout this course. The CLI we've touched briefly for exploration. The MCP server is what we're looking at now.
 
----
-
-## 10.2 What MCP Is
-
-The Model Context Protocol is an open standard that defines how AI models connect to tools. When Vibium runs as an MCP server, it exposes its browser automation tools — navigate, find, click, fill, screenshot — as MCP tool calls. An AI model (such as Claude) can invoke those tools to explore and interact with a live browser.
-
-From your perspective: you describe what you want to test, and the agent navigates, reads the page, takes actions, and reports back what it found.
+The important thing to understand is that these aren't different products — they're different entry points into the same engine. A `page.find()` call from TypeScript, a `vibium find text "..."` from the CLI, and a `browser_find` MCP tool call from Claude all end up at the same place: the Vibium daemon, which talks to the browser.
 
 ---
 
-## 10.3 Starting Vibium in MCP Mode
+## What MCP is
 
-Vibium's MCP server is configured in your AI client's settings. In Claude Desktop (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+The Model Context Protocol is an open standard — similar in purpose to what USB is for hardware. AI models speak MCP to connect to external tools. When Vibium runs as an MCP server, it exposes its browser automation capabilities — navigate, find, click, fill, screenshot, and more — as MCP tool calls. Any AI model that speaks MCP can invoke those tools.
+
+From your perspective as a test engineer, this means you can open Claude Desktop, describe what you want to test, and watch Claude navigate a real browser, read the page, take actions, and report back. The AI handles selector discovery, action sequencing, and error recovery. You describe the outcome you want.
+
+---
+
+## Setting it up
+
+Configure the Vibium MCP server in Claude Desktop. Open `~/Library/Application Support/Claude/claude_desktop_config.json` and add:
 
 ```json
 {
@@ -41,15 +45,15 @@ Vibium's MCP server is configured in your AI client's settings. In Claude Deskto
 }
 ```
 
-Once configured and the Claude Desktop app is restarted, you can type natural language commands and Claude will use Vibium's MCP tools to carry them out in a real browser.
+Restart Claude Desktop. You'll see the Vibium tools become available — look for the hammer icon in the interface, which indicates active MCP connections. From here, you can interact with a live browser through natural language.
 
 ---
 
-## 10.4 A Side-by-Side Comparison
+## TypeScript client vs MCP: a side-by-side
 
 The same scenario expressed two ways:
 
-**TypeScript client (deterministic):**
+**TypeScript client — precise and deterministic:**
 
 ```typescript
 await page.go('https://automation-exercise.daisyladybug.com/products')
@@ -57,10 +61,10 @@ const select = await page.find({ css: 'select:first-of-type' })
 await select.select('Electronics')
 await page.waitForText('SHOWING 3 OF 12 PRODUCTS')
 const count = await page.count('a[href*="/products/prod_"]')
-assert.equal(count, 3)
+assert.equal(count, 3, '3 Electronics products')
 ```
 
-**MCP prompt (agent-driven):**
+**MCP prompt — flexible and exploratory:**
 
 ```
 Go to automation-exercise.daisyladybug.com/products.
@@ -68,58 +72,109 @@ Filter by the Electronics category.
 Tell me how many products are shown and what their names are.
 ```
 
-The TypeScript version is precise, repeatable, and fast. The MCP version is flexible — you don't need to know the selector, the exact text, or even that there's a `select` element. The agent figures it out.
+The TypeScript version knows the selector (`select:first-of-type`), knows the expected count (`3`), and will fail with a clear message if either changes. The MCP version doesn't need to know any of that. Claude finds the dropdown, identifies the correct option, applies the filter, reads the results, and tells you what it found.
+
+Neither is better — they're different tools for different moments.
 
 ---
 
-## 10.5 When to Use Each
+## When to use each
 
-Use the TypeScript client when:
+Use the **TypeScript client** when:
+
 - You're writing a regression test that must pass/fail deterministically
 - You know exactly what to check and how to check it
-- You need it to run unattended in CI
-- You care about cost (TypeScript client uses the Vibium daemon directly; MCP routes through an LLM)
+- The test needs to run unattended in CI on every push
+- Cost matters — TypeScript client uses the daemon directly, no LLM inference
 
-Use MCP when:
-- You're exploring a new page for the first time
-- You want to generate test cases by describing scenarios
-- You're debugging a flaky test and want a second opinion on what the page looks like
-- You're prototyping an automation before writing the formal test
+Use **MCP** when:
+
+- You're exploring a new page or flow for the first time and don't yet know the selectors
+- You want to describe a test scenario and let the agent generate initial TypeScript code
+- You're debugging a flaky test and want to see what the page actually looks like at the failure point
+- You're doing broad exploratory testing where the exact assertions aren't defined yet
 
 ---
 
-## 10.6 Generating TypeScript Tests with MCP
+## The generation workflow
 
-One powerful workflow: use MCP to explore and describe a flow, then ask the agent to generate the corresponding TypeScript. The agent can observe the page, identify selectors, and produce a test file you refine and commit.
+One of the most valuable MCP workflows is test generation: use MCP to explore and document a flow, then ask the agent to produce the TypeScript.
 
-Example prompt:
+Here's an example prompt you might give Claude:
 
 ```
 Navigate to automation-exercise.daisyladybug.com/products.
 Find the search input and search for "coffee".
-Tell me what appears and generate a Vibium TypeScript test
-that asserts the correct product is visible and others are not.
+Tell me what products appear and generate a Vibium TypeScript test
+that asserts the correct product is visible and that "Wireless Headphones"
+is not visible after the search.
 ```
 
-The agent navigates, observes, and returns TypeScript code using `page.find()`, `page.waitForText()`, and assertions. You review the output, clean it up, and add it to your test suite.
+Claude navigates the app, performs the search, reads the results, and generates a test like:
 
-This is how MCP fits into a test automation workflow: agents for exploration and generation, TypeScript client for the final executable tests.
+```typescript
+import vibium from 'vibium'
+import assert from 'node:assert/strict'
+
+const AUT = 'https://automation-exercise.daisyladybug.com'
+
+async function testSearchForCoffee() {
+  const browser = await vibium.start({ headless: false })
+  const context = await browser.newContext()
+  const page = await context.newPage()
+
+  try {
+    await page.go(`${AUT}/products`)
+
+    const search = await page.find({ css: "input[placeholder='Search products...']" })
+    await search.fill('coffee')
+
+    const coffeeMaker = await page.find({ text: 'Coffee Maker' })
+    assert.ok(await coffeeMaker.isVisible(), 'Coffee Maker visible after search')
+
+    const headphones = await page.find({ text: 'Wireless Headphones' })
+    assert.ok(!await headphones.isVisible(), 'Wireless Headphones hidden after search')
+
+    console.log('Search assertions passed.')
+  } finally {
+    await browser.close()
+  }
+}
+
+testSearchForCoffee().catch(err => {
+  console.error('Test failed:', err.message)
+  process.exit(1)
+})
+```
+
+You review it, refine it, add it to your test suite. The agent did the exploration; you own the final code.
+
+This workflow becomes especially powerful for large applications with many pages — MCP handles the discovery phase, you handle the quality gate.
 
 ---
 
-## 10.7 Course Summary
+## Course summary
 
-You've covered the full arc from installing Vibium to running tests in CI:
+You've covered the complete arc of browser test automation with Vibium. Let me walk back through what we built:
 
-1. **The Landscape** — where Vibium fits among Selenium, Playwright, and Cypress
-2. **Architecture** — Browser → BrowserContext → Page → Element, and the three action categories
-3. **Your First Test** — navigate, find, assert, cleanup
-4. **Working with Forms** — fill, select, validation, the complete checkout flow
-5. **Assertions and Waiting** — element state methods, waitForText, waitForURL, asserting totals
-6. **Organizing Tests** — Vitest, beforeEach/afterEach, Page Objects
-7. **Capturing Events** — dialogs, console, downloads with `Promise.all`
-8. **Network Interception** — stubbing APIs, simulating failures
-9. **Running in CI** — headless mode, exit codes, GitHub Actions
-10. **Introduction to MCP** — agent-driven automation, when to use each interface
+In **Chapter 1** we mapped the ecosystem — where Selenium and WebDriver BiDi came from, what Playwright and Cypress bring to the table, and why Vibium sits at a new point in the landscape where the lines between "test runner" and "AI agent" are blurring.
 
-The patterns from this course — async/await, `try/finally`, `waitFor*` before assertions, Page Objects, `Promise.all` for captures — compose directly into production test suites. Keep them in mind as you extend your test coverage.
+In **Chapter 2** we opened up the engine — the Browser/Context/Page/Element hierarchy that everything in this course builds on, the three categories of operations (actions, captures, waits), and the OOP model that makes the Page Object Pattern natural.
+
+In **Chapter 3** you wrote your first real test — navigate, find, assert, clean up with `try/finally`. We also looked at `vibium.record()` and how recordings at `player.vibium.dev` give you a time machine for debugging.
+
+In **Chapter 4** you drove forms — `fill()`, `select()`, the `fieldMap` loop pattern for multi-field forms, and the checkout flow from cart to confirmation.
+
+In **Chapter 5** you learned assertions and waiting — `isVisible()`, `isEnabled()`, `isChecked()`, `text()`, `value()`, `attr()`, and the rule: always `waitForText` or `waitForURL` after an action that causes a DOM update, before asserting on the result.
+
+In **Chapter 6** you built a real test framework — Vitest, `beforeEach`/`afterEach` for atomic tests, Page Objects for DRY selectors, and the OOP and Single Responsibility principles that make a test codebase maintainable.
+
+In **Chapter 7** you worked with captures — the `Promise.all` pattern for dialogs, console, and downloads, and why the click inside a capture must fire-and-forget.
+
+In **Chapter 8** you intercepted the network — `route.fulfill()` for synthetic responses, `route.abort()` for connection failures, and `route.continue()` for partial intercepts.
+
+In **Chapter 9** you took the suite to CI — headless env vars, the Vibium daemon lifecycle with `if: always()`, environment variables for base URLs, and recordings for debugging CI-only failures.
+
+And now in **Chapter 10** you saw the third interface — MCP for agent-driven exploration and test generation, and how TypeScript and MCP complement each other in a real workflow.
+
+The patterns you've learned — async/await with `try/finally`, `waitFor*` before assertions, Page Objects for DRY selectors, `Promise.all` for captures, atomic tests with `beforeEach`/`afterEach` — these compose directly into production test suites. Take them with you.
