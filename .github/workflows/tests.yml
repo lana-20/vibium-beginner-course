@@ -8,11 +8,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  # To use the pre-baked image (faster): swap runs-on for container below
-  # and remove the Chrome deps, Install Vibium, and Patch Chrome steps.
-  #   container: ghcr.io/lana-20/vibium-ci:latest
   test:
     runs-on: ubuntu-latest
+    container: ghcr.io/lana-20/vibium-ci:latest
 
     steps:
       - uses: actions/checkout@v4
@@ -22,42 +20,8 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Cache vibium Chrome
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/vibium
-          key: vibium-chrome-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: vibium-chrome-${{ runner.os }}-
-
-      - name: Install Chrome dependencies
-        run: |
-          sudo apt-get update -o Acquire::AllowInsecureRepositories=true || true
-          sudo apt-get install -y --no-install-recommends \
-            libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 \
-            libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 \
-            libxrandr2 libgbm1 libasound2t64 libnspr4 libnss3 || \
-          sudo apt-get install -y --no-install-recommends \
-            libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 \
-            libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 \
-            libxrandr2 libgbm1 libasound2 libnspr4 libnss3
-
       - name: Install dependencies
         run: npm ci
-
-      - name: Install Vibium
-        run: npm install -g vibium
-
-      - name: Patch Chrome for CI sandbox
-        run: |
-          CHROME=$(find ~/.cache/vibium -name "chrome" -not -name "chromedriver" -not -name "*.real" | head -1)
-          if [ -n "$CHROME" ] && [ ! -f "${CHROME}.real" ]; then
-            echo "Patching: $CHROME"
-            mv "$CHROME" "${CHROME}.real"
-            printf '#!/bin/sh\nexec "%s.real" --no-sandbox "$@"\n' "$CHROME" > "$CHROME"
-            chmod +x "$CHROME"
-          else
-            echo "Chrome already patched, skipping"
-          fi
 
       - name: Start Vibium daemon
         run: vibium daemon start
