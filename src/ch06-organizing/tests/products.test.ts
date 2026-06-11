@@ -1,4 +1,4 @@
-import { describe, it, beforeEach, afterEach, expect } from 'vitest'
+import { describe, it, beforeAll, afterAll, beforeEach, afterEach, expect } from 'vitest'
 import { browser as vibium } from 'vibium'
 import { ProductsPage } from '../pages/ProductsPage'
 import { CartPage } from '../pages/CartPage'
@@ -7,16 +7,24 @@ const AUT = 'https://automation-exercise.daisyladybug.com'
 
 describe('Products page', () => {
   let browser: Awaited<ReturnType<typeof vibium.start>>
+  let context: any
   let page: any
 
+  beforeAll(async () => {
+    browser = await vibium.start({ headless: process.env.CI === 'true' })
+  })
+
+  afterAll(async () => {
+    await browser.stop()
+  })
+
   beforeEach(async () => {
-    browser = await vibium.start({ headless: true })
-    const context = await browser.newContext()
+    context = await browser.newContext()
     page = await context.newPage()
   })
 
   afterEach(async () => {
-    await browser.stop()
+    await context.close()
   })
 
   it('shows 12 products by default', async () => {
