@@ -1,0 +1,17 @@
+FROM node:20-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 \
+    libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 \
+    libxrandr2 libgbm1 libasound2t64 libnspr4 libnss3 \
+    ca-certificates curl \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN npm install -g vibium && vibium install
+
+RUN CHROME=$(find /root/.cache/vibium -name "chrome" -not -name "chromedriver" | head -1) \
+    && mv "$CHROME" "${CHROME}.real" \
+    && printf '#!/bin/sh\nexec "%s.real" --no-sandbox "$@"\n' "$CHROME" > "$CHROME" \
+    && chmod +x "$CHROME"
+
+ENV CI=true
