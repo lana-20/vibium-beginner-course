@@ -38,14 +38,15 @@ jobs:
 
       - name: Verify vibium binary
         run: |
-          echo "=== @vibium packages ==="
-          ls node_modules/@vibium/ 2>/dev/null || echo "(none)"
           echo "=== linux-x64 binary ==="
-          ls node_modules/@vibium/linux-x64/bin/ 2>/dev/null || echo "(not found)"
-          echo "=== chrome location ==="
-          find node_modules/@vibium/linux-x64 -name "chrome" -o -name "chrome-linux" 2>/dev/null | head -5 || echo "(not found)"
-          echo "=== vibium version ==="
-          vibium version 2>&1 || echo "(daemon version failed)"
+          ls node_modules/@vibium/linux-x64/bin/
+          echo "=== chrome in home ==="
+          find ~/.vibium -name "chrome" 2>/dev/null | head -5 || echo "(~/.vibium not found)"
+          find ~/.local -name "chrome" 2>/dev/null | head -5 || echo "(~/.local not found)"
+          echo "=== run vibium install ==="
+          node_modules/@vibium/linux-x64/bin/vibium install 2>&1 | tail -5
+          echo "=== chrome after install ==="
+          find ~/.vibium -name "chrome" 2>/dev/null | head -5 || echo "(still not found)"
 
       - name: Run tests
         run: npm run test:ci
