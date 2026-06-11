@@ -36,13 +36,13 @@ jobs:
       - name: Start Vibium daemon
         run: vibium daemon start
 
-      - name: Test Chrome binary directly
+      - name: Patch Chrome for CI sandbox
         run: |
-          CHROME=/home/runner/.cache/vibium/chrome-for-testing/149.0.7827.55/chrome
-          echo "--- without --no-sandbox ---"
-          timeout 3 $CHROME --headless --dump-dom about:blank 2>&1 | head -5 || echo "exit: $?"
-          echo "--- with --no-sandbox ---"
-          timeout 3 $CHROME --headless --no-sandbox --dump-dom about:blank 2>&1 | head -5 || echo "exit: $?"
+          CHROME=$(find ~/.cache/vibium -name "chrome" -not -name "chromedriver" | head -1)
+          echo "Patching: $CHROME"
+          mv "$CHROME" "${CHROME}.real"
+          printf '#!/bin/sh\nexec "%s.real" --no-sandbox "$@"\n' "$CHROME" > "$CHROME"
+          chmod +x "$CHROME"
 
       - name: Run tests
         run: npm run test:ci
