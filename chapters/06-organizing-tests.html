@@ -202,12 +202,12 @@
   })
 
   <span class="fn">afterEach</span>(<span class="k">async</span> () => {
-    <span class="k">await</span> browser.<span class="fn">close</span>()
+    <span class="k">await</span> browser.<span class="fn">stop</span>()
   })
 
   <span class="fn">it</span>(<span class="s">'shows 12 products'</span>, <span class="k">async</span> () => {
     <span class="k">await</span> page.<span class="fn">go</span>(<span class="s">`${AUT}/products`</span>)
-    <span class="k">const</span> count = <span class="k">await</span> page.<span class="fn">count</span>(<span class="s">'a[href*="/products/prod_"]'</span>)
+    <span class="k">const</span> count = (<span class="k">await</span> page.<span class="fn">findAll</span>(<span class="s">'a[href*="/products/prod_"]'</span>)).<span class="p">length</span>
     <span class="fn">expect</span>(count).<span class="fn">toBe</span>(<span class="n">12</span>)
   })
 })</pre></div>
@@ -230,19 +230,17 @@
   }
 
   <span class="k">async</span> <span class="fn">search</span>(query: <span class="t">string</span>) {
-    <span class="k">const</span> input = <span class="k">await</span> <span class="k">this</span>.page.<span class="fn">find</span>({
-      css: <span class="s">"input[placeholder='Search products...']"</span>
-    })
+    <span class="k">const</span> input = <span class="k">await</span> <span class="k">this</span>.page.<span class="fn">find</span>(<span class="s">"input[placeholder='Search products...']"</span>)
     <span class="k">await</span> input.<span class="fn">fill</span>(query)
   }
 
   <span class="k">async</span> <span class="fn">filterByCategory</span>(category: <span class="t">string</span>) {
-    <span class="k">const</span> select = <span class="k">await</span> <span class="k">this</span>.page.<span class="fn">find</span>({ css: <span class="s">'select:first-of-type'</span> })
-    <span class="k">await</span> select.<span class="fn">select</span>(category)
+    <span class="k">const</span> select = <span class="k">await</span> <span class="k">this</span>.page.<span class="fn">find</span>(<span class="s">'select:first-of-type'</span>)
+    <span class="k">await</span> select.<span class="fn">selectOption</span>(category)
   }
 
   <span class="k">async</span> <span class="fn">productCount</span>() {
-    <span class="k">return</span> <span class="k">this</span>.page.<span class="fn">count</span>(<span class="s">'a[href*="/products/prod_"]'</span>)
+    <span class="k">return</span> (<span class="k">await</span> <span class="k">this</span>.page.<span class="fn">findAll</span>(<span class="s">'a[href*="/products/prod_"]'</span>)).<span class="p">length</span>
   }
 }</pre></div>
       </div>
@@ -288,7 +286,7 @@
   page2.<span class="fn">go</span>(<span class="s">`${AUT}/cart`</span>),
 ])
 
-<span class="k">await</span> browser.<span class="fn">close</span>()</pre></div>
+<span class="k">await</span> browser.<span class="fn">stop</span>()</pre></div>
       </div>
       <p>Within a single Vitest suite, Vitest's parallel test runner handles this for you automatically — each test in the suite gets its own <code class="inline">beforeEach</code>-created context, and Vitest runs them concurrently. But if you need to orchestrate multiple browser sessions within a single test (for example, testing a real-time chat feature where two users must be active simultaneously), the multi-context pattern above is the right approach.</p>
     </div>

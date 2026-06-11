@@ -281,7 +281,7 @@
   headless: process.env.CI === <span class="s">'true'</span>,
 })
 <span class="c">// ... test logic ...</span>
-<span class="k">await</span> browser.<span class="fn">close</span>()
+<span class="k">await</span> browser.<span class="fn">stop</span>()
 <span class="k">const</span> url = <span class="k">await</span> <span class="fn">stop</span>()
 console.<span class="fn">log</span>(<span class="s">'Recording:'</span>, url)
 <span class="c">// → https://player.vibium.dev/session/abc123</span></pre></div>

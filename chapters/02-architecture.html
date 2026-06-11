@@ -229,7 +229,7 @@
 <span class="k">const</span> button = <span class="k">await</span> page.<span class="fn">find</span>({ role: <span class="s">'link'</span>, text: <span class="s">'Explore Products'</span> })
 <span class="k">await</span> button.<span class="fn">click</span>()
 
-<span class="k">await</span> browser.<span class="fn">close</span>()</pre></div>
+<span class="k">await</span> browser.<span class="fn">stop</span>()</pre></div>
       </div>
     </div>
 
@@ -245,7 +245,7 @@
 <span class="k">const</span> btn = <span class="k">await</span> page.<span class="fn">find</span>({ role: <span class="s">'button'</span>, text: <span class="s">'Add to cart'</span> })
 
 <span class="c">// CSS selector — use when role+text isn't enough</span>
-<span class="k">const</span> input = <span class="k">await</span> page.<span class="fn">find</span>({ css: <span class="s">'#search-input'</span> })
+<span class="k">const</span> input = <span class="k">await</span> page.<span class="fn">find</span>(<span class="s">'#search-input'</span>)
 
 <span class="c">// text only — fine for reading content, returns outermost match</span>
 <span class="k">const</span> heading = <span class="k">await</span> page.<span class="fn">find</span>({ text: <span class="s">'Featured Products'</span> })</pre></div>
@@ -273,8 +273,8 @@ console.<span class="fn">log</span>(dialog.message)
       <div class="code-panel">
         <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">waits</span></div>
         <div class="code-body"><pre>
-<span class="k">await</span> page.<span class="fn">waitForURL</span>(<span class="s">'**/checkout/success'</span>)
-<span class="k">await</span> page.<span class="fn">waitForText</span>(<span class="s">'Order confirmed'</span>)</pre></div>
+<span class="k">await</span> page.<span class="fn">_waitForURL</span>(<span class="s">'**/checkout/success'</span>)
+<span class="k">await</span> page.<span class="fn">find</span>({ text: <span class="s">'Order confirmed'</span> })</pre></div>
       </div>
     </div>
 

@@ -46,7 +46,7 @@ This fire-and-forget pattern for click inside a capture is a rule. It applies to
 Our app at automation-exercise uses React for all its modals, so native browser dialogs don't appear there. We'll use `page.setContent()` to inject a minimal HTML page that triggers real native dialogs:
 
 ```typescript
-import vibium from 'vibium'
+import { browser as vibium } from 'vibium'
 import assert from 'node:assert/strict'
 
 async function testDialogCapture() {
@@ -86,7 +86,7 @@ async function testDialogCapture() {
       })(),
     ])
 
-    await page.waitForText('confirmed')
+    await page.find({ text: 'confirmed' })
     assert.ok(
       await (await page.find({ text: 'confirmed' })).isVisible(),
       'confirm was accepted'
@@ -95,7 +95,7 @@ async function testDialogCapture() {
 
     console.log('All dialog assertions passed.')
   } finally {
-    await browser.close()
+    await browser.stop()
   }
 }
 
@@ -105,7 +105,7 @@ testDialogCapture().catch(err => {
 })
 ```
 
-After the first capture, `alertResult` has a `type` property (`'alert'`, `'confirm'`, or `'prompt'`) and a `message` property with the text the dialog showed. After the second capture, we use `waitForText` to confirm the DOM updated to "confirmed" — meaning the app correctly received the dialog's outcome.
+After the first capture, `alertResult` has a `type` property (`'alert'`, `'confirm'`, or `'prompt'`) and a `message` property with the text the dialog showed. After the second capture, we use `page.find({ text: 'confirmed' })` to confirm the DOM updated to "confirmed" — meaning the app correctly received the dialog's outcome.
 
 ---
 
@@ -114,7 +114,7 @@ After the first capture, `alertResult` has a `type` property (`'alert'`, `'confi
 `page.capture.console()` collects all console output emitted during a block of browser actions. This is useful for verifying that your app logs the right messages in response to user actions — or, just as importantly, that it *doesn't* log errors it shouldn't.
 
 ```typescript
-import vibium from 'vibium'
+import { browser as vibium } from 'vibium'
 import assert from 'node:assert/strict'
 
 async function testConsoleCapture() {
@@ -146,7 +146,7 @@ async function testConsoleCapture() {
 
     console.log('Console capture assertions passed.')
   } finally {
-    await browser.close()
+    await browser.stop()
   }
 }
 
@@ -165,7 +165,7 @@ Each message in the returned array has a `type` (matching the console method use
 `page.capture.download()` intercepts a file download triggered by a link or button click. You pass a directory where the file should be saved. The result gives you the filename and the saved path.
 
 ```typescript
-import vibium from 'vibium'
+import { browser as vibium } from 'vibium'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import path from 'node:path'
@@ -199,7 +199,7 @@ async function testDownloadCapture() {
     )
     console.log('Download capture assertions passed.')
   } finally {
-    await browser.close()
+    await browser.stop()
   }
 }
 

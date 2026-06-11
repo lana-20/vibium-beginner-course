@@ -25,12 +25,12 @@ Here's the correct approach:
 
 ```typescript
 await increase.click()
-await page.waitForText('$159.98')  // block until the text is in the DOM
+await page.find({ text: '$159.98' })  // polls until the text is in the DOM
 const total = await page.find({ text: '$159.98' })
 assert.ok(await total.isVisible(), 'total updated')
 ```
 
-`waitForText` blocks your script until that exact string appears somewhere on the page. Once it does, you know the DOM has settled and your assertion is safe to run. This is the pattern you'll use after *every* action that causes a dynamic update.
+`page.find({ text })` polls until that exact string appears somewhere on the page. Once it does, you know the DOM has settled and your assertion is safe to run. This is the pattern you'll use after *every* action that causes a dynamic update.
 
 ---
 
@@ -61,14 +61,14 @@ assert.ok(await terms.isChecked(), 'terms checkbox is checked')
 `text()` returns the visible text content of the element. Use this when you need to assert the exact text value, not just presence:
 
 ```typescript
-const price = await page.find({ css: '.product-price' })
+const price = await page.find('.product-price')
 assert.equal(await price.text(), '$79.99', 'price is correct')
 ```
 
 `value()` returns the current value of an input field — what's typed in it. This is different from `text()`, which reads the rendered text content. For inputs, always use `value()`:
 
 ```typescript
-const email = await page.find({ css: 'input[name=email]' })
+const email = await page.find('input[name=email]')
 assert.equal(await email.value(), 'jane@test.com', 'email filled correctly')
 ```
 
@@ -82,28 +82,30 @@ assert.ok(href?.includes('/products'), 'nav link points to products page')
 
 ---
 
-## waitForText and waitForURL
+## Waiting for text and URL changes
 
-These two methods are the backbone of timing in Vibium tests. You'll use them constantly.
+The two most common waits in Vibium tests:
 
-`page.waitForText(text)` blocks until the given string appears anywhere on the page. Both take an optional `timeout` in milliseconds — the default is 30 seconds, which is usually fine for local development:
+`page.find({ text })` locates an element by its text content and polls until it appears. Since `find` throws if the element isn't found within the timeout, using it as a wait is idiomatic — you don't need a separate `waitFor` call:
 
 ```typescript
 // After a category filter click, wait for the count label to update
-await page.waitForText('SHOWING 3 OF 12 PRODUCTS')
+await page.find({ text: 'Showing 3 of 12 products' })
 
 // You can set a tighter timeout if the update should be fast
-await page.waitForText('Order confirmed', { timeout: 10_000 })
+await page.find({ text: 'Order confirmed' }, { timeout: 10_000 })
 ```
 
-`page.waitForURL(pattern)` blocks until the current URL matches a glob pattern. Use this after actions that trigger navigation — form submits, link clicks, button clicks that route to a new page:
+Note that `find({ text })` matches against DOM text nodes — not rendered text. CSS `text-transform: uppercase` is visual only. If the DOM says `"Showing 3 of 12 products"`, search for that exact string regardless of how it appears on screen.
+
+`page._waitForURL(pattern)` blocks until the current URL matches a glob pattern. Use this after actions that trigger navigation — form submits, link clicks, button clicks that route to a new page:
 
 ```typescript
 // After clicking Place Order
-await page.waitForURL('**/confirmation')
+await page._waitForURL('**/confirmation')
 
 // After clicking a product card
-await page.waitForURL('**/products/prod_001')
+await page._waitForURL('**/products/prod_001')
 ```
 
 The pattern uses `**` as a wildcard for any path prefix, so `'**/confirmation'` matches `https://automation-exercise.daisyladybug.com/confirmation` regardless of the base URL.
@@ -112,22 +114,22 @@ The pattern uses `**` as a wildcard for any path prefix, so `'**/confirmation'` 
 
 ## Asserting on counts
 
-Sometimes the right assertion isn't about a specific element — it's about how many elements of a certain type are present. `page.count()` takes a CSS selector and returns the number of matching elements:
+Sometimes the right assertion isn't about a specific element — it's about how many elements of a certain type are present. `page.findAll()` returns an array of all matching elements — take its `.length` to count:
 
 ```typescript
 await page.go(`${AUT}/products`)
-const productCount = await page.count('a[href*="/products/prod_"]')
+const productCount = (await page.findAll('a[href*="/products/prod_"]')).length
 assert.equal(productCount, 12, '12 products on catalog page')
 ```
 
 This is particularly useful for testing filter behavior — you can assert that the count changed:
 
 ```typescript
-const category = await page.find({ css: 'select:first-of-type' })
-await category.select('Electronics')
-await page.waitForText('SHOWING 3 OF 12 PRODUCTS')
+const category = await page.find('select:first-of-type')
+await category.selectOption('Electronics')
+await page.find({ text: 'Showing 3 of 12 products' })
 
-const filtered = await page.count('a[href*="/products/prod_"]')
+const filtered = (await page.findAll('a[href*="/products/prod_"]')).length
 assert.equal(filtered, 3, '3 products after Electronics filter')
 ```
 
@@ -140,7 +142,7 @@ Now let's put all of this together in a test that covers real dynamic behavior. 
 Here's how to test it correctly:
 
 ```typescript
-import vibium from 'vibium'
+import { browser as vibium } from 'vibium'
 import assert from 'node:assert/strict'
 
 const AUT = 'https://automation-exercise.daisyladybug.com'
@@ -159,7 +161,7 @@ async function testCartTotals() {
 
     // Verify initial state
     assert.ok(
-      await (await page.find({ text: '1 ITEM · 1 PRODUCT' })).isVisible(),
+      await (await page.find({ text: '1 item · 1 product' })).isVisible(),
       'cart shows 1 item'
     )
     assert.ok(
@@ -175,12 +177,12 @@ async function testCartTotals() {
     await increase.click()
 
     // Wait for all three values to update before asserting
-    await page.waitForText('2 ITEMS · 1 PRODUCT')
-    await page.waitForText('$159.98')
+    await page.find({ text: '2 items · 1 product' })
+    await page.find({ text: '$159.98' })
 
     // Now assert on the settled state
     assert.ok(
-      await (await page.find({ text: '2 ITEMS · 1 PRODUCT' })).isVisible(),
+      await (await page.find({ text: '2 items · 1 product' })).isVisible(),
       'cart shows 2 items'
     )
     assert.ok(
@@ -194,7 +196,7 @@ async function testCartTotals() {
 
     console.log('All assertions passed.')
   } finally {
-    await browser.close()
+    await browser.stop()
   }
 }
 
@@ -204,7 +206,7 @@ testCartTotals().catch(err => {
 })
 ```
 
-Let me point out the key decision: we call `waitForText` twice — once for the count label and once for the subtotal. You might wonder why. Because the DOM update that changes the count label might complete a few milliseconds before the subtotal recalculates. By waiting for both values explicitly, we know the page is fully settled before we assert on any of them.
+Let me point out the key decision: we call `page.find({ text })` twice — once for the count label and once for the subtotal. You might wonder why. Because the DOM update that changes the count label might complete a few milliseconds before the subtotal recalculates. By waiting for both values explicitly, we know the page is fully settled before we assert on any of them.
 
 The total `$175.98` includes a $16 shipping fee. We don't wait for that separately because by the time both `waitForText` calls resolve, that value is already in the DOM too.
 
@@ -212,7 +214,7 @@ The total `$175.98` includes a $16 shipping fee. We don't wait for that separate
 
 ## Debugging with recordings
 
-One last thing for this chapter. When you're chasing a timing-related failure — your assertion fails intermittently and you can't reproduce it locally — this is exactly when `vibium.record()` pays off. Swap your `vibium.start()` for `vibium.record()`, run the test, and open the recording URL at `player.vibium.dev`. Scrub through the timeline to the moment the assertion fires and look at exactly what was in the DOM. You'll immediately see whether your `waitForText` resolved too early.
+One last thing for this chapter. When you're chasing a timing-related failure — your assertion fails intermittently and you can't reproduce it locally — this is exactly when `vibium.record()` pays off. Swap your `vibium.start()` for `vibium.record()`, run the test, and open the recording URL at `player.vibium.dev`. Scrub through the timeline to the moment the assertion fires and look at exactly what was in the DOM. You'll immediately see whether the `find({ text })` wait resolved too early.
 
 We'll see this again in Chapter 9 when we talk about CI observability.
 

@@ -35,7 +35,7 @@ Let's test that the products page correctly renders products from the API — bu
 We'll stub the products endpoint to return exactly two items, then verify that exactly two product cards appear in the DOM:
 
 ```typescript
-import vibium from 'vibium'
+import { browser as vibium } from 'vibium'
 import assert from 'node:assert/strict'
 
 const AUT = 'https://automation-exercise.daisyladybug.com'
@@ -65,7 +65,7 @@ async function testStubProductList() {
 
     await page.go(`${AUT}/products`)
 
-    const count = await page.count('a[href*="/products/prod_"]')
+    const count = (await page.findAll('a[href*="/products/prod_"]')).length
     assert.equal(count, 2, 'stubbed response shows exactly 2 products')
 
     assert.ok(
@@ -79,7 +79,7 @@ async function testStubProductList() {
 
     console.log('Stub assertions passed.')
   } finally {
-    await browser.close()
+    await browser.stop()
   }
 }
 
@@ -111,13 +111,13 @@ async function testNetworkError() {
     await page.go(`${AUT}/products`)
 
     // The app should show some kind of error or empty state
-    const body = await page.find({ css: 'body' })
+    const body = await page.find('body')
     const text = await body.text()
     assert.ok(text.length > 0, 'page rendered despite API failure')
 
     console.log('Network error handling verified.')
   } finally {
-    await browser.close()
+    await browser.stop()
   }
 }
 ```

@@ -25,7 +25,7 @@ The search input has a placeholder of "Search products..." — we can use that a
 ```typescript
 await page.go(`${AUT}/products`)
 
-const search = await page.find({ css: "input[placeholder='Search products...']" })
+const search = await page.find("input[placeholder='Search products...']")
 await search.fill('headphones')
 ```
 
@@ -42,16 +42,16 @@ Two methods worth distinguishing here: `fill()` clears the field first, then typ
 
 ## Driving select dropdowns
 
-Standard `<select>` elements are driven with `element.select()`. Pass the visible option text — the string the user would see in the dropdown:
+Standard `<select>` elements are driven with `element.selectOption()`. Pass the visible option text — the string the user would see in the dropdown:
 
 ```typescript
 // Filter to Electronics
-const category = await page.find({ css: 'select:first-of-type' })
-await category.select('Electronics')
+const category = await page.find('select:first-of-type')
+await category.selectOption('Electronics')
 
 // Change sort order
-const sort = await page.find({ css: 'select:last-of-type' })
-await sort.select('Price: Low to High')
+const sort = await page.find('select:last-of-type')
+await sort.selectOption('Price: Low to High')
 ```
 
 After selecting a category, a label updates to show the active filter. We'll learn in Chapter 5 how to properly wait for that update before asserting on it. For now, let's focus on the form mechanics.
@@ -118,7 +118,7 @@ const fieldMap: Record<string, string> = {
 }
 
 for (const [name, value] of Object.entries(fieldMap)) {
-  const field = await page.find({ css: `input[name=${name}]` })
+  const field = await page.find(`input[name=${name}]`)
   await field.fill(value)
 }
 ```
@@ -128,7 +128,7 @@ This `fieldMap` pattern is worth adopting as a habit. The data lives in one obje
 After filling, we can verify a specific field's value using `element.value()`:
 
 ```typescript
-const emailField = await page.find({ css: 'input[name=email]' })
+const emailField = await page.find('input[name=email]')
 assert.equal(await emailField.value(), 'jane@test.com', 'email field value')
 ```
 
@@ -137,10 +137,10 @@ Then submit and wait for the confirmation page:
 ```typescript
 const submit = await page.find({ role: 'button', text: 'Place Order' })
 await submit.click()
-await page.waitForURL('**/confirmation')
+await page._waitForURL('**/confirmation')
 ```
 
-`waitForURL` blocks until the URL matches the pattern. This is the right way to handle navigation triggered by a form submit — you don't know exactly when the app will finish processing and change the URL, so you wait for the outcome rather than sleeping for an arbitrary duration.
+`_waitForURL` blocks until the URL matches the pattern. This is the right way to handle navigation triggered by a form submit — you don't know exactly when the app will finish processing and change the URL, so you wait for the outcome rather than sleeping for an arbitrary duration.
 
 ---
 
@@ -149,7 +149,7 @@ await page.waitForURL('**/confirmation')
 Here's the full flow in one test, using the `fieldMap` pattern:
 
 ```typescript
-import vibium from 'vibium'
+import { browser as vibium } from 'vibium'
 import assert from 'node:assert/strict'
 
 const AUT = 'https://automation-exercise.daisyladybug.com'
@@ -177,7 +177,7 @@ async function testCheckoutFlow() {
 
     // Fill all 12 fields
     for (const [name, value] of Object.entries(fieldMap)) {
-      const field = await page.find({ css: `input[name=${name}]` })
+      const field = await page.find(`input[name=${name}]`)
       await field.fill(value)
     }
 
@@ -186,7 +186,7 @@ async function testCheckoutFlow() {
     await submit.click()
 
     // Wait for confirmation
-    await page.waitForURL('**/confirmation')
+    await page._waitForURL('**/confirmation')
     assert.ok(
       (await page.url()).includes('/confirmation'),
       'reached confirmation page'
@@ -194,7 +194,7 @@ async function testCheckoutFlow() {
 
     console.log('Checkout flow passed.')
   } finally {
-    await browser.close()
+    await browser.stop()
   }
 }
 

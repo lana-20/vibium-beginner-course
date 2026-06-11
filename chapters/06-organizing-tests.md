@@ -8,7 +8,7 @@ This chapter is about building a proper test framework. We'll introduce Vitest a
 
 ## What's wrong with standalone scripts
 
-Let me be specific about the problem. Here's a typical issue: you have five test files for the products page. Each one contains `page.find({ css: 'select:first-of-type' })` — the category dropdown selector. The app redesigns and the category select is now inside a `<form>` wrapper, so the correct selector is `form select:first-of-type`. You now update five files. You miss one. That test fails silently for weeks until someone notices.
+Let me be specific about the problem. Here's a typical issue: you have five test files for the products page. Each one contains `page.find('select:first-of-type')` — the category dropdown selector. The app redesigns and the category select is now inside a `<form>` wrapper, so the correct selector is `form select:first-of-type`. You now update five files. You miss one. That test fails silently for weeks until someone notices.
 
 That's the DRY problem: **Don't Repeat Yourself**. Duplication of selectors, duplication of setup code, duplication of assertions — every duplicate is a liability. When the app changes, you pay for every copy.
 
@@ -59,7 +59,7 @@ Here's the pattern:
 
 ```typescript
 import { describe, it, beforeEach, afterEach, expect } from 'vitest'
-import vibium from 'vibium'
+import { browser as vibium } from 'vibium'
 
 describe('Products page', () => {
   let browser: Awaited<ReturnType<typeof vibium.start>>
@@ -72,20 +72,20 @@ describe('Products page', () => {
   })
 
   afterEach(async () => {
-    await browser.close()
+    await browser.stop()
   })
 
   it('shows 12 products by default', async () => {
     await page.go(`${AUT}/products`)
-    expect(await page.count('a[href*="/products/prod_"]')).toBe(12)
+    expect((await page.findAll('a[href*="/products/prod_"]')).length).toBe(12)
   })
 
   it('filters to 3 products when Electronics selected', async () => {
     await page.go(`${AUT}/products`)
-    const select = await page.find({ css: 'select:first-of-type' })
-    await select.select('Electronics')
-    await page.waitForText('SHOWING 3 OF 12 PRODUCTS')
-    expect(await page.find({ text: 'SHOWING 3 OF 12 PRODUCTS' })).toBeTruthy()
+    const select = await page.find('select:first-of-type')
+    await select.selectOption('Electronics')
+    await page.find({ text: 'Showing 3 of 12 products' })
+    expect(await page.find({ text: 'Showing 3 of 12 products' })).toBeTruthy()
   })
 })
 ```
@@ -94,7 +94,7 @@ Every `it()` block gets a fresh browser and a new page. `beforeEach` runs before
 
 This is what **atomic tests** look like in practice. We defined atomicity in Chapter 2: a test does one thing, sets up its own state, and tears down cleanly. `beforeEach`/`afterEach` enforce this structurally. You don't have to remember to do it — the framework does it for you.
 
-If `afterEach` throws or the test crashes, the browser still gets closed because `afterEach` is always invoked. Compare this to putting `browser.close()` at the end of an `it` block — if the test throws, you skip the close and leak a browser process.
+If `afterEach` throws or the test crashes, the browser still gets closed because `afterEach` is always invoked. Compare this to putting `browser.stop()` at the end of an `it` block — if the test throws, you skip the close and leak a browser process.
 
 ---
 
@@ -126,22 +126,22 @@ export class ProductsPage {
   }
 
   async search(query: string) {
-    const input = await this.page.find({ css: "input[placeholder='Search products...']" })
+    const input = await this.page.find("input[placeholder='Search products...']")
     await input.fill(query)
   }
 
   async filterByCategory(category: string) {
-    const select = await this.page.find({ css: 'select:first-of-type' })
-    await select.select(category)
+    const select = await this.page.find('select:first-of-type')
+    await select.selectOption(category)
   }
 
   async sortBy(option: string) {
-    const select = await this.page.find({ css: 'select:last-of-type' })
-    await select.select(option)
+    const select = await this.page.find('select:last-of-type')
+    await select.selectOption(option)
   }
 
   async productCount() {
-    return this.page.count('a[href*="/products/prod_"]')
+    return (await this.page.findAll('a[href*="/products/prod_"]')).length
   }
 
   async isProductVisible(name: string) {
@@ -187,12 +187,12 @@ export class CartPage {
   }
 
   async itemCount() {
-    const el = await this.page.find({ css: '.cart-summary' })
+    const el = await this.page.find('.cart-summary')
     return el.text()
   }
 
   async subtotal() {
-    const el = await this.page.find({ css: '.cart-subtotal' })
+    const el = await this.page.find('.cart-subtotal')
     return el.text()
   }
 
@@ -215,7 +215,7 @@ Here's how all of this comes together in a real test file:
 ```typescript
 // src/ch06-organizing/tests/products.test.ts
 import { describe, it, beforeEach, afterEach, expect } from 'vitest'
-import vibium from 'vibium'
+import { browser as vibium } from 'vibium'
 import { ProductsPage } from '../pages/ProductsPage'
 import { CartPage } from '../pages/CartPage'
 
@@ -232,7 +232,7 @@ describe('Products page', () => {
   })
 
   afterEach(async () => {
-    await browser.close()
+    await browser.stop()
   })
 
   it('shows 12 products by default', async () => {
@@ -245,7 +245,7 @@ describe('Products page', () => {
     const products = new ProductsPage(page)
     await products.goto()
     await products.filterByCategory('Electronics')
-    await page.waitForText('SHOWING 3 OF 12 PRODUCTS')
+    await page.find({ text: 'Showing 3 of 12 products' })
     expect(await products.isProductVisible('Wireless Headphones')).toBe(true)
   })
 
@@ -264,7 +264,7 @@ describe('Products page', () => {
 
     const cart = new CartPage(page)
     await cart.goto()
-    expect(await cart.itemCount()).toBe('1 ITEM · 1 PRODUCT')
+    expect(await cart.itemCount()).toBe('1 item · 1 product')
   })
 })
 ```
@@ -319,7 +319,7 @@ await Promise.all([
   page2.go(`${AUT}/cart`),
 ])
 
-await browser.close()
+await browser.stop()
 ```
 
 Within a Vitest suite, Vitest handles this for you — each `it` block gets its own `beforeEach`-created context, and Vitest runs tests concurrently. But if you need to orchestrate multiple browser sessions *within a single test* — for example, testing a real-time feature where two users must be active simultaneously — the multi-context pattern is the right approach. Two contexts, one browser, complete isolation between them.

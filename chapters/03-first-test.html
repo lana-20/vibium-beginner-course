@@ -178,7 +178,7 @@
       <div class="code-panel">
         <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file"><em>ch03/</em>navigate.ts</span></div>
         <div class="code-body"><pre>
-<span class="k">import</span> vibium <span class="k">from</span> <span class="s">'vibium'</span>
+<span class="k">import</span> { browser <span class="k">as</span> vibium } <span class="k">from</span> <span class="s">'vibium'</span>
 
 <span class="k">const</span> AUT = <span class="s">'https://automation-exercise.daisyladybug.com/'</span>
 
@@ -190,7 +190,7 @@
   <span class="k">await</span> page.<span class="fn">go</span>(AUT)
 
   console.<span class="fn">log</span>(<span class="s">'navigated successfully'</span>)
-  <span class="k">await</span> browser.<span class="fn">close</span>()
+  <span class="k">await</span> browser.<span class="fn">stop</span>()
 }
 
 <span class="fn">main</span>()</pre></div>
@@ -249,7 +249,7 @@ console.<span class="fn">log</span>(<span class="s">'✓ hero heading visible'</
       <div class="code-panel">
         <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file"><em>ch03/</em>03-complete-test.ts</span></div>
         <div class="code-body"><pre>
-<span class="k">import</span> vibium <span class="k">from</span> <span class="s">'vibium'</span>
+<span class="k">import</span> { browser <span class="k">as</span> vibium } <span class="k">from</span> <span class="s">'vibium'</span>
 <span class="k">import</span> assert <span class="k">from</span> <span class="s">'node:assert/strict'</span>
 
 <span class="k">const</span> AUT = <span class="s">'https://automation-exercise.daisyladybug.com/'</span>
@@ -282,7 +282,7 @@ console.<span class="fn">log</span>(<span class="s">'✓ hero heading visible'</
 
     console.<span class="fn">log</span>(<span class="s">'All assertions passed.'</span>)
   } <span class="k">finally</span> {
-    <span class="k">await</span> browser.<span class="fn">close</span>()
+    <span class="k">await</span> browser.<span class="fn">stop</span>()
   }
 }
 
@@ -325,7 +325,7 @@ console.<span class="fn">log</span>(<span class="s">'✓ hero heading visible'</
         <div class="code-body"><pre>
 <span class="k">const</span> { browser, stop } = <span class="k">await</span> vibium.<span class="fn">record</span>({ headless: <span class="k">false</span> })
 <span class="c">// ... your test logic ...</span>
-<span class="k">await</span> browser.<span class="fn">close</span>()
+<span class="k">await</span> browser.<span class="fn">stop</span>()
 <span class="k">const</span> url = <span class="k">await</span> <span class="fn">stop</span>()
 console.<span class="fn">log</span>(<span class="s">'Recording:'</span>, url)
 <span class="c">// → https://player.vibium.dev/session/abc123</span></pre></div>

@@ -35,7 +35,7 @@ Every interaction with Vibium follows the same four-level hierarchy. Let me walk
 In code, that hierarchy looks like this:
 
 ```typescript
-import vibium from 'vibium'
+import { browser as vibium } from 'vibium'
 
 async function main() {
   const browser = await vibium.start({ headless: false })   // Browser
@@ -47,7 +47,7 @@ async function main() {
   const heading = await page.find({ role: 'heading', text: 'automation-exercise' })  // Element
   console.log(await heading.text())
 
-  await browser.close()
+  await browser.stop()
 }
 
 main()
@@ -68,7 +68,7 @@ The key design decision is *how* you describe the element you want. Vibium uses 
 const button = await page.find({ role: 'button', text: 'Add to Cart' })
 
 // By CSS selector — when you need structural precision
-const input = await page.find({ css: 'input[name=email]' })
+const input = await page.find('input[name=email]')
 ```
 
 The role-plus-text approach describes what the element *means*, not what it *looks like*. "Button" refers to the semantic role — it doesn't matter whether the HTML is a `<button>`, an `<a>` styled as a button, or a `<div role="button">`. The text narrows it to the specific one. CSS selectors are a fallback for form inputs or elements where semantic targeting isn't precise enough.
@@ -85,7 +85,7 @@ Everything you do with a Vibium page falls into one of three categories: **actio
 - `page.go(url)` — navigate
 - `element.click()` — click
 - `element.fill(text)` — clear a field and type
-- `element.select(value)` — choose a dropdown option
+- `element.selectOption(value)` — choose a dropdown option
 
 **Captures** are events the browser sends *to* you:
 - `page.capture.dialog()` — intercept an alert or confirm
@@ -93,8 +93,8 @@ Everything you do with a Vibium page falls into one of three categories: **actio
 - `page.capture.download()` — intercept a file download
 
 **Waits** block your script until a condition is true:
-- `page.waitForText(text)` — wait until text appears
-- `page.waitForURL(pattern)` — wait until the URL matches
+- `page.find({ text })` — wait until text appears (find polls until the element exists)
+- `page._waitForURL(pattern)` — wait until the URL matches
 
 The pattern you'll use constantly: trigger an action, wait for the DOM to settle, then assert. We'll dig into that in Chapter 5.
 
@@ -106,7 +106,7 @@ You might notice that Vibium's API is object-oriented — you call methods on ob
 
 Each object in the hierarchy carries context. A `Page` object knows which browser context it belongs to. An `Element` object knows which page it came from, which DOM node it represents, and whether that node is still attached. When you call `element.click()`, Vibium doesn't re-query the DOM — it already has a reference to the exact node.
 
-This OOP model is also the foundation for the **Page Object Pattern** in Chapter 6. When you wrap a page's interactions in a class, each method on that class translates directly to one or more Vibium calls. The `ProductsPage` class you'll build has a `filterByCategory()` method that internally calls `page.find()` and `element.select()`. The test doesn't know or care about the selector — it just calls `products.filterByCategory('Electronics')`. That's OOP applied to test organization.
+This OOP model is also the foundation for the **Page Object Pattern** in Chapter 6. When you wrap a page's interactions in a class, each method on that class translates directly to one or more Vibium calls. The `ProductsPage` class you'll build has a `filterByCategory()` method that internally calls `page.find()` and `element.selectOption()`. The test doesn't know or care about the selector — it just calls `products.filterByCategory('Electronics')`. That's OOP applied to test organization.
 
 ---
 
@@ -142,7 +142,7 @@ We'll use this in Chapter 8. For now, just know it lives at the page level and i
 Here's a complete example that touches most of what we just covered. This is close to what you'll write in Chapter 3, but I want you to see the full shape now:
 
 ```typescript
-import vibium from 'vibium'
+import { browser as vibium } from 'vibium'
 
 const AUT = 'https://automation-exercise.daisyladybug.com/'
 
@@ -164,17 +164,17 @@ async function exploreApp() {
     await productsLink.click()
 
     // Wait for URL to update after the click
-    await page.waitForURL('**/products')
+    await page._waitForURL('**/products')
     console.log('Now at:', await page.url())
 
   } finally {
-    await browser.close()  // always runs, even if something threw
+    await browser.stop()  // always runs, even if something threw
   }
 }
 
 exploreApp()
 ```
 
-Run this and you'll see the browser open, navigate home, then click through to the products page. The `try/finally` pattern is something you'll write in every test in this course. `browser.close()` in `finally` means the browser always cleans up — whether the test passed, failed, or threw an unexpected error.
+Run this and you'll see the browser open, navigate home, then click through to the products page. The `try/finally` pattern is something you'll write in every test in this course. `browser.stop()` in `finally` means the browser always cleans up — whether the test passed, failed, or threw an unexpected error.
 
 In the next chapter, we turn this foundation into a real test with assertions, proper failure handling, and a structure you can run reliably in CI. Let's go write it.

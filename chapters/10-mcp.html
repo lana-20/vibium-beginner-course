@@ -221,10 +221,10 @@
         <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">TypeScript client — deterministic</span></div>
         <div class="code-body"><pre>
 <span class="k">await</span> page.<span class="fn">go</span>(<span class="s">`${AUT}/products`</span>)
-<span class="k">const</span> select = <span class="k">await</span> page.<span class="fn">find</span>({ css: <span class="s">'select:first-of-type'</span> })
-<span class="k">await</span> select.<span class="fn">select</span>(<span class="s">'Electronics'</span>)
-<span class="k">await</span> page.<span class="fn">waitForText</span>(<span class="s">'SHOWING 3 OF 12 PRODUCTS'</span>)
-<span class="k">const</span> count = <span class="k">await</span> page.<span class="fn">count</span>(<span class="s">'a[href*="/products/prod_"]'</span>)
+<span class="k">const</span> select = <span class="k">await</span> page.<span class="fn">find</span>(<span class="s">'select:first-of-type'</span>)
+<span class="k">await</span> select.<span class="fn">selectOption</span>(<span class="s">'Electronics'</span>)
+<span class="k">await</span> page.<span class="fn">find</span>({ text: <span class="s">'Showing 3 of 12 products'</span> })
+<span class="k">const</span> count = (<span class="k">await</span> page.<span class="fn">findAll</span>(<span class="s">'a[href*="/products/prod_"]'</span>)).<span class="p">length</span>
 assert.<span class="fn">equal</span>(count, <span class="n">3</span>)</pre></div>
       </div>
       <div class="prompt-panel">
@@ -269,7 +269,7 @@ assert.<span class="fn">equal</span>(count, <span class="n">3</span>)</pre></div
         <div class="toc-item"><span class="toc-num">Ch 2</span><span class="toc-title">Vibium architecture — Browser → Page → Element</span></div>
         <div class="toc-item"><span class="toc-num">Ch 3</span><span class="toc-title">Your first test — navigate, find, assert</span></div>
         <div class="toc-item"><span class="toc-num">Ch 4</span><span class="toc-title">Working with forms — fill, select, validation</span></div>
-        <div class="toc-item"><span class="toc-num">Ch 5</span><span class="toc-title">Assertions and waiting — state methods, waitForText</span></div>
+        <div class="toc-item"><span class="toc-num">Ch 5</span><span class="toc-title">Assertions and waiting — state methods, page.find({ text })</span></div>
         <div class="toc-item"><span class="toc-num">Ch 6</span><span class="toc-title">Organizing tests — Vitest, Page Objects</span></div>
         <div class="toc-item"><span class="toc-num">Ch 7</span><span class="toc-title">Capturing events — dialogs, console, downloads</span></div>
         <div class="toc-item"><span class="toc-num">Ch 8</span><span class="toc-title">Network interception — stub, abort, partial</span></div>

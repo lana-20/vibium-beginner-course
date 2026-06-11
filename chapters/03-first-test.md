@@ -45,7 +45,7 @@ That's everything. Notice that we didn't install a browser, configure a WebDrive
 Let's make sure everything works. Create a file at `src/ch03-first-test/01-navigate-and-read.ts` and type this out:
 
 ```typescript
-import vibium from 'vibium'
+import { browser as vibium } from 'vibium'
 
 const AUT = 'https://automation-exercise.daisyladybug.com/'
 
@@ -57,7 +57,7 @@ async function main() {
   await page.go(AUT)
 
   console.log('navigated successfully')
-  await browser.close()
+  await browser.stop()
 }
 
 main()
@@ -138,7 +138,7 @@ Notice the third argument to both — a string label. This appears in the error 
 
 Now let's put everything together into a properly structured test. There are a few habits I want you to establish right from the start, because they'll matter more and more as your test suite grows:
 
-**Use `try/finally` for cleanup.** The browser always needs to close — whether the test passes, fails, or throws an unexpected error. `finally` runs in all three cases, so put `browser.close()` there.
+**Use `try/finally` for cleanup.** The browser always needs to close — whether the test passes, fails, or throws an unexpected error. `finally` runs in all three cases, so put `browser.stop()` there.
 
 **Call `process.exit(1)` on failure.** This ensures CI systems know the test failed. Without a non-zero exit code, your CI pipeline will think everything is fine even when it isn't.
 
@@ -147,7 +147,7 @@ Now let's put everything together into a properly structured test. There are a f
 Here's the complete test:
 
 ```typescript
-import vibium from 'vibium'
+import { browser as vibium } from 'vibium'
 import assert from 'node:assert/strict'
 
 const AUT = 'https://automation-exercise.daisyladybug.com/'
@@ -180,7 +180,7 @@ async function testHomepage() {
 
     console.log('All assertions passed.')
   } finally {
-    await browser.close()
+    await browser.stop()
   }
 }
 
@@ -249,7 +249,7 @@ There's one more tool I want to show you before we move on, because it transform
 Here's how to use it:
 
 ```typescript
-import vibium from 'vibium'
+import { browser as vibium } from 'vibium'
 
 async function main() {
   const { browser, stop } = await vibium.record({ headless: false })
@@ -260,7 +260,7 @@ async function main() {
     await page.go(AUT)
     // ... your test logic
   } finally {
-    await browser.close()
+    await browser.stop()
     const url = await stop()
     console.log('Recording:', url)
   }

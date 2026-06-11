@@ -138,7 +138,7 @@
   <div class="hero-inner">
     <div class="hero-eyebrow">Chapter 5</div>
     <h1 class="hero-title">Assertions and <em>Waiting</em></h1>
-    <p class="hero-desc">Master element state methods, synchronize with async DOM updates using waitForText and waitForURL, and write a test that verifies live cart totals after a quantity change.</p>
+    <p class="hero-desc">Master element state methods, synchronize with async DOM updates using page.find({ text }) and page._waitForURL(), and write a test that verifies live cart totals after a quantity change.</p>
     <div class="hero-meta">
       <span class="meta-item"><span class="meta-dot"></span>Intermediate</span>
       <span class="meta-item"><span class="meta-dot"></span>TypeScript</span>
@@ -167,14 +167,13 @@ assert.ok(await total.isVisible())</pre>
         <div class="bg-panel good">
           <div class="bg-label">Correct pattern</div>
           <pre>await button.click()
-await page.waitForText('$159.98')
 const total = await page.find(
   { text: '$159.98' }
 )
 assert.ok(await total.isVisible())</pre>
         </div>
       </div>
-      <p>Vibium's actions (<code class="inline">click</code>, <code class="inline">fill</code>, <code class="inline">select</code>) auto-wait for the target to be interactive. But state that appears <em class="inline">after</em> an action — new text in the DOM, a new URL — needs an explicit <code class="inline">waitForText</code> or <code class="inline">waitForURL</code> call before you assert. <code class="inline">waitForText</code> blocks your script until that exact string appears somewhere on the page. Once it does, you know the DOM has settled and your assertion is safe.</p>
+      <p>Vibium's actions (<code class="inline">click</code>, <code class="inline">fill</code>, <code class="inline">selectOption</code>) auto-wait for the target to be interactive. But state that appears <em class="inline">after</em> an action — new text in the DOM, a new URL — needs an explicit <code class="inline">page.find({ text })</code> or <code class="inline">page._waitForURL()</code> call before you assert. <code class="inline">page.find({ text })</code> polls until that string appears anywhere on the page. Once it does, you know the DOM has settled and your assertion is safe.</p>
     </div>
 
     <div class="section-block">
@@ -224,36 +223,34 @@ assert.<span class="fn">ok</span>(href?.<span class="fn">includes</span>(<span c
 
     <div class="section-block">
       <div class="section-eyebrow">5.3</div>
-      <h2 class="section-heading">waitForText and <em>waitForURL</em></h2>
-      <p><code class="inline">page.waitForText(text)</code> blocks until the string appears anywhere on the page. <code class="inline">page.waitForURL(pattern)</code> blocks until the URL matches. Both default to a 30-second timeout.</p>
+      <h2 class="section-heading">Waiting for Text and <em>URL Changes</em></h2>
+      <p><code class="inline">page.find({ text })</code> polls until an element with that text exists on the page — use it after any action that causes a DOM update. <code class="inline">page._waitForURL(pattern)</code> blocks until the URL matches a glob pattern. Both default to a 30-second timeout.</p>
       <div class="code-panel">
         <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file"><em>ch05/</em>02-waits.ts (excerpt)</span></div>
         <div class="code-body"><pre>
-<span class="k">const</span> category = <span class="k">await</span> page.<span class="fn">find</span>({ css: <span class="s">'select:first-of-type'</span> })
-<span class="k">await</span> category.<span class="fn">select</span>(<span class="s">'Electronics'</span>)
+<span class="k">const</span> category = <span class="k">await</span> page.<span class="fn">find</span>(<span class="s">'select:first-of-type'</span>)
+<span class="k">await</span> category.<span class="fn">selectOption</span>(<span class="s">'Electronics'</span>)
 
-<span class="c">// wait for count label to update before asserting</span>
-<span class="k">await</span> page.<span class="fn">waitForText</span>(<span class="s">'SHOWING 3 OF 12 PRODUCTS'</span>)
-
-<span class="k">const</span> label = <span class="k">await</span> page.<span class="fn">find</span>({ text: <span class="s">'SHOWING 3 OF 12 PRODUCTS'</span> })
+<span class="c">// find polls until the label appears — no separate wait needed</span>
+<span class="k">const</span> label = <span class="k">await</span> page.<span class="fn">find</span>({ text: <span class="s">'Showing 3 of 12 products'</span> })
 assert.<span class="fn">ok</span>(<span class="k">await</span> label.<span class="fn">isVisible</span>(), <span class="s">'filter label updated'</span>)
 
 <span class="c">// navigate then wait for URL</span>
 <span class="k">const</span> link = <span class="k">await</span> page.<span class="fn">find</span>({ role: <span class="s">'link'</span>, text: <span class="s">'Wireless Headphones'</span> })
 <span class="k">await</span> link.<span class="fn">click</span>()
-<span class="k">await</span> page.<span class="fn">waitForURL</span>(<span class="s">'**/products/prod_001'</span>)</pre></div>
+<span class="k">await</span> page.<span class="fn">_waitForURL</span>(<span class="s">'**/products/prod_001'</span>)</pre></div>
       </div>
     </div>
 
     <div class="section-block">
       <div class="section-eyebrow">5.4</div>
       <h2 class="section-heading">Asserting on <em>Counts and Attributes</em></h2>
-      <p>Use <code class="inline">page.count(selector)</code> to assert element counts. Use <code class="inline">element.attr(name)</code> to assert attribute values.</p>
+      <p>Use <code class="inline">(await page.findAll(selector)).length</code> to assert element counts. Use <code class="inline">element.attr(name)</code> to assert attribute values.</p>
       <div class="code-panel">
         <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">count + attribute assertions</span></div>
         <div class="code-body"><pre>
 <span class="k">await</span> page.<span class="fn">go</span>(<span class="s">`${AUT}/products`</span>)
-<span class="k">const</span> count = <span class="k">await</span> page.<span class="fn">count</span>(<span class="s">'a[href*="/products/prod_"]'</span>)
+<span class="k">const</span> count = (<span class="k">await</span> page.<span class="fn">findAll</span>(<span class="s">'a[href*="/products/prod_"]'</span>)).<span class="p">length</span>
 assert.<span class="fn">equal</span>(count, <span class="n">12</span>, <span class="s">'12 products on catalog page'</span>)
 
 <span class="k">const</span> link = <span class="k">await</span> page.<span class="fn">find</span>({ role: <span class="s">'link'</span>, text: <span class="s">'Products'</span> })
@@ -265,7 +262,7 @@ assert.<span class="fn">ok</span>(href?.<span class="fn">includes</span>(<span c
     <div class="section-block">
       <div class="section-eyebrow">5.5</div>
       <h2 class="section-heading">A Complete <em>State Test</em></h2>
-      <p>This test adds Wireless Headphones to the cart, increases the quantity to 2, and asserts that three separate DOM values update correctly. We call <code class="inline">waitForText</code> twice after the click — once for the count label and once for the subtotal — because the DOM updates for each value may not happen in the same render cycle. Don't assert until you've confirmed the page has settled on the specific values you're checking.</p>
+      <p>This test adds Wireless Headphones to the cart, increases the quantity to 2, and asserts that three separate DOM values update correctly. We call <code class="inline">page.find({ text })</code> twice after the click — once for the count label and once for the subtotal — because the DOM updates for each value may not happen in the same render cycle. Don't assert until you've confirmed the page has settled on the specific values you're checking.</p>
       <div class="code-panel">
         <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file"><em>ch05/</em>03-cart-totals.ts</span></div>
         <div class="code-body"><pre>
@@ -277,7 +274,7 @@ assert.<span class="fn">ok</span>(href?.<span class="fn">includes</span>(<span c
 
 <span class="c">// verify initial state: qty 1</span>
 assert.<span class="fn">ok</span>(
-  <span class="k">await</span> (<span class="k">await</span> page.<span class="fn">find</span>({ text: <span class="s">'1 ITEM · 1 PRODUCT'</span> })).<span class="fn">isVisible</span>()
+  <span class="k">await</span> (<span class="k">await</span> page.<span class="fn">find</span>({ text: <span class="s">'1 item · 1 product'</span> })).<span class="fn">isVisible</span>()
 )
 
 <span class="c">// increase quantity</span>
@@ -287,14 +284,14 @@ assert.<span class="fn">ok</span>(
 })
 <span class="k">await</span> increase.<span class="fn">click</span>()
 
-<span class="c">// wait before asserting — React re-render is async</span>
-<span class="k">await</span> page.<span class="fn">waitForText</span>(<span class="s">'2 ITEMS · 1 PRODUCT'</span>)
-<span class="k">await</span> page.<span class="fn">waitForText</span>(<span class="s">'$159.98'</span>)
+<span class="c">// find polls — waits for React re-render automatically</span>
+<span class="k">await</span> page.<span class="fn">find</span>({ text: <span class="s">'2 items · 1 product'</span> })
+<span class="k">await</span> page.<span class="fn">find</span>({ text: <span class="s">'$159.98'</span> })
 
 assert.<span class="fn">ok</span>(<span class="k">await</span> (<span class="k">await</span> page.<span class="fn">find</span>({ text: <span class="s">'$159.98'</span> })).<span class="fn">isVisible</span>(), <span class="s">'subtotal'</span>)
 assert.<span class="fn">ok</span>(<span class="k">await</span> (<span class="k">await</span> page.<span class="fn">find</span>({ text: <span class="s">'$175.98'</span> })).<span class="fn">isVisible</span>(), <span class="s">'total'</span>)</pre></div>
       </div>
-      <div class="callout"><p><strong>Why two waitForText calls?</strong> The subtotal and total are computed separately. Waiting for the subtotal doesn't guarantee the total has updated too — wait for each value you intend to assert.</p></div>
+      <div class="callout"><p><strong>Why two find({ text }) calls?</strong> The subtotal and total are computed separately. Polling for the subtotal doesn't guarantee the total has updated too — poll for each value you intend to assert.</p></div>
     </div>
 
   </div>

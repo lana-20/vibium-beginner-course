@@ -57,10 +57,10 @@ The same scenario expressed two ways:
 
 ```typescript
 await page.go('https://automation-exercise.daisyladybug.com/products')
-const select = await page.find({ css: 'select:first-of-type' })
-await select.select('Electronics')
-await page.waitForText('SHOWING 3 OF 12 PRODUCTS')
-const count = await page.count('a[href*="/products/prod_"]')
+const select = await page.find('select:first-of-type')
+await select.selectOption('Electronics')
+await page.find({ text: 'Showing 3 of 12 products' })
+const count = (await page.findAll('a[href*="/products/prod_"]')).length
 assert.equal(count, 3, '3 Electronics products')
 ```
 
@@ -113,7 +113,7 @@ is not visible after the search.
 Claude navigates the app, performs the search, reads the results, and generates a test like:
 
 ```typescript
-import vibium from 'vibium'
+import { browser as vibium } from 'vibium'
 import assert from 'node:assert/strict'
 
 const AUT = 'https://automation-exercise.daisyladybug.com'
@@ -126,7 +126,7 @@ async function testSearchForCoffee() {
   try {
     await page.go(`${AUT}/products`)
 
-    const search = await page.find({ css: "input[placeholder='Search products...']" })
+    const search = await page.find("input[placeholder='Search products...']")
     await search.fill('coffee')
 
     const coffeeMaker = await page.find({ text: 'Coffee Maker' })
@@ -137,7 +137,7 @@ async function testSearchForCoffee() {
 
     console.log('Search assertions passed.')
   } finally {
-    await browser.close()
+    await browser.stop()
   }
 }
 
@@ -163,9 +163,9 @@ In **Chapter 2** we opened up the engine — the Browser/Context/Page/Element hi
 
 In **Chapter 3** you wrote your first real test — navigate, find, assert, clean up with `try/finally`. We also looked at `vibium.record()` and how recordings at `player.vibium.dev` give you a time machine for debugging.
 
-In **Chapter 4** you drove forms — `fill()`, `select()`, the `fieldMap` loop pattern for multi-field forms, and the checkout flow from cart to confirmation.
+In **Chapter 4** you drove forms — `fill()`, `selectOption()`, the `fieldMap` loop pattern for multi-field forms, and the checkout flow from cart to confirmation.
 
-In **Chapter 5** you learned assertions and waiting — `isVisible()`, `isEnabled()`, `isChecked()`, `text()`, `value()`, `attr()`, and the rule: always `waitForText` or `waitForURL` after an action that causes a DOM update, before asserting on the result.
+In **Chapter 5** you learned assertions and waiting — `isVisible()`, `isEnabled()`, `isChecked()`, `text()`, `value()`, `attr()`, and the rule: always `page.find({ text })` or `page._waitForURL()` after an action that causes a DOM update, before asserting on the result.
 
 In **Chapter 6** you built a real test framework — Vitest, `beforeEach`/`afterEach` for atomic tests, Page Objects for DRY selectors, and the OOP and Single Responsibility principles that make a test codebase maintainable.
 

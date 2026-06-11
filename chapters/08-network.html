@@ -190,7 +190,7 @@
 })
 
 <span class="k">await</span> page.<span class="fn">go</span>(<span class="s">`${AUT}/products`</span>)
-<span class="k">const</span> count = <span class="k">await</span> page.<span class="fn">count</span>(<span class="s">'a[href*="/products/prod_"]'</span>)
+<span class="k">const</span> count = (<span class="k">await</span> page.<span class="fn">findAll</span>(<span class="s">'a[href*="/products/prod_"]'</span>)).<span class="p">length</span>
 assert.<span class="fn">equal</span>(count, <span class="n">2</span>, <span class="s">'stubbed response shows 2 products'</span>)</pre></div>
       </div>
     </div>

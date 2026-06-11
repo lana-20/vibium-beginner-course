@@ -196,7 +196,7 @@
         <div class="code-body"><pre>
 <span class="k">await</span> page.<span class="fn">go</span>(<span class="s">`${AUT}/products`</span>)
 
-<span class="k">const</span> search = <span class="k">await</span> page.<span class="fn">find</span>({ css: <span class="s">"input[placeholder='Search products...']"</span> })
+<span class="k">const</span> search = <span class="k">await</span> page.<span class="fn">find</span>(<span class="s">"input[placeholder='Search products...']"</span>)
 <span class="k">await</span> search.<span class="fn">fill</span>(<span class="s">'headphones'</span>)
 
 <span class="k">const</span> result = <span class="k">await</span> page.<span class="fn">find</span>({ text: <span class="s">'Wireless Headphones'</span> })
@@ -211,20 +211,20 @@ assert.<span class="fn">ok</span>(!<span class="k">await</span> other.<span clas
     <div class="section-block">
       <div class="section-eyebrow">4.3</div>
       <h2 class="section-heading">Working with <em>Select Dropdowns</em></h2>
-      <p>The category and sort dropdowns are standard <code class="inline">&lt;select&gt;</code> elements. Call <code class="inline">element.select()</code> with the visible option text.</p>
+      <p>The category and sort dropdowns are standard <code class="inline">&lt;select&gt;</code> elements. Call <code class="inline">element.selectOption()</code> with the visible option text.</p>
       <div class="code-panel">
         <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">select dropdowns</span></div>
         <div class="code-body"><pre>
 <span class="c">// filter by category</span>
-<span class="k">const</span> category = <span class="k">await</span> page.<span class="fn">find</span>({ css: <span class="s">'select:first-of-type'</span> })
-<span class="k">await</span> category.<span class="fn">select</span>(<span class="s">'Electronics'</span>)
+<span class="k">const</span> category = <span class="k">await</span> page.<span class="fn">find</span>(<span class="s">'select:first-of-type'</span>)
+<span class="k">await</span> category.<span class="fn">selectOption</span>(<span class="s">'Electronics'</span>)
 
 <span class="k">const</span> label = <span class="k">await</span> page.<span class="fn">find</span>({ text: <span class="s">'Electronics'</span> })
 assert.<span class="fn">ok</span>(<span class="k">await</span> label.<span class="fn">isVisible</span>(), <span class="s">'Electronics filter active'</span>)
 
 <span class="c">// change sort order</span>
-<span class="k">const</span> sort = <span class="k">await</span> page.<span class="fn">find</span>({ css: <span class="s">'select:last-of-type'</span> })
-<span class="k">await</span> sort.<span class="fn">select</span>(<span class="s">'Price: Low to High'</span>)</pre></div>
+<span class="k">const</span> sort = <span class="k">await</span> page.<span class="fn">find</span>(<span class="s">'select:last-of-type'</span>)
+<span class="k">await</span> sort.<span class="fn">selectOption</span>(<span class="s">'Price: Low to High'</span>)</pre></div>
       </div>
     </div>
 
@@ -251,12 +251,12 @@ assert.<span class="fn">ok</span>(<span class="k">await</span> label.<span class
 }
 
 <span class="k">for</span> (<span class="k">const</span> [name, value] <span class="k">of</span> Object.<span class="fn">entries</span>(fieldMap)) {
-  <span class="k">const</span> field = <span class="k">await</span> page.<span class="fn">find</span>({ css: `input[name=${name}]` })
+  <span class="k">const</span> field = <span class="k">await</span> page.<span class="fn">find</span>(`input[name=${name}]`)
   <span class="k">await</span> field.<span class="fn">fill</span>(value)
 }
 
 <span class="c">// verify a field after filling</span>
-<span class="k">const</span> emailField = <span class="k">await</span> page.<span class="fn">find</span>({ css: <span class="s">'input[name=email]'</span> })
+<span class="k">const</span> emailField = <span class="k">await</span> page.<span class="fn">find</span>(<span class="s">'input[name=email]'</span>)
 assert.<span class="fn">equal</span>(<span class="k">await</span> emailField.<span class="fn">value</span>(), <span class="s">'jane@test.com'</span>, <span class="s">'email field value'</span>)</pre></div>
       </div>
       <p>The <code class="inline">fieldMap</code> loop is a clean pattern for forms with many fields: define the data separately, keep the fill logic generic. Swapping in different test data later means only changing the object.</p>
@@ -309,13 +309,13 @@ assert.<span class="fn">equal</span>(<span class="k">await</span> emailField.<sp
         <div class="code-body"><pre>
 <span class="c">// 1. search filter</span>
 <span class="k">await</span> page.<span class="fn">go</span>(<span class="s">`${AUT}/products`</span>)
-<span class="k">const</span> search = <span class="k">await</span> page.<span class="fn">find</span>({ css: <span class="s">"input[placeholder='Search products...']"</span> })
+<span class="k">const</span> search = <span class="k">await</span> page.<span class="fn">find</span>(<span class="s">"input[placeholder='Search products...']"</span>)
 <span class="k">await</span> search.<span class="fn">fill</span>(<span class="s">'headphones'</span>)
 assert.<span class="fn">ok</span>(<span class="k">await</span> (<span class="k">await</span> page.<span class="fn">find</span>({ text: <span class="s">'Wireless Headphones'</span> })).<span class="fn">isVisible</span>())
 
 <span class="c">// 2. category filter</span>
-<span class="k">const</span> category = <span class="k">await</span> page.<span class="fn">find</span>({ css: <span class="s">'select:first-of-type'</span> })
-<span class="k">await</span> category.<span class="fn">select</span>(<span class="s">'Electronics'</span>)
+<span class="k">const</span> category = <span class="k">await</span> page.<span class="fn">find</span>(<span class="s">'select:first-of-type'</span>)
+<span class="k">await</span> category.<span class="fn">selectOption</span>(<span class="s">'Electronics'</span>)
 
 <span class="c">// 3. add to cart</span>
 <span class="k">await</span> page.<span class="fn">go</span>(<span class="s">`${AUT}/products/prod_001`</span>)
@@ -325,14 +325,14 @@ assert.<span class="fn">ok</span>(<span class="k">await</span> (<span class="k">
 <span class="c">// 4. fill checkout form</span>
 <span class="k">await</span> page.<span class="fn">go</span>(<span class="s">`${AUT}/checkout`</span>)
 <span class="k">for</span> (<span class="k">const</span> [name, value] <span class="k">of</span> Object.<span class="fn">entries</span>(fieldMap)) {
-  <span class="k">const</span> field = <span class="k">await</span> page.<span class="fn">find</span>({ css: `input[name=${name}]` })
+  <span class="k">const</span> field = <span class="k">await</span> page.<span class="fn">find</span>(`input[name=${name}]`)
   <span class="k">await</span> field.<span class="fn">fill</span>(value)
 }
 
 <span class="c">// 5. submit and assert confirmation</span>
 <span class="k">const</span> submit = <span class="k">await</span> page.<span class="fn">find</span>({ role: <span class="s">'button'</span>, text: <span class="s">'Place Order'</span> })
 <span class="k">await</span> submit.<span class="fn">click</span>()
-<span class="k">await</span> page.<span class="fn">waitForURL</span>(<span class="s">'**/confirmation'</span>)</pre></div>
+<span class="k">await</span> page.<span class="fn">_waitForURL</span>(<span class="s">'**/confirmation'</span>)</pre></div>
       </div>
     </div>
 
