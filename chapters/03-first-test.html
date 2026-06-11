@@ -147,6 +147,18 @@
   <div class="container">
 
     <div class="section-block">
+      <div class="section-eyebrow">Prerequisites</div>
+      <h2 class="section-heading">What You <em>Need First</em></h2>
+      <p>Before installing anything, make sure your machine has:</p>
+      <ul class="prereq-list">
+        <li><strong>Node.js 18 or later.</strong> Run <code class="inline">node --version</code> to check. If it's not installed, go to nodejs.org and download the LTS release.</li>
+        <li><strong>npm</strong> ships bundled with Node.js — if Node is installed, npm is already there.</li>
+        <li><strong>A code editor.</strong> VS Code works well for TypeScript — autocomplete and inline type errors out of the box.</li>
+      </ul>
+      <p>That's all. Vibium manages its own browser binaries internally, so you don't need to install Chrome separately.</p>
+    </div>
+
+    <div class="section-block">
       <div class="section-eyebrow">3.1</div>
       <h2 class="section-heading">Installing <em>Vibium</em></h2>
       <p>Create a new directory for your project and install the Vibium TypeScript client and <code class="inline">tsx</code>, which lets you run TypeScript files directly without a separate compile step.</p>
@@ -196,6 +208,7 @@
 <span class="fn">main</span>()</pre></div>
       </div>
       <p>The key option to notice is <code class="inline">headless: false</code>. During development and learning, always keep this — you want to see what the browser is doing. Once your tests are solid, switch to <code class="inline">headless: true</code> for CI speed, which we'll cover in Chapter 9.</p>
+      <div class="callout"><p><strong>What's happening behind the scenes:</strong> When <code class="inline">vibium.start()</code> is called, Vibium quietly starts a background daemon process — a lightweight service that manages Chrome on the client's behalf. Your TypeScript code sends commands to the daemon; the daemon talks to Chrome. Locally this is automatic and invisible. You'll need to manage the daemon lifecycle explicitly when running in CI, and Chapter 9 covers exactly how. For now, it just works.</p></div>
     </div>
 
     <div class="section-block">

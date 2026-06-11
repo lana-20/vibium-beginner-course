@@ -240,6 +240,14 @@ assert.<span class="fn">ok</span>(<span class="k">await</span> label.<span class
 <span class="k">await</span> link.<span class="fn">click</span>()
 <span class="k">await</span> page.<span class="fn">_waitForURL</span>(<span class="s">'**/products/prod_001'</span>)</pre></div>
       </div>
+      <div class="callout">
+        <p><strong>When find() times out:</strong> If <code class="inline">page.find()</code> throws <code class="inline">TimeoutError: Timeout 30000ms exceeded</code>, it polled for 30 seconds and never found what it was looking for. Three things to check:</p>
+        <ol class="callout-list">
+          <li><strong>Selector is wrong.</strong> Run <code class="inline">vibium find text "exact text"</code> from the CLI against the running page to confirm the text exists in the DOM. <code class="inline">find({ text })</code> matches DOM text nodes, not CSS-rendered text — if CSS applies <code class="inline">text-transform: uppercase</code>, the DOM text is still lowercase.</li>
+          <li><strong>Element isn't rendered yet.</strong> A previous action didn't fully settle. Add <code class="inline">vibium.record()</code> to capture what's actually on screen at the moment of failure.</li>
+          <li><strong>Wrong page entirely.</strong> Navigation went somewhere unexpected. Add <code class="inline">console.log(await page.url())</code> before the failing find to confirm you're on the right page.</li>
+        </ol>
+      </div>
     </div>
 
     <div class="section-block">

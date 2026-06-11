@@ -4,6 +4,18 @@ We've covered the landscape and the architecture. Now let's write actual code. I
 
 ---
 
+## Prerequisites
+
+Before you install anything, make sure your machine has:
+
+- **Node.js 18 or later.** Run `node --version` to check. If it's not installed, go to nodejs.org and download the LTS release — that's the stable, recommended version.
+- **npm** ships bundled with Node.js. If Node is installed, npm is already there.
+- **A code editor.** VS Code works well for TypeScript — it gives you autocomplete and inline type errors for everything in this course.
+
+That's all. Vibium manages its own browser binaries internally, so you don't need to install Chrome separately.
+
+---
+
 ## Installing Vibium
 
 Let's get the project set up. Open your terminal and create a new directory for your course work:
@@ -72,6 +84,10 @@ npx tsx src/ch03-first-test/01-navigate-and-read.ts
 Go ahead and run that now. A browser window will open, navigate to the app, and close. You'll see "navigated successfully" in your terminal. That's all this does — but it confirms your setup is working.
 
 The key option to notice is `headless: false`. During development and learning, always keep this — you want to see what the browser is doing. Once your tests are solid, you can switch to `headless: true` for speed, and that's what we'll do in CI in Chapter 9.
+
+> **What's happening behind the scenes:** When `vibium.start()` is called, Vibium quietly starts a background daemon process — a lightweight service that manages Chrome on the client's behalf. Your TypeScript code sends commands to the daemon; the daemon talks to Chrome. Locally this is automatic and invisible. You'll need to manage the daemon lifecycle explicitly when running tests in CI, and Chapter 9 covers exactly how. For now, it just works.
+
+---
 
 ---
 

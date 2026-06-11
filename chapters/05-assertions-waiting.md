@@ -110,6 +110,12 @@ await page._waitForURL('**/products/prod_001')
 
 The pattern uses `**` as a wildcard for any path prefix, so `'**/confirmation'` matches `https://automation-exercise.daisyladybug.com/confirmation` regardless of the base URL.
 
+> **When find() times out:** If `page.find()` throws `TimeoutError: Timeout 30000ms exceeded`, it polled for 30 seconds and never found what it was looking for. Three things to check:
+>
+> 1. **Selector is wrong.** Run `vibium find text "exact text"` from the CLI against the running page to confirm the text exists in the DOM. Remember: `find({ text })` matches DOM text nodes, not CSS-rendered text — if the DOM says `"Showing 3 of 12 products"` but CSS renders it uppercase, you must pass the lowercase DOM string.
+> 2. **Element isn't rendered yet.** A previous action didn't fully settle. Add `vibium.record()` to capture what's actually on screen at the moment of failure.
+> 3. **Wrong page entirely.** Navigation went somewhere unexpected. Add `console.log(await page.url())` or `console.log(await page.title())` before the failing find to confirm you're looking at the right page.
+
 ---
 
 ## Asserting on counts

@@ -147,6 +147,13 @@
   <div class="container">
 
     <div class="section-block">
+      <div class="section-eyebrow">GitHub Actions in 60 seconds</div>
+      <h2 class="section-heading">The CI Model <em>You Need to Know</em></h2>
+      <p>If you haven't used GitHub Actions before, here's the minimum. A <strong>workflow</strong> is a YAML file in <code class="inline">.github/workflows/</code>. GitHub runs it automatically in response to events you define — for us, a push to <code class="inline">main</code> or a pull request. The <code class="inline">on:</code> key defines the triggers.</p>
+      <p>A workflow contains <strong>jobs</strong>. Each job runs on a <strong>runner</strong> — a temporary virtual machine GitHub spins up, uses, and discards. The <code class="inline">runs-on:</code> key picks the OS. A job contains <strong>steps</strong>, which run sequentially. Each step either uses a pre-built action (<code class="inline">uses: actions/checkout@v4</code>) or runs a shell command (<code class="inline">run: npm ci</code>). That's the entire model — everything else in this chapter is Vibium-specific configuration on top of it.</p>
+    </div>
+
+    <div class="section-block">
       <div class="section-eyebrow">9.1</div>
       <h2 class="section-heading">headless: true <em>in CI</em></h2>
       <p>A test suite that only runs on your laptop is not a test suite — it's a demo. The whole point of automated testing is that the machine runs the checks every time someone pushes code. CI runners don't have a display server, so <code class="inline">headless: false</code> will fail immediately. The solution: read from <code class="inline">process.env.CI</code>. GitHub Actions sets it automatically for every job. Locally it's unset, so the browser opens visibly. In CI, it's <code class="inline">'true'</code> and the browser runs headlessly.</p>
