@@ -25,13 +25,18 @@ jobs:
 
       - name: Start Vibium daemon
         run: vibium daemon start
+        env:
+          HOME: /root
 
       - name: Run tests
         run: npm run test:ci
         env:
           CI: true
+          HOME: /root
           AUT_BASE_URL: ${{ vars.AUT_BASE_URL }}
 
       - name: Stop Vibium daemon
         if: always()
         run: vibium daemon stop
+        env:
+          HOME: /root
