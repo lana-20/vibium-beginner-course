@@ -260,6 +260,34 @@
     </div>
 
     <div class="section-block">
+      <div class="section-eyebrow">6.4b — Running</div>
+      <h2 class="section-heading">What <em>npm test</em> Shows You</h2>
+      <p>Run the suite with <code class="inline">npm test</code>. Vitest discovers every <code class="inline">*.test.ts</code> file in <code class="inline">src/</code>, runs them, and prints a result summary. A passing run looks like this:</p>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">terminal — all passing</span></div>
+        <div class="code-body"><pre>
+ ✓ src/ch06-organizing/tests/products.test.ts (4 tests) 22s
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  14:32:11
+   Duration  23.5s</pre></div>
+      </div>
+      <p>If a test fails, Vitest names it and shows the assertion that failed:</p>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">terminal — one failure</span></div>
+        <div class="code-body"><pre>
+ ✗ Products page &gt; shows 12 products by default 6211ms
+   → AssertionError: expected 11 to be 12
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 3 passed (4)
+   Duration  23.4s</pre></div>
+      </div>
+      <p>The test name tells you exactly which case failed. The assertion message tells you what was expected. The other three tests still ran and passed — failures don't stop the suite.</p>
+    </div>
+
+    <div class="section-block">
       <div class="section-eyebrow">6.5 — Bonus</div>
       <h2 class="section-heading">Parallel Contexts — Multiple Tabs, <em>One Browser</em></h2>
       <p>Playwright runs tests in parallel across multiple worker processes, each with their own browser instance. Vibium can achieve a similar result within a single browser process using multiple <code class="inline">BrowserContext</code> objects. Each context is fully isolated — its own cookies, storage, and auth state — and can run a <code class="inline">Page</code> independently.</p>

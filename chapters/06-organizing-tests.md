@@ -275,7 +275,29 @@ Run it:
 npm test
 ```
 
-Vitest prints a result table showing which tests passed, which failed, and how long each took. Every test ran with a fresh browser, in isolation, against a clean page state. If one test fails, the others still run.
+You'll see output like this:
+
+```
+ ✓ src/ch06-organizing/tests/products.test.ts (4 tests) 22s
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  14:32:11
+   Duration  23.5s
+```
+
+Every test ran with a fresh browser, in isolation, against a clean page state. If one test fails, the others still run. A failing test looks like this:
+
+```
+ ✗ Products page > shows 12 products by default 6211ms
+   → AssertionError: expected 11 to be 12
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 3 passed (4)
+   Duration  23.4s
+```
+
+The test name tells you exactly which case failed. The assertion message tells you what was expected. No log scanning needed.
 
 ---
 

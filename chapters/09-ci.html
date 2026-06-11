@@ -163,7 +163,7 @@
       <div class="section-eyebrow">9.2 – 9.3</div>
       <h2 class="section-heading">Exit Codes and <em>the Daemon</em></h2>
       <p>CI systems determine whether a job passed or failed by the process exit code. If your test fails but the process exits with 0, CI thinks everything is fine. Vitest handles exit codes automatically. For standalone scripts, the <code class="inline">.catch(err => { process.exit(1) })</code> pattern from earlier chapters is why it's there.</p>
-      <p>The Vibium TypeScript client communicates with a local daemon process. That daemon must be running before your tests start. Start it before tests, stop it after — and use <code class="inline">if: always()</code> on the stop step so the daemon is cleaned up even when tests fail. This is the YAML equivalent of <code class="inline">finally</code> in TypeScript.</p>
+      <p>Vibium's architecture separates the client from the browser. The TypeScript code you write doesn't talk to Chrome directly — it sends messages to a background daemon process, which manages the browser on its behalf. Locally, this is invisible: the first time you call <code class="inline">vibium.start()</code>, the client checks whether a daemon is running and starts one automatically if not. You never think about it. CI breaks this assumption — each workflow job starts from a clean environment with no persistent processes, so nothing auto-starts. You manage the daemon lifecycle explicitly: start it before your tests, stop it after.</p>
       <div class="code-panel">
         <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">daemon lifecycle in workflow</span></div>
         <div class="code-body"><pre>

@@ -32,7 +32,12 @@ From your perspective as a test engineer, this means you can open Claude Desktop
 
 ## Setting it up
 
-Configure the Vibium MCP server in Claude Desktop. Open `~/Library/Application Support/Claude/claude_desktop_config.json` and add:
+You need Claude Desktop installed on your machine to follow this section. Download it from claude.ai and create a free account if you don't have one. The MCP integration runs locally — Claude Desktop spawns the Vibium MCP server as a subprocess and connects to it, no cloud relay involved.
+
+Once Claude Desktop is installed, open its config file and add the Vibium server entry. The config file location depends on your OS:
+
+- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
 
 ```json
 {
@@ -45,7 +50,7 @@ Configure the Vibium MCP server in Claude Desktop. Open `~/Library/Application S
 }
 ```
 
-Restart Claude Desktop. You'll see the Vibium tools become available — look for the hammer icon in the interface, which indicates active MCP connections. From here, you can interact with a live browser through natural language.
+Restart Claude Desktop. You'll see the Vibium tools become available — look for the hammer icon in the interface, which indicates active MCP connections. Claude Desktop starts the Vibium daemon automatically when it launches `vibium mcp`, so you don't need to run `vibium daemon start` separately here. From here, you can interact with a live browser through natural language.
 
 ---
 

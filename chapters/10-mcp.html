@@ -197,9 +197,10 @@
       <div class="section-eyebrow">10.2 – 10.3</div>
       <h2 class="section-heading">What MCP Is and <em>How to Start It</em></h2>
       <p>The Model Context Protocol is an open standard — similar in purpose to what USB is for hardware. When Vibium runs as an MCP server, it exposes its browser automation capabilities — navigate, find, click, fill, screenshot — as MCP tool calls. Any AI model that speaks MCP can invoke those tools. From your perspective: describe what you want to test, and the agent navigates a real browser, reads the page, takes actions, and reports back.</p>
-      <p>Configure Vibium as an MCP server in Claude Desktop:</p>
+      <p>You need Claude Desktop installed on your machine to follow this section — download it from claude.ai and create a free account if you don't have one. The MCP integration runs entirely locally; Claude Desktop spawns the Vibium MCP server as a subprocess and connects to it, no cloud relay involved.</p>
+      <p>Once Claude Desktop is installed, open its config file and add the Vibium server entry. The file location depends on your OS: <code class="inline">~/Library/Application Support/Claude/claude_desktop_config.json</code> on macOS, or <code class="inline">%APPDATA%\Claude\claude_desktop_config.json</code> on Windows.</p>
       <div class="code-panel">
-        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">~/Library/Application Support/Claude/claude_desktop_config.json</span></div>
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">claude_desktop_config.json</span></div>
         <div class="code-body"><pre>
 {
   <span class="s">"mcpServers"</span>: {
@@ -210,7 +211,7 @@
   }
 }</pre></div>
       </div>
-      <p>Restart Claude Desktop. You'll see Vibium tools become available — look for the hammer icon in the interface, which indicates active MCP connections. From here, you can interact with a live browser through natural language.</p>
+      <p>Restart Claude Desktop. You'll see Vibium tools become available — look for the hammer icon in the interface, which indicates active MCP connections. Claude Desktop starts the Vibium daemon automatically when it launches <code class="inline">vibium mcp</code>, so you don't need to run <code class="inline">vibium daemon start</code> separately here. From here, you can interact with a live browser through natural language.</p>
     </div>
 
     <div class="section-block">
