@@ -316,3 +316,66 @@ Then write a **second test** called `testCartTotal` (separate function) that:
 - D. It is required before any `assert.equal` call
 
 **Answers:** 1-B, 2-B, 3-A, 4-C, 5-C
+
+---
+
+## Solution
+
+```typescript
+import { browser as vibium } from 'vibium'
+import assert from 'node:assert/strict'
+
+const AUT = 'https://automation-exercise.daisyladybug.com'
+
+async function testProductFilter() {
+  const browser = await vibium.start({ headless: false })
+  const context = await browser.newContext()
+  const page = await context.newPage()
+
+  try {
+    await page.go(`${AUT}/products`)
+
+    const category = await page.find('select:first-of-type')
+    await category.selectOption('Electronics')
+
+    // find() waits for the result to appear after filtering
+    const headphones = await page.find({ text: 'Wireless Headphones' })
+    assert.ok(await headphones.isVisible(), 'Wireless Headphones visible after Electronics filter')
+
+    const productCount = (await page.findAll('a[href*="/products/prod_"]')).length
+    assert.ok(productCount > 0, 'at least one product visible after filter')
+
+    console.log(`testProductFilter passed. ${productCount} product(s) in Electronics.`)
+  } finally {
+    await browser.stop()
+  }
+}
+
+async function testCartTotal() {
+  const browser = await vibium.start({ headless: false })
+  const context = await browser.newContext()
+  const page = await context.newPage()
+
+  try {
+    await page.go(`${AUT}/products/prod_001`)
+    const addToCart = await page.find({ role: 'button', text: 'Add to Cart' })
+    await addToCart.click()
+
+    await page.go(`${AUT}/cart`)
+
+    // wait for the cart summary to render
+    const summary = await page.find({ text: '1 item · 1 product' })
+    assert.ok(await summary.isVisible(), 'cart summary visible')
+
+    const subtotalEl = await page.find({ text: '$79.99' })
+    assert.ok(await subtotalEl.isVisible(), 'subtotal visible')
+
+    console.log('testCartTotal passed.')
+  } finally {
+    await browser.stop()
+  }
+}
+
+Promise.all([testProductFilter(), testCartTotal()])
+  .catch(err => { console.error('Test failed:', err.message); process.exit(1) })
+```

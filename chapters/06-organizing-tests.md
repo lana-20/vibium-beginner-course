@@ -444,3 +444,80 @@ Use `beforeEach`/`afterEach` for browser lifecycle. Every assertion must have a 
 - D. Run Vitest tests in parallel processes
 
 **Answers:** 1-B, 2-B, 3-B, 4-B, 5-C
+
+---
+
+## Solution
+
+```typescript
+// src/ch06-organizing-tests/pages/CartPage.ts
+import type { Page } from 'vibium'
+
+const AUT = process.env.AUT_BASE_URL || 'https://automation-exercise.daisyladybug.com'
+
+export class CartPage {
+  constructor(private page: Page) {}
+
+  async goto() {
+    await this.page.go(`${AUT}/cart`)
+  }
+
+  async getItemCount() {
+    const summary = await this.page.find('.cart-summary-count, [class*="count"]')
+    return summary.text()
+  }
+
+  async getSubtotal() {
+    const el = await this.page.find('[class*="subtotal"], [data-testid="subtotal"]')
+    return el.text()
+  }
+}
+```
+
+```typescript
+// src/ch06-organizing-tests/cart.test.ts
+import { browser as vibium } from 'vibium'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import type { Browser, Page } from 'vibium'
+import { ProductsPage } from './pages/ProductsPage'
+import { CartPage } from './pages/CartPage'
+
+const AUT = process.env.AUT_BASE_URL || 'https://automation-exercise.daisyladybug.com'
+
+let browser: Browser
+let page: Page
+
+beforeEach(async () => {
+  browser = await vibium.start({ headless: process.env.CI === 'true' })
+  const context = await browser.newContext()
+  page = await context.newPage()
+})
+
+afterEach(async () => {
+  await browser.stop()
+})
+
+describe('Products and Cart', () => {
+  it('searches and finds a product', async () => {
+    const products = new ProductsPage(page)
+    await products.goto()
+    await products.search('yoga')
+    const yogaMat = await page.find({ text: 'Yoga Mat' })
+    expect(await yogaMat.isVisible()).toBe(true)
+  })
+
+  it('adds a product and checks cart', async () => {
+    await page.go(`${AUT}/products/prod_001`)
+    const addBtn = await page.find({ role: 'button', text: 'Add to Cart' })
+    await addBtn.click()
+
+    const cart = new CartPage(page)
+    await cart.goto()
+    // wait for cart to render
+    const summary = await page.find({ text: '1 item' })
+    expect(await summary.isVisible()).toBe(true)
+  })
+})
+```
+
+> **Note on `getItemCount()` and `getSubtotal()`:** The exact selector for cart totals depends on the app's DOM structure. Use the Vibium CLI (`vibium find text "1 item"`) against the live cart page to find the exact element and update the selectors accordingly.

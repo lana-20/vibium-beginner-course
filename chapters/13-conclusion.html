@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Course Conclusion: What's Next — Vibium Course</title>
+  <link rel="icon" type="image/png" href="https://www.daisyladybug.com/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1a2a; --bg-dark: #0a1220; --card: #13243a; --card-dark: #0d1e30;
+      --off-white: #f5f0eb; --coral: #d4552a; --coral-light: #e8785a; --coral-dark: #a83e1e;
+      --mint: #4aa8a5; --mint-light: #9dbfb8; --gold: #b8862a; --gold-light: #d4a85a;
+      --violet: #7455bf; --violet-light: #9e85d4; --steel: #3d6abf; --steel-light: #7298d4;
+      --border: rgba(255,255,255,0.08); --border-mid: rgba(255,255,255,0.14);
+      --fg-2: rgba(245,240,235,0.65); --fg-3: rgba(245,240,235,0.38);
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body: 'Inter', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --r-md: 8px; --r-lg: 12px; --r-xl: 16px; --r-2xl: 24px;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--off-white); font-family: var(--font-body); -webkit-font-smoothing: antialiased; line-height: 1.6; }
+    a { text-decoration: none; color: inherit; }
+    .container { max-width: 760px; margin: 0 auto; padding: 0 32px; }
+
+    nav { border-bottom: 1px solid var(--border); background: rgba(15,26,42,0.92); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 50; }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 14px 32px; max-width: 1100px; margin: 0 auto; }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand img { width: 36px; height: 36px; object-fit: contain; }
+    .brand-text { font-family: var(--font-display); font-size: 17px; letter-spacing: -0.01em; }
+    .brand-text em { font-style: italic; color: var(--coral); }
+    .nav-chapters { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+    .nav-ch { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); padding: 5px 10px; border-radius: 999px; border: 1px solid transparent; transition: all 150ms; }
+    .nav-ch:hover { color: var(--off-white); border-color: var(--border-mid); }
+    .nav-ch.active { color: var(--coral-light); border-color: rgba(212,85,42,0.3); background: rgba(212,85,42,0.07); }
+
+    .hero { padding: 72px 0 56px; background: radial-gradient(ellipse at 70% 20%, rgba(212,85,42,0.18) 0%, transparent 55%), radial-gradient(ellipse at 15% 80%, rgba(74,168,165,0.12) 0%, transparent 55%), var(--bg-dark); }
+    .hero-inner { max-width: 760px; margin: 0 auto; padding: 0 32px; }
+    .hero-eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.26em; text-transform: uppercase; color: var(--coral-light); margin-bottom: 20px; }
+    .hero-title { font-family: var(--font-display); font-size: clamp(36px, 5vw, 60px); font-weight: 400; line-height: 1.05; letter-spacing: -0.025em; margin-bottom: 20px; }
+    .hero-title em { font-style: italic; color: var(--coral); }
+    .hero-desc { font-size: 16px; color: var(--fg-2); line-height: 1.7; max-width: 560px; margin-bottom: 32px; }
+    .hero-meta { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .meta-item { display: flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-3); }
+    .meta-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--coral); opacity: 0.7; }
+
+    .content { padding: 72px 0 88px; }
+    .section-block { padding: 48px 0; border-bottom: 1px solid var(--border); }
+    .section-block:last-child { border-bottom: none; }
+    .section-eyebrow { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--coral-light); margin-bottom: 14px; }
+    .section-heading { font-family: var(--font-display); font-size: clamp(24px, 3vw, 34px); font-weight: 400; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 24px; }
+    .section-heading em { font-style: italic; color: var(--coral); }
+    p { font-size: 16px; color: var(--fg-2); line-height: 1.75; margin-bottom: 18px; }
+    p:last-child { margin-bottom: 0; }
+    strong { color: var(--off-white); font-weight: 600; }
+    code.inline { font-family: var(--font-mono); font-size: 13px; background: rgba(255,255,255,0.06); border: 1px solid var(--border-mid); border-radius: 4px; padding: 1px 6px; color: var(--mint-light); }
+
+    .built-list { list-style: none; padding: 0; margin: 16px 0; display: flex; flex-direction: column; gap: 8px; }
+    .built-list li { font-size: 15px; color: var(--fg-2); line-height: 1.6; padding: 10px 14px; border: 1px solid var(--border); border-left: 3px solid var(--mint); border-radius: var(--r-lg); background: rgba(255,255,255,0.02); }
+
+    .pattern-list { list-style: none; padding: 0; margin: 16px 0; display: flex; flex-direction: column; gap: 16px; }
+    .pattern-item { padding: 16px 18px; background: var(--card); border: 1px solid var(--border); border-radius: var(--r-xl); }
+    .pattern-title { font-family: var(--font-mono); font-size: 12px; color: var(--coral-light); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+    .pattern-desc { font-size: 14px; color: var(--fg-2); line-height: 1.6; }
+
+    .next-steps { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 24px 0; }
+    @media (max-width: 600px) { .next-steps { grid-template-columns: 1fr; } }
+    .next-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r-xl); padding: 18px 20px; }
+    .next-num { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg-3); margin-bottom: 6px; }
+    .next-title { font-family: var(--font-display); font-size: 17px; margin-bottom: 8px; }
+    .next-desc { font-size: 13px; color: var(--fg-2); line-height: 1.5; }
+
+    .ch-nav { padding: 48px 0; border-top: 1px solid var(--border); background: var(--bg-dark); }
+    .ch-nav-inner { max-width: 760px; margin: 0 auto; padding: 0 32px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .ch-link { display: flex; flex-direction: column; gap: 4px; }
+    .ch-link-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--fg-3); }
+    .ch-link-title { font-family: var(--font-display); font-size: 17px; color: var(--coral-light); letter-spacing: -0.01em; transition: color 150ms; }
+    .ch-link:hover .ch-link-title { color: var(--coral); }
+
+    footer { background: var(--bg-dark); border-top: 1px solid var(--border); padding: 32px 0; }
+    .footer-inner { max-width: 760px; margin: 0 auto; padding: 0 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .footer-brand { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--fg-3); }
+    .footer-brand em { color: var(--coral-light); font-style: normal; }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); transition: color 150ms; }
+    .footer-links a:hover { color: var(--fg-2); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="https://www.daisyladybug.com/" class="brand">
+      <img src="https://www.daisyladybug.com/ldb-logo.webp" alt="Daisy Lady Bug" />
+      <div>
+        <div class="brand-text">Vibium <em>Beginner</em></div>
+      </div>
+    </a>
+    <div class="nav-chapters">
+      <a class="nav-ch" href="00-intro.html">Intro</a>
+      <a class="nav-ch" href="01-landscape.html">1</a>
+      <a class="nav-ch" href="02-architecture.html">2</a>
+      <a class="nav-ch" href="03-first-test.html">3</a>
+      <a class="nav-ch" href="04-forms.html">4</a>
+      <a class="nav-ch" href="05-assertions-waiting.html">5</a>
+      <a class="nav-ch" href="06-organizing-tests.html">6</a>
+      <a class="nav-ch" href="07-captures.html">7</a>
+      <a class="nav-ch" href="08-network.html">8</a>
+      <a class="nav-ch" href="09-ci-local.html">9</a>
+      <a class="nav-ch" href="10-ci-actions.html">10</a>
+      <a class="nav-ch" href="11-ci-docker.html">11</a>
+      <a class="nav-ch" href="12-mcp.html">12</a>
+      <a class="nav-ch active" href="13-conclusion.html">13</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Conclusion</div>
+    <h1 class="hero-title">What's <em>Next</em></h1>
+    <p class="hero-desc">You've finished the course. Here's what you built, the patterns to carry forward, and where to go from here.</p>
+    <div class="hero-meta">
+      <span class="meta-item"><span class="meta-dot"></span>No code</span>
+      <span class="meta-item"><span class="meta-dot"></span>~5 min</span>
+    </div>
+  </div>
+</section>
+
+<main class="content">
+  <div class="container">
+
+    <div class="section-block">
+      <div class="section-eyebrow">What you built</div>
+      <h2 class="section-heading">12 Chapters, One Complete <em>Suite</em></h2>
+      <ul class="built-list">
+        <li>A <strong>homepage smoke test</strong> with five assertions covering title, headings, product data, and navigation</li>
+        <li>A <strong>forms test</strong> using <code class="inline">fill()</code>, <code class="inline">selectOption()</code>, the <code class="inline">fieldMap</code> loop pattern, and <code class="inline">_waitForURL</code> for checkout</li>
+        <li>A <strong>dynamic state test</strong> that waits on DOM updates before asserting cart totals</li>
+        <li>A <strong>Vitest suite</strong> with Page Objects, <code class="inline">beforeEach</code>/<code class="inline">afterEach</code> lifecycle, and the <code class="inline">vibium.record()</code> integration</li>
+        <li><strong>Capture tests</strong> for dialogs, console output, and file downloads — all using the <code class="inline">Promise.all</code> fire-and-forget pattern</li>
+        <li><strong>Network intercept tests</strong> that stub responses, simulate 500 errors, and use partial intercepts for edge cases</li>
+        <li>A <strong>GitHub Actions workflow</strong> using a pre-baked Docker image, daemon lifecycle management, and verbose CI logging</li>
+        <li>An introduction to the <strong>MCP interface</strong> for agent-driven browser automation</li>
+      </ul>
+      <p>All of it runs against a real application. Every pattern you used here transfers directly to production test suites.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">Patterns to take with you</div>
+      <h2 class="section-heading">Five Patterns That <em>Travel</em></h2>
+      <p>These appear in almost every professional-grade test suite. Internalize them and the rest follows.</p>
+      <ul class="pattern-list">
+        <li class="pattern-item">
+          <div class="pattern-title">Wait for the observable outcome, then assert</div>
+          <div class="pattern-desc">Never assert immediately after an action that causes a DOM change. Insert <code class="inline">page.find({ text })</code> or <code class="inline">page._waitForURL()</code> first. This eliminates the most common source of test flakiness.</div>
+        </li>
+        <li class="pattern-item">
+          <div class="pattern-title">Try/finally for cleanup</div>
+          <div class="pattern-desc"><code class="inline">browser.stop()</code> belongs in <code class="inline">finally</code>, always. In Vitest, <code class="inline">afterEach</code> serves the same role. Tests that don't clean up leave state that breaks other tests in ways that are very hard to diagnose.</div>
+        </li>
+        <li class="pattern-item">
+          <div class="pattern-title">Page Objects for selectors</div>
+          <div class="pattern-desc">Selectors change. Tests shouldn't. Centralizing selectors in a Page Object class means a CSS class rename requires one edit, not a grep-and-replace across 40 test files.</div>
+        </li>
+        <li class="pattern-item">
+          <div class="pattern-title">Promise.all for captures</div>
+          <div class="pattern-desc">Register the capture before the action that fires it. The fire-and-forget click inside <code class="inline">Promise.all</code> is the only reliable way to handle dialogs, console, and downloads. Any other pattern creates a deadlock.</div>
+        </li>
+        <li class="pattern-item">
+          <div class="pattern-title">Recordings for CI failures</div>
+          <div class="pattern-desc">When a test passes locally and fails in CI, you cannot diagnose it from a stack trace alone. A recording gives you the DOM state at every step. This is the difference between a 10-minute fix and a two-hour debugging session.</div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">What to do next</div>
+      <h2 class="section-heading">Where to Go <em>From Here</em></h2>
+      <div class="next-steps">
+        <div class="next-card">
+          <div class="next-num">Next step 1</div>
+          <div class="next-title">Practice on a real app</div>
+          <div class="next-desc">Find an app you use and write 5 tests: smoke test, form submission, search, negative case, and one with dynamic DOM updates.</div>
+        </div>
+        <div class="next-card">
+          <div class="next-num">Next step 2</div>
+          <div class="next-title">Read the Vibium docs</div>
+          <div class="next-desc">This course covers the most common patterns but not the full API. Spend an hour with network interception, context options, and the CLI reference.</div>
+        </div>
+        <div class="next-card">
+          <div class="next-num">Next step 3</div>
+          <div class="next-title">Learn Playwright</div>
+          <div class="next-desc">Vibium and Playwright share architectural concepts. If you understand Vibium, picking up Playwright is straightforward. Many teams use both.</div>
+        </div>
+        <div class="next-card">
+          <div class="next-num">Next step 4</div>
+          <div class="next-title">Explore the MCP interface</div>
+          <div class="next-desc">Chapter 12 scratched the surface. The real power is building agent workflows where an agent runs a test, reads the failure, adjusts, and re-tests.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">A note on the tools</div>
+      <h2 class="section-heading">The Fundamentals <em>Last</em></h2>
+      <p>Vibium is a young project. APIs will evolve, new features will appear, and patterns that are idiomatic today may be superseded by better ones. The fundamentals — wait for observable state, keep tests atomic, separate data from logic — are stable across all tools and versions. Those are worth more than any specific API.</p>
+      <p>If something in this course no longer works as described, check the Vibium changelog. If you find a discrepancy, the course repository has an issues page. Good luck, and thank you for taking this course.</p>
+    </div>
+
+  </div>
+</main>
+
+<div class="ch-nav">
+  <div class="ch-nav-inner">
+    <a class="ch-link" href="12-mcp.html">
+      <span class="ch-link-label">← Chapter 12</span>
+      <span class="ch-link-title">Introduction to MCP</span>
+    </a>
+    <a class="ch-link next" href="../reference/cheat-sheet.html">
+      <span class="ch-link-label">Reference</span>
+      <span class="ch-link-title">API Cheat Sheet →</span>
+    </a>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">Vibium Beginner Course · <em>A Daisy Lady Bug course</em></div>
+    <div class="footer-links">
+      <a href="https://www.daisyladybug.com/">daisyladybug.com</a>
+      <a href="https://automation-exercise.daisyladybug.com/">AUT</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

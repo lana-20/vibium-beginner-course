@@ -270,4 +270,92 @@ Then write a **second test** called `testValidationErrors` (separate function, s
 
 **Answers:** 1-B, 2-D, 3-C, 4-C, 5-B
 
+---
+
+## Solution
+
+```typescript
+import { browser as vibium } from 'vibium'
+import assert from 'node:assert/strict'
+
+const AUT = 'https://automation-exercise.daisyladybug.com'
+
+const fieldMap: Record<string, string> = {
+  firstName: 'Alex', lastName: 'Rivera', email: 'alex@test.com',
+  phone: '5559876543', address: '789 Pine St', city: 'Seattle',
+  state: 'WA', zipCode: '98101', cardName: 'Alex Rivera',
+  cardNumber: '4111111111111111', cardExpiry: '06/27', cardCvc: '123',
+}
+
+async function testSearchAndCheckout() {
+  const browser = await vibium.start({ headless: false })
+  const context = await browser.newContext()
+  const page = await context.newPage()
+
+  try {
+    await page.go(`${AUT}/products`)
+    const search = await page.find("input[placeholder='Search products...']")
+    await search.fill('yoga')
+
+    const yogaMat = await page.find({ text: 'Yoga Mat' })
+    assert.ok(await yogaMat.isVisible(), 'Yoga Mat visible after search')
+
+    // Assert Wireless Headphones is not in filtered results
+    const filteredCount = (await page.findAll('a[href*="/products/prod_"]')).length
+    assert.ok(filteredCount < 12, 'search narrowed results from 12')
+
+    await page.go(`${AUT}/products/prod_007`)
+    const addToCart = await page.find({ role: 'button', text: 'Add to Cart' })
+    await addToCart.click()
+
+    await page.go(`${AUT}/checkout`)
+    for (const [name, value] of Object.entries(fieldMap)) {
+      const field = await page.find(`input[name=${name}]`)
+      await field.fill(value)
+    }
+
+    const submit = await page.find({ role: 'button', text: 'Place Order' })
+    await submit.click()
+    await page._waitForURL('**/confirmation')
+    assert.ok((await page.url()).includes('/confirmation'), 'reached confirmation page')
+
+    console.log('testSearchAndCheckout passed.')
+  } finally {
+    await browser.stop()
+  }
+}
+
+async function testValidationErrors() {
+  const browser = await vibium.start({ headless: false })
+  const context = await browser.newContext()
+  const page = await context.newPage()
+
+  try {
+    await page.go(`${AUT}/products/prod_001`)
+    const addToCart = await page.find({ role: 'button', text: 'Add to Cart' })
+    await addToCart.click()
+
+    await page.go(`${AUT}/checkout`)
+    const submit = await page.find({ role: 'button', text: 'Place Order' })
+    await submit.click()
+
+    const firstError = await page.find({ text: '✗ First name required' })
+    assert.ok(await firstError.isVisible(), 'first name error visible')
+
+    const emailError = await page.find({ text: '✗ Valid email required' })
+    assert.ok(await emailError.isVisible(), 'email error visible')
+
+    const cardError = await page.find({ text: '✗ Valid card number required' })
+    assert.ok(await cardError.isVisible(), 'card number error visible')
+
+    console.log('testValidationErrors passed.')
+  } finally {
+    await browser.stop()
+  }
+}
+
+Promise.all([testSearchAndCheckout(), testValidationErrors()])
+  .catch(err => { console.error('Test failed:', err.message); process.exit(1) })
+```
+
 In the next chapter, we'll look much more closely at assertions and waiting — specifically how to assert on dynamic state like cart totals that update after you interact with the page.

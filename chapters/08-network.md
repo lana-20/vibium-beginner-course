@@ -247,3 +247,100 @@ Write three separate test functions that use `page.route()`:
 - D. It works without a real server being configured at all
 
 **Answers:** 1-B, 2-B, 3-C, 4-B, 5-B
+
+---
+
+## Solution
+
+```typescript
+import { browser as vibium } from 'vibium'
+import assert from 'node:assert/strict'
+
+const AUT = 'https://automation-exercise.daisyladybug.com'
+
+async function testEmptyProducts() {
+  const browser = await vibium.start({ headless: false })
+  const context = await browser.newContext()
+  const page = await context.newPage()
+
+  try {
+    await page.route('**/api/products*', async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([]),
+      })
+    })
+
+    await page.go(`${AUT}/products`)
+
+    const count = (await page.findAll('a[href*="/products/prod_"]')).length
+    assert.equal(count, 0, 'no products when API returns empty array')
+
+    console.log('testEmptyProducts passed.')
+  } finally {
+    await browser.stop()
+  }
+}
+
+async function testServerError() {
+  const browser = await vibium.start({ headless: false })
+  const context = await browser.newContext()
+  const page = await context.newPage()
+
+  try {
+    await page.route('**/api/products*', async route => {
+      await route.fulfill({
+        status: 500,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'Internal Server Error' }),
+      })
+    })
+
+    await page.go(`${AUT}/products`)
+
+    // The app should render some kind of error state or empty state
+    const count = (await page.findAll('a[href*="/products/prod_"]')).length
+    assert.equal(count, 0, 'no products shown on server error')
+
+    console.log('testServerError passed.')
+  } finally {
+    await browser.stop()
+  }
+}
+
+async function testPartialIntercept() {
+  const browser = await vibium.start({ headless: false })
+  const context = await browser.newContext()
+  const page = await context.newPage()
+
+  try {
+    await page.route('**/*', async route => {
+      if (route.request().url().includes('/api/products')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify([{ id: 'prod_stub', name: 'Stubbed Product', price: 1 }]),
+        })
+      } else {
+        await route.continue()
+      }
+    })
+
+    await page.go(`${AUT}/products`)
+
+    const stubbed = await page.find({ text: 'Stubbed Product' })
+    assert.ok(await stubbed.isVisible(), 'stubbed product visible')
+
+    const realCount = (await page.findAll('a[href*="/products/prod_"]')).length
+    assert.equal(realCount, 1, 'only stubbed product present, not real ones')
+
+    console.log('testPartialIntercept passed.')
+  } finally {
+    await browser.stop()
+  }
+}
+
+Promise.all([testEmptyProducts(), testServerError(), testPartialIntercept()])
+  .catch(err => { console.error('Test failed:', err.message); process.exit(1) })
+```

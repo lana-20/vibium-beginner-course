@@ -348,3 +348,67 @@ Then introduce a deliberate failure in one assertion â€” wrong expected value â€
 - D. Open a visible browser window on your screen
 
 **Answers:** 1-B, 2-C, 3-D, 4-B, 5-D
+
+---
+
+## Solution
+
+```typescript
+import { browser as vibium } from 'vibium'
+import assert from 'node:assert/strict'
+
+const AUT = 'https://automation-exercise.daisyladybug.com'
+
+async function testProductsPage() {
+  const browser = await vibium.start({ headless: false })
+  const context = await browser.newContext()
+  const page = await context.newPage()
+
+  try {
+    await page.go(`${AUT}/products`)
+
+    assert.equal(
+      await page.title(),
+      'automation-exercise | E-commerce Testing Sandbox',
+      'page title'
+    )
+
+    const heading = await page.find({ role: 'heading', text: 'Products' })
+    assert.ok(await heading.isVisible(), 'Products heading visible')
+
+    const product = await page.find({ text: 'Wireless Headphones' })
+    assert.ok(await product.isVisible(), 'product name visible')
+
+    const search = await page.find("input[placeholder='Search products...']")
+    assert.ok(await search.isEnabled(), 'search input enabled')
+
+    const category = await page.find('select:first-of-type')
+    assert.ok(await category.isVisible(), 'category select visible')
+
+    console.log('All assertions passed.')
+  } finally {
+    await browser.stop()
+  }
+}
+
+testProductsPage().catch(err => {
+  console.error('Test failed:', err.message)
+  process.exit(1)
+})
+```
+
+To see a deliberate failure, change the title assertion to:
+```typescript
+assert.equal(await page.title(), 'wrong title', 'page title')
+```
+
+The output will be:
+```
+Test failed: Expected values to be strictly equal:
++ actual - expected
+
++ 'automation-exercise | E-commerce Testing Sandbox'
+- 'wrong title'
+```
+
+The label `'page title'` tells you which assertion failed. The `+` line is what you got; the `-` line is what you expected.

@@ -277,3 +277,50 @@ Expected terminal output: the homepage title, the Products href, the products UR
 - D. It prevents the daemon from restarting
 
 **Answers:** 1-C, 2-C, 3-C, 4-D, 5-B
+
+---
+
+## Solution
+
+```typescript
+import { browser as vibium } from 'vibium'
+
+const AUT = 'https://automation-exercise.daisyladybug.com'
+
+async function main() {
+  const browser = await vibium.start({ headless: false })
+  const context = await browser.newContext()
+  const page = await context.newPage()
+
+  try {
+    // Level 1: Browser — created above
+    // Level 2: Context — created above
+    // Level 3: Page
+    await page.go(AUT)
+    console.log('Title:', await page.title())
+
+    // Level 4: Element
+    const productsLink = await page.find({ role: 'link', text: 'Products' })
+    console.log('Products href:', await productsLink.attr('href'))
+
+    await productsLink.click()
+    await page._waitForURL('**/products')
+    console.log('URL:', await page.url())
+
+    const firstProduct = await page.find('a[href*="/products/prod_"]')
+    console.log('First product:', await firstProduct.text())
+  } finally {
+    await browser.stop()
+  }
+}
+
+main()
+```
+
+Expected terminal output:
+```
+Title: automation-exercise | E-commerce Testing Sandbox
+Products href: /products
+URL: https://automation-exercise.daisyladybug.com/products
+First product: Wireless Headphones
+```

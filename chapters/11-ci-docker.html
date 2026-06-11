@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chapter 11: The Docker CI Image — Vibium Course</title>
+  <link rel="icon" type="image/png" href="https://www.daisyladybug.com/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1a2a; --bg-dark: #0a1220; --card: #13243a; --card-dark: #0d1e30;
+      --off-white: #f5f0eb; --coral: #d4552a; --coral-light: #e8785a; --coral-dark: #a83e1e;
+      --mint: #4aa8a5; --mint-light: #9dbfb8; --gold: #b8862a; --gold-light: #d4a85a;
+      --violet: #7455bf; --violet-light: #9e85d4; --steel: #3d6abf; --steel-light: #7298d4;
+      --border: rgba(255,255,255,0.08); --border-mid: rgba(255,255,255,0.14);
+      --fg-2: rgba(245,240,235,0.65); --fg-3: rgba(245,240,235,0.38);
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body: 'Inter', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --r-md: 8px; --r-lg: 12px; --r-xl: 16px; --r-2xl: 24px;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--off-white); font-family: var(--font-body); -webkit-font-smoothing: antialiased; line-height: 1.6; }
+    a { text-decoration: none; color: inherit; }
+    .container { max-width: 760px; margin: 0 auto; padding: 0 32px; }
+    nav { border-bottom: 1px solid var(--border); background: rgba(15,26,42,0.92); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 50; }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 14px 32px; max-width: 1100px; margin: 0 auto; }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand img { width: 36px; height: 36px; object-fit: contain; }
+    .brand-text { font-family: var(--font-display); font-size: 17px; letter-spacing: -0.01em; }
+    .brand-text em { font-style: italic; color: var(--coral); }
+    .nav-chapters { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+    .nav-ch { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); padding: 5px 10px; border-radius: 999px; border: 1px solid transparent; transition: all 150ms; }
+    .nav-ch:hover { color: var(--off-white); border-color: var(--border-mid); }
+    .nav-ch.active { color: var(--coral-light); border-color: rgba(212,85,42,0.3); background: rgba(212,85,42,0.07); }
+    .hero { padding: 72px 0 56px; background: radial-gradient(ellipse at 70% 20%, rgba(212,85,42,0.18) 0%, transparent 55%), radial-gradient(ellipse at 15% 80%, rgba(74,168,165,0.12) 0%, transparent 55%), var(--bg-dark); }
+    .hero-inner { max-width: 760px; margin: 0 auto; padding: 0 32px; }
+    .hero-eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.26em; text-transform: uppercase; color: var(--coral-light); margin-bottom: 20px; }
+    .hero-title { font-family: var(--font-display); font-size: clamp(36px, 5vw, 60px); font-weight: 400; line-height: 1.05; letter-spacing: -0.025em; margin-bottom: 20px; }
+    .hero-title em { font-style: italic; color: var(--coral); }
+    .hero-desc { font-size: 16px; color: var(--fg-2); line-height: 1.7; max-width: 560px; margin-bottom: 32px; }
+    .hero-meta { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .meta-item { display: flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-3); }
+    .meta-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--coral); opacity: 0.7; }
+    .content { padding: 72px 0 88px; }
+    .section-block { padding: 48px 0; border-bottom: 1px solid var(--border); }
+    .section-block:last-child { border-bottom: none; }
+    .section-eyebrow { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--coral-light); margin-bottom: 14px; }
+    .section-heading { font-family: var(--font-display); font-size: clamp(24px, 3vw, 34px); font-weight: 400; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 24px; }
+    .section-heading em { font-style: italic; color: var(--coral); }
+    p { font-size: 16px; color: var(--fg-2); line-height: 1.75; margin-bottom: 18px; }
+    p:last-child { margin-bottom: 0; }
+    strong { color: var(--off-white); font-weight: 600; }
+    code.inline { font-family: var(--font-mono); font-size: 13px; background: rgba(255,255,255,0.06); border: 1px solid var(--border-mid); border-radius: 4px; padding: 1px 6px; color: var(--mint-light); }
+    .code-panel { background: var(--card); border: 1px solid var(--border-mid); border-radius: var(--r-xl); overflow: hidden; margin: 28px 0; box-shadow: 0 16px 48px rgba(0,0,0,0.35); }
+    .code-bar { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02); }
+    .cd { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
+    .cd.r { background: #ff5f57; } .cd.y { background: #febc2e; } .cd.g { background: #28c840; }
+    .code-file { margin-left: 8px; font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); }
+    .code-file em { color: var(--coral-light); font-style: normal; }
+    .code-body { padding: 20px 22px; overflow-x: auto; }
+    pre { font-family: var(--font-mono); font-size: 13px; line-height: 1.85; white-space: pre; color: var(--fg-2); }
+    .callout { background: rgba(74,168,165,0.07); border: 1px solid rgba(74,168,165,0.22); border-radius: var(--r-lg); padding: 16px 20px; margin: 24px 0; }
+    .callout p { font-size: 14px; color: var(--fg-2); margin: 0; }
+    .callout strong { color: var(--mint-light); }
+    .ch-nav { padding: 48px 0; border-top: 1px solid var(--border); background: var(--bg-dark); }
+    .ch-nav-inner { max-width: 760px; margin: 0 auto; padding: 0 32px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .ch-link { display: flex; flex-direction: column; gap: 4px; }
+    .ch-link-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--fg-3); }
+    .ch-link-title { font-family: var(--font-display); font-size: 17px; color: var(--coral-light); letter-spacing: -0.01em; transition: color 150ms; }
+    .ch-link:hover .ch-link-title { color: var(--coral); }
+    .ch-link.next { text-align: right; }
+    footer { background: var(--bg-dark); border-top: 1px solid var(--border); padding: 32px 0; }
+    .footer-inner { max-width: 760px; margin: 0 auto; padding: 0 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .footer-brand { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--fg-3); }
+    .footer-brand em { color: var(--coral-light); font-style: normal; }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); transition: color 150ms; }
+    .footer-links a:hover { color: var(--fg-2); }
+    .exercise-block, .quiz-block { background: rgba(255,255,255,0.03); border: 1px solid var(--border-mid); border-radius: var(--r-xl); padding: 28px 32px; margin: 32px 0 0; }
+    .exercise-block { border-left: 3px solid var(--mint); }
+    .quiz-block { border-left: 3px solid var(--coral); }
+    .block-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 14px; }
+    .exercise-block .block-label { color: var(--mint-light); }
+    .quiz-block .block-label { color: var(--coral-light); }
+    .block-title { font-family: var(--font-display); font-size: 20px; font-weight: 400; letter-spacing: -0.01em; margin-bottom: 16px; }
+    .quiz-q { margin-bottom: 22px; }
+    .quiz-q p { margin-bottom: 8px; }
+    .quiz-opts { list-style: none; padding: 0; margin: 0 0 4px; display: flex; flex-direction: column; gap: 6px; }
+    .quiz-opts li { font-size: 14px; color: var(--fg-2); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); }
+    .quiz-answers { font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .exercise-block ol, .exercise-block ul { padding-left: 22px; margin: 8px 0 12px; }
+    .exercise-block li { font-size: 15px; color: var(--fg-2); line-height: 1.6; margin-bottom: 6px; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="https://www.daisyladybug.com/" class="brand">
+      <img src="https://www.daisyladybug.com/ldb-logo.webp" alt="Daisy Lady Bug" />
+      <div><div class="brand-text">Vibium <em>Beginner</em></div></div>
+    </a>
+    <div class="nav-chapters">
+      <a class="nav-ch" href="00-intro.html">Intro</a>
+      <a class="nav-ch" href="01-landscape.html">1</a>
+      <a class="nav-ch" href="02-architecture.html">2</a>
+      <a class="nav-ch" href="03-first-test.html">3</a>
+      <a class="nav-ch" href="04-forms.html">4</a>
+      <a class="nav-ch" href="05-assertions-waiting.html">5</a>
+      <a class="nav-ch" href="06-organizing-tests.html">6</a>
+      <a class="nav-ch" href="07-captures.html">7</a>
+      <a class="nav-ch" href="08-network.html">8</a>
+      <a class="nav-ch" href="09-ci-local.html">9</a>
+      <a class="nav-ch" href="10-ci-actions.html">10</a>
+      <a class="nav-ch active" href="11-ci-docker.html">11</a>
+      <a class="nav-ch" href="12-mcp.html">12</a>
+      <a class="nav-ch" href="13-conclusion.html">13</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Chapter 11</div>
+    <h1 class="hero-title">The <em>Docker</em> CI Image</h1>
+    <p class="hero-desc">What the pre-baked CI image is, why it exists, how to build your own, and how to keep it synchronized with your workflow.</p>
+    <div class="hero-meta">
+      <span class="meta-item"><span class="meta-dot"></span>Docker</span>
+      <span class="meta-item"><span class="meta-dot"></span>YAML</span>
+      <span class="meta-item"><span class="meta-dot"></span>~20 min</span>
+    </div>
+  </div>
+</section>
+
+<main class="content">
+  <div class="container">
+
+    <div class="section-block">
+      <div class="section-eyebrow">11.1</div>
+      <h2 class="section-heading">Why a Pre-Baked <em>Image</em></h2>
+      <p>The standard GitHub Actions approach downloads Chrome on every run — around 300 MB each time, costing 20–30 seconds per workflow run. Multiply that by dozens of runs per day and it adds up.</p>
+      <p>The better approach: build a Docker image with Chrome already inside it, push it to a registry, and point your workflow at that image. Chrome is always there, ready immediately. The download cost is paid once, at image build time, not on every test run.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">11.2</div>
+      <h2 class="section-heading">The <em>Dockerfile</em></h2>
+      <p>This is <code class="inline">Dockerfile.ci</code> at the root of the course repository:</p>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">Dockerfile.ci</span></div>
+        <div class="code-body"><pre>FROM node:20-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 \
+    libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 \
+    libxrandr2 libgbm1 libasound2 libnspr4 libnss3 \
+    libcairo2 libpango-1.0-0 libpangocairo-1.0-0 \
+    libx11-6 libx11-xcb1 libxcb1 libxcursor1 libxext6 \
+    libxi6 libxrender1 libxtst6 libdbus-1-3 \
+    fonts-liberation ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN npm install -g vibium && vibium install
+
+RUN CHROME=$(find /root/.cache/vibium -name "chrome" -not -name "chromedriver" | head -1) \
+    && mv "$CHROME" "${CHROME}.real" \
+    && printf '#!/bin/sh\nexec "%s.real" --no-sandbox --disable-dev-shm-usage "$@"\n' "$CHROME" > "$CHROME" \
+    && chmod +x "$CHROME"
+
+ENV HOME=/root</pre></div>
+      </div>
+      <p><strong>The <code class="inline">apt-get install</code> block</strong> installs the system libraries Chrome needs. The non-obvious one is <code class="inline">libcairo2</code> — Chrome uses Cairo for 2D rendering even in headless mode. If it's missing, Chrome exits immediately with exit code 1 and no output, a silent failure that's hard to diagnose.</p>
+      <p><strong>The three-line RUN block</strong> creates a wrapper script around the real Chrome binary. Two flags are required for Linux CI containers: <code class="inline">--no-sandbox</code> bypasses AppArmor process sandboxing, and <code class="inline">--disable-dev-shm-usage</code> tells Chrome to use <code class="inline">/tmp</code> instead of the 64 MB Docker shared memory limit. Vibium launches Chrome by path — it finds the wrapper, which injects both flags before passing arguments through.</p>
+      <p><strong><code class="inline">ENV HOME=/root</code></strong> bakes the environment variable into the image so Node.js's <code class="inline">os.homedir()</code> returns <code class="inline">/root</code> where Chrome was downloaded.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">11.3</div>
+      <h2 class="section-heading">Publishing the <em>Image</em></h2>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">terminal</span></div>
+        <div class="code-body"><pre># Authenticate
+echo $GITHUB_TOKEN | docker login ghcr.io -u YOUR_USERNAME --password-stdin
+
+# Build and push
+docker build -f Dockerfile.ci -t ghcr.io/YOUR_USERNAME/vibium-ci:latest .
+docker push ghcr.io/YOUR_USERNAME/vibium-ci:latest</pre></div>
+      </div>
+      <p>Update your workflow's <code class="inline">container:</code> key to reference your image instead of <code class="inline">ghcr.io/lana-20/vibium-ci:latest</code>.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">11.4</div>
+      <h2 class="section-heading">Auto-Rebuilding the <em>Image</em></h2>
+      <p>A second workflow rebuilds and republishes the image whenever <code class="inline">Dockerfile.ci</code> changes:</p>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">.github/workflows/build-ci-image.yml</span></div>
+        <div class="code-body"><pre>name: Build CI image
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - Dockerfile.ci
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.ci
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/vibium-ci:latest</pre></div>
+      </div>
+      <p>The <code class="inline">paths:</code> filter means this workflow only runs when <code class="inline">Dockerfile.ci</code> actually changes — not on every push. Update the Dockerfile, push, and the next test workflow run automatically picks up the new image.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">11.5</div>
+      <h2 class="section-heading">The Full <em>CI Loop</em></h2>
+      <p>At this point your CI setup has three synchronized parts:</p>
+      <p><strong>1. <code class="inline">Dockerfile.ci</code></strong> — defines the environment. Add a system dependency here and push.</p>
+      <p><strong>2. <code class="inline">build-ci-image.yml</code></strong> — rebuilds the image when the Dockerfile changes.</p>
+      <p><strong>3. <code class="inline">tests.yml</code></strong> — runs your tests on every push, using the pre-built image.</p>
+      <p>The image and the workflow are independent concerns — updating your Node.js version in the test workflow doesn't require rebuilding the image, and adding a system library to the Dockerfile doesn't require changing the test workflow.</p>
+
+      <div class="exercise-block">
+        <div class="block-label">Exercise</div>
+        <p class="block-title">Build and Publish Your Own CI Image</p>
+        <ol>
+          <li>Copy <code class="inline">Dockerfile.ci</code> from the course repository into your project root</li>
+          <li>Build the image locally: <code class="inline">docker build -f Dockerfile.ci -t ghcr.io/YOUR_USERNAME/vibium-ci:latest .</code></li>
+          <li>Authenticate with GHCR and push: <code class="inline">docker push ghcr.io/YOUR_USERNAME/vibium-ci:latest</code></li>
+          <li>Update your <code class="inline">tests.yml</code> to reference your image</li>
+          <li>Push and confirm the workflow runs using your image (check "Set up job" in the Actions log)</li>
+          <li>Create <code class="inline">.github/workflows/build-ci-image.yml</code> so future Dockerfile changes auto-rebuild</li>
+        </ol>
+      </div>
+
+      <div class="quiz-block">
+        <div class="block-label">Quiz</div>
+        <p class="block-title">5 Questions</p>
+
+        <div class="quiz-q">
+          <p><strong>1.</strong> The primary reason for using a pre-baked Docker image is:</p>
+          <ul class="quiz-opts">
+            <li>A. Docker images are faster than bare runners</li>
+            <li>B. Chrome is already inside the image, eliminating the ~300 MB download and 20–30 second setup cost on every run</li>
+            <li>C. Docker containers provide better test isolation than bare runners</li>
+            <li>D. The GitHub Container Registry is faster than other registries</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>2.</strong> <code class="inline">--no-sandbox</code> is required in the Docker CI image because:</p>
+          <ul class="quiz-opts">
+            <li>A. Chrome always requires --no-sandbox on Linux</li>
+            <li>B. AppArmor on Ubuntu CI runners blocks Chrome's process sandbox</li>
+            <li>C. Docker containers don't support sandboxed processes</li>
+            <li>D. The Vibium CLI requires it</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>3.</strong> The Chrome wrapper script approach is used because:</p>
+          <ul class="quiz-opts">
+            <li>A. It is the only way to set environment variables for Chrome</li>
+            <li>B. Vibium launches Chrome by binary path; the wrapper intercepts that path and injects required flags before passing arguments through</li>
+            <li>C. Docker requires wrapper scripts for any binary that opens network connections</li>
+            <li>D. It prevents Chrome from writing to /dev/shm</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>4.</strong> <code class="inline">ENV HOME=/root</code> in the Dockerfile is needed because:</p>
+          <ul class="quiz-opts">
+            <li>A. Root is the only user permitted to run Chrome</li>
+            <li>B. Node.js uses os.homedir() to locate the Vibium Chrome cache; the variable must point to /root where vibium install placed it</li>
+            <li>C. The daemon writes PID files to $HOME</li>
+            <li>D. GitHub Actions containers reset HOME to an empty value</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>5.</strong> The <code class="inline">paths: [Dockerfile.ci]</code> filter on the image rebuild workflow means:</p>
+          <ul class="quiz-opts">
+            <li>A. The workflow only runs on changes to files inside the Docker build context</li>
+            <li>B. The workflow runs only when Dockerfile.ci itself changes, not on every push</li>
+            <li>C. The workflow ignores changes to all other files in the repo</li>
+            <li>D. Docker builds only include files matching the path filter</li>
+          </ul>
+        </div>
+
+        <div class="quiz-answers">Answers: 1-B &nbsp; 2-B &nbsp; 3-B &nbsp; 4-B &nbsp; 5-B</div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<div class="ch-nav">
+  <div class="ch-nav-inner">
+    <a class="ch-link" href="10-ci-actions.html">
+      <span class="ch-link-label">← Chapter 10</span>
+      <span class="ch-link-title">GitHub Actions Workflow</span>
+    </a>
+    <a class="ch-link next" href="12-mcp.html">
+      <span class="ch-link-label">Next — Chapter 12</span>
+      <span class="ch-link-title">Introduction to MCP →</span>
+    </a>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">Vibium Beginner Course · <em>A Daisy Lady Bug course</em></div>
+    <div class="footer-links">
+      <a href="https://www.daisyladybug.com/">daisyladybug.com</a>
+      <a href="https://automation-exercise.daisyladybug.com/">AUT</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -118,3 +118,17 @@ There's no code to write here. The goal is to connect the landscape you just rea
 - D. Delegates to Selenium for non-Chromium browsers
 
 **Answers:** 1-C, 2-B, 3-C, 4-D, 5-B
+
+---
+
+## Solution
+
+This exercise has no code to run — it's a research task. A strong response includes:
+
+1. **Tools appearing most often:** Selenium and Playwright appear in the majority of senior QA and automation engineer postings. Playwright has been gaining ground in new job listings since 2023.
+
+2. **Tool not mentioned:** Vibium is unlikely to appear in job postings yet — it's a newer entrant. That's expected and not a problem: the patterns you learn with Vibium (async/await, role-based locators, network interception, CI integration) are directly transferable to Playwright and Selenium.
+
+3. **CI tool:** If the posting mentions GitHub Actions, GitLab CI, or Jenkins alongside Playwright or Selenium, the test suite almost certainly runs headlessly on push. Keywords like "flaky tests," "test parallelism," or "Allure reports" confirm a mature CI setup.
+
+Come back to your notes at the end of the course and see whether the landscape looks different from your perspective.

@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chapter 9: CI Basics — Vibium Course</title>
+  <link rel="icon" type="image/png" href="https://www.daisyladybug.com/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1a2a; --bg-dark: #0a1220; --card: #13243a; --card-dark: #0d1e30;
+      --off-white: #f5f0eb; --coral: #d4552a; --coral-light: #e8785a; --coral-dark: #a83e1e;
+      --mint: #4aa8a5; --mint-light: #9dbfb8; --gold: #b8862a; --gold-light: #d4a85a;
+      --violet: #7455bf; --violet-light: #9e85d4; --steel: #3d6abf; --steel-light: #7298d4;
+      --border: rgba(255,255,255,0.08); --border-mid: rgba(255,255,255,0.14);
+      --fg-2: rgba(245,240,235,0.65); --fg-3: rgba(245,240,235,0.38);
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body: 'Inter', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --r-md: 8px; --r-lg: 12px; --r-xl: 16px; --r-2xl: 24px;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--off-white); font-family: var(--font-body); -webkit-font-smoothing: antialiased; line-height: 1.6; }
+    a { text-decoration: none; color: inherit; }
+    .container { max-width: 760px; margin: 0 auto; padding: 0 32px; }
+    nav { border-bottom: 1px solid var(--border); background: rgba(15,26,42,0.92); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 50; }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 14px 32px; max-width: 1100px; margin: 0 auto; }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand img { width: 36px; height: 36px; object-fit: contain; }
+    .brand-text { font-family: var(--font-display); font-size: 17px; letter-spacing: -0.01em; }
+    .brand-text em { font-style: italic; color: var(--coral); }
+    .nav-chapters { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+    .nav-ch { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); padding: 5px 10px; border-radius: 999px; border: 1px solid transparent; transition: all 150ms; }
+    .nav-ch:hover { color: var(--off-white); border-color: var(--border-mid); }
+    .nav-ch.active { color: var(--coral-light); border-color: rgba(212,85,42,0.3); background: rgba(212,85,42,0.07); }
+    .hero { padding: 72px 0 56px; background: radial-gradient(ellipse at 70% 20%, rgba(212,85,42,0.18) 0%, transparent 55%), radial-gradient(ellipse at 15% 80%, rgba(74,168,165,0.12) 0%, transparent 55%), var(--bg-dark); }
+    .hero-inner { max-width: 760px; margin: 0 auto; padding: 0 32px; }
+    .hero-eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.26em; text-transform: uppercase; color: var(--coral-light); margin-bottom: 20px; }
+    .hero-title { font-family: var(--font-display); font-size: clamp(36px, 5vw, 60px); font-weight: 400; line-height: 1.05; letter-spacing: -0.025em; margin-bottom: 20px; }
+    .hero-title em { font-style: italic; color: var(--coral); }
+    .hero-desc { font-size: 16px; color: var(--fg-2); line-height: 1.7; max-width: 560px; margin-bottom: 32px; }
+    .hero-meta { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .meta-item { display: flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-3); }
+    .meta-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--coral); opacity: 0.7; }
+    .content { padding: 72px 0 88px; }
+    .section-block { padding: 48px 0; border-bottom: 1px solid var(--border); }
+    .section-block:last-child { border-bottom: none; }
+    .section-eyebrow { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--coral-light); margin-bottom: 14px; }
+    .section-heading { font-family: var(--font-display); font-size: clamp(24px, 3vw, 34px); font-weight: 400; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 24px; }
+    .section-heading em { font-style: italic; color: var(--coral); }
+    p { font-size: 16px; color: var(--fg-2); line-height: 1.75; margin-bottom: 18px; }
+    p:last-child { margin-bottom: 0; }
+    strong { color: var(--off-white); font-weight: 600; }
+    code.inline { font-family: var(--font-mono); font-size: 13px; background: rgba(255,255,255,0.06); border: 1px solid var(--border-mid); border-radius: 4px; padding: 1px 6px; color: var(--mint-light); }
+    .code-panel { background: var(--card); border: 1px solid var(--border-mid); border-radius: var(--r-xl); overflow: hidden; margin: 28px 0; box-shadow: 0 16px 48px rgba(0,0,0,0.35); }
+    .code-bar { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02); }
+    .cd { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
+    .cd.r { background: #ff5f57; } .cd.y { background: #febc2e; } .cd.g { background: #28c840; }
+    .code-file { margin-left: 8px; font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); }
+    .code-file em { color: var(--coral-light); font-style: normal; }
+    .code-body { padding: 20px 22px; overflow-x: auto; }
+    pre { font-family: var(--font-mono); font-size: 13px; line-height: 1.85; white-space: pre; color: var(--fg-2); }
+    .callout { background: rgba(74,168,165,0.07); border: 1px solid rgba(74,168,165,0.22); border-radius: var(--r-lg); padding: 16px 20px; margin: 24px 0; }
+    .callout p { font-size: 14px; color: var(--fg-2); margin: 0; }
+    .callout strong { color: var(--mint-light); }
+    .ch-nav { padding: 48px 0; border-top: 1px solid var(--border); background: var(--bg-dark); }
+    .ch-nav-inner { max-width: 760px; margin: 0 auto; padding: 0 32px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .ch-link { display: flex; flex-direction: column; gap: 4px; }
+    .ch-link-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--fg-3); }
+    .ch-link-title { font-family: var(--font-display); font-size: 17px; color: var(--coral-light); letter-spacing: -0.01em; transition: color 150ms; }
+    .ch-link:hover .ch-link-title { color: var(--coral); }
+    .ch-link.next { text-align: right; }
+    footer { background: var(--bg-dark); border-top: 1px solid var(--border); padding: 32px 0; }
+    .footer-inner { max-width: 760px; margin: 0 auto; padding: 0 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .footer-brand { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--fg-3); }
+    .footer-brand em { color: var(--coral-light); font-style: normal; }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); transition: color 150ms; }
+    .footer-links a:hover { color: var(--fg-2); }
+    .exercise-block, .quiz-block { background: rgba(255,255,255,0.03); border: 1px solid var(--border-mid); border-radius: var(--r-xl); padding: 28px 32px; margin: 32px 0 0; }
+    .exercise-block { border-left: 3px solid var(--mint); }
+    .quiz-block { border-left: 3px solid var(--coral); }
+    .block-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 14px; }
+    .exercise-block .block-label { color: var(--mint-light); }
+    .quiz-block .block-label { color: var(--coral-light); }
+    .block-title { font-family: var(--font-display); font-size: 20px; font-weight: 400; letter-spacing: -0.01em; margin-bottom: 16px; }
+    .quiz-q { margin-bottom: 22px; }
+    .quiz-q p { margin-bottom: 8px; }
+    .quiz-opts { list-style: none; padding: 0; margin: 0 0 4px; display: flex; flex-direction: column; gap: 6px; }
+    .quiz-opts li { font-size: 14px; color: var(--fg-2); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); }
+    .quiz-answers { font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .exercise-block ol, .exercise-block ul { padding-left: 22px; margin: 8px 0 12px; }
+    .exercise-block li { font-size: 15px; color: var(--fg-2); line-height: 1.6; margin-bottom: 6px; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="https://www.daisyladybug.com/" class="brand">
+      <img src="https://www.daisyladybug.com/ldb-logo.webp" alt="Daisy Lady Bug" />
+      <div><div class="brand-text">Vibium <em>Beginner</em></div></div>
+    </a>
+    <div class="nav-chapters">
+      <a class="nav-ch" href="00-intro.html">Intro</a>
+      <a class="nav-ch" href="01-landscape.html">1</a>
+      <a class="nav-ch" href="02-architecture.html">2</a>
+      <a class="nav-ch" href="03-first-test.html">3</a>
+      <a class="nav-ch" href="04-forms.html">4</a>
+      <a class="nav-ch" href="05-assertions-waiting.html">5</a>
+      <a class="nav-ch" href="06-organizing-tests.html">6</a>
+      <a class="nav-ch" href="07-captures.html">7</a>
+      <a class="nav-ch" href="08-network.html">8</a>
+      <a class="nav-ch active" href="09-ci-local.html">9</a>
+      <a class="nav-ch" href="10-ci-actions.html">10</a>
+      <a class="nav-ch" href="11-ci-docker.html">11</a>
+      <a class="nav-ch" href="12-mcp.html">12</a>
+      <a class="nav-ch" href="13-conclusion.html">13</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Chapter 9</div>
+    <h1 class="hero-title">CI Basics — Headless, Daemon,<br>and <em>Environment Setup</em></h1>
+    <p class="hero-desc">Everything that changes when you move from local development to CI: headless mode, exit codes, the Vibium daemon lifecycle, and environment variables.</p>
+    <div class="hero-meta">
+      <span class="meta-item"><span class="meta-dot"></span>TypeScript</span>
+      <span class="meta-item"><span class="meta-dot"></span>YAML</span>
+      <span class="meta-item"><span class="meta-dot"></span>~25 min</span>
+    </div>
+  </div>
+</section>
+
+<main class="content">
+  <div class="container">
+
+    <div class="section-block">
+      <div class="section-eyebrow">9.1</div>
+      <h2 class="section-heading">headless: true in <em>CI</em></h2>
+      <p>CI runners don't have a display server. There's no screen, so there's no browser window to show. If you run with <code class="inline">headless: false</code>, the process fails immediately.</p>
+      <p>But you don't want to hard-code <code class="inline">headless: true</code> either — during development, you want to see the browser. The solution is an environment variable:</p>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">setup.ts</span></div>
+        <div class="code-body"><pre>const headless = process.env.CI === 'true'
+const browser = await vibium.start({ headless })</pre></div>
+      </div>
+      <p>GitHub Actions sets <code class="inline">CI=true</code> automatically for every job. Locally, <code class="inline">CI</code> is unset, so the expression evaluates to <code class="inline">false</code> and the browser opens visibly. One change, both environments covered.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">9.2</div>
+      <h2 class="section-heading">Exit <em>Codes</em></h2>
+      <p>CI systems determine whether a job passed or failed by the process exit code. Exit code 0 means success; anything non-zero means failure. If your test fails but the process exits with 0, CI thinks everything is fine.</p>
+      <p>This is why every standalone script in this course ends with:</p>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">any-script.ts</span></div>
+        <div class="code-body"><pre>main().catch(err => {
+  console.error('Test failed:', err.message)
+  process.exit(1)
+})</pre></div>
+      </div>
+      <p>When you use Vitest, this is handled automatically — a failing test causes <code class="inline">vitest run</code> to exit with code 1. You don't need to manage it manually in test files.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">9.3</div>
+      <h2 class="section-heading">The Vibium Daemon in <em>CI</em></h2>
+      <p>Vibium's architecture separates the client from the browser. Your TypeScript code doesn't talk to Chrome directly — it sends messages to a daemon process, which manages the browser on its behalf. Locally this is invisible; the first call to <code class="inline">vibium.start()</code> auto-starts the daemon if needed.</p>
+      <p>CI breaks this assumption. Each workflow job starts from a clean environment — no persistent processes, no auto-start. You're responsible for the daemon lifecycle explicitly:</p>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">.github/workflows/tests.yml (excerpt)</span></div>
+        <div class="code-body"><pre>- name: Start Vibium daemon
+  run: vibium daemon start
+
+- name: Run tests
+  run: npm test
+
+- name: Stop Vibium daemon
+  if: always()
+  run: vibium daemon stop</pre></div>
+      </div>
+      <div class="callout"><p><strong>if: always()</strong> means this step runs regardless of whether previous steps succeeded or failed — it's the YAML equivalent of <code class="inline">finally</code> in TypeScript. Without it, a test failure would leave the daemon running.</p></div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">9.4</div>
+      <h2 class="section-heading">One Browser, <em>Many Tests</em></h2>
+      <p>Starting a fresh browser for every test is simple but costly — each browser start and stop takes a few seconds. In CI you can share one browser across all tests in a suite and only create a fresh context per test:</p>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">products.test.ts</span></div>
+        <div class="code-body"><pre>describe('Products page', () => {
+  let browser: Awaited&lt;ReturnType&lt;typeof vibium.start&gt;&gt;
+  let context: any
+  let page: any
+
+  beforeAll(async () => {
+    browser = await vibium.start({ headless: process.env.CI === 'true' })
+  })
+
+  afterAll(async () => {
+    await browser.stop()
+  })
+
+  beforeEach(async () => {
+    context = await browser.newContext()
+    page = await context.newPage()
+  })
+
+  afterEach(async () => {
+    await context.close()
+  })
+
+  it('shows 12 products', async () => { /* ... */ })
+  it('filters by category', async () => { /* ... */ })
+})</pre></div>
+      </div>
+      <p><code class="inline">beforeAll</code> starts one browser for the whole describe block. <code class="inline">beforeEach</code> opens a fresh context per test — fully isolated cookies, storage, and navigation history. <code class="inline">afterEach</code> closes the context. <code class="inline">afterAll</code> stops the browser once every test is done.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">9.5</div>
+      <h2 class="section-heading">Environment <em>Variables</em></h2>
+      <p>Hard-coding URLs in test code creates a problem: testing against staging or a preview deployment requires code changes. Use environment variables instead:</p>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">setup.ts</span></div>
+        <div class="code-body"><pre>const AUT = process.env.AUT_BASE_URL || 'https://automation-exercise.daisyladybug.com'</pre></div>
+      </div>
+      <div class="callout"><p><strong>Use <code class="inline">||</code> here, not <code class="inline">??</code>.</strong> GitHub Actions <code class="inline">vars.*</code> returns an empty string <code class="inline">""</code> when a variable is not configured. <code class="inline">||</code> catches any falsy value including empty strings; <code class="inline">??</code> only catches <code class="inline">null</code> and <code class="inline">undefined</code> and would use <code class="inline">""</code> as the URL.</p></div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">9.6</div>
+      <h2 class="section-heading">Debugging CI Failures with <em>Recordings</em></h2>
+      <p>Tests that pass locally but fail in CI are usually timing or environment differences. <code class="inline">vibium.record()</code> captures a full replay URL that you can open at <code class="inline">player.vibium.dev</code> — every action, DOM state, and network request, scrub-able frame by frame.</p>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">ci-smoke.test.ts (record wired into Vitest)</span></div>
+        <div class="code-body"><pre>let stopRecording: (() => Promise&lt;string&gt;) | null = null
+
+beforeAll(async () => {
+  const recording = await vibium.record({ headless: process.env.CI === 'true' })
+  browser = recording.browser
+  stopRecording = recording.stop
+})
+
+afterAll(async () => {
+  await browser.stop()
+  if (stopRecording) {
+    const url = await stopRecording()
+    console.log('Recording:', url)
+    stopRecording = null
+  }
+})</pre></div>
+      </div>
+      <p>The recording URL appears in your workflow logs. Open it when a test fails in CI to see exactly what the browser showed at the moment of failure.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">9.7</div>
+      <h2 class="section-heading">Verbose <em>CI Output</em></h2>
+      <p>Add a CI-specific test script to <code class="inline">package.json</code>:</p>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">package.json</span></div>
+        <div class="code-body"><pre>{
+  "scripts": {
+    "test": "vitest run",
+    "test:ci": "vitest run --reporter=verbose"
+  }
+}</pre></div>
+      </div>
+      <p>The default Vitest reporter is compact. In CI, verbose output prints each test name, pass/fail status, and timing — faster to scan when you're looking for a specific failure. In the next chapter we'll write the GitHub Actions workflow that uses <code class="inline">npm run test:ci</code>.</p>
+
+      <div class="exercise-block">
+        <div class="block-label">Exercise</div>
+        <p class="block-title">Prepare Your Suite for CI</p>
+        <ol>
+          <li>Replace any hardcoded <code class="inline">headless: false</code> with <code class="inline">const headless = process.env.CI === 'true'</code></li>
+          <li>Replace any hardcoded AUT URL with <code class="inline">process.env.AUT_BASE_URL || 'https://...'</code></li>
+          <li>Add <code class="inline">"test:ci": "vitest run --reporter=verbose"</code> to your <code class="inline">package.json</code> scripts</li>
+          <li>In one test file, switch from <code class="inline">vibium.start()</code> to <code class="inline">vibium.record()</code> and log the recording URL in <code class="inline">afterAll</code></li>
+          <li>Run <code class="inline">CI=true npm run test:ci</code> locally to simulate CI mode and confirm all tests pass headlessly</li>
+        </ol>
+      </div>
+
+      <div class="quiz-block">
+        <div class="block-label">Quiz</div>
+        <p class="block-title">5 Questions</p>
+
+        <div class="quiz-q">
+          <p><strong>1.</strong> Why does <code class="inline">process.env.CI === 'true'</code> work as a headless flag for both local and CI environments?</p>
+          <ul class="quiz-opts">
+            <li>A. GitHub Actions and your shell both set CI=true by default</li>
+            <li>B. GitHub Actions sets CI=true; locally the variable is unset, so the expression evaluates to false</li>
+            <li>C. Vibium reads the CI variable automatically</li>
+            <li>D. The flag only applies to headless mode, not to other settings</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>2.</strong> <code class="inline">if: always()</code> on the daemon stop step ensures:</p>
+          <ul class="quiz-opts">
+            <li>A. The stop command runs after every individual test</li>
+            <li>B. The stop step runs even if earlier steps failed, preventing orphaned daemon processes</li>
+            <li>C. GitHub Actions retries the stop step if it fails</li>
+            <li>D. The daemon is restarted between test runs</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>3.</strong> Why use <code class="inline">||</code> instead of <code class="inline">??</code> when falling back to a default URL?</p>
+          <ul class="quiz-opts">
+            <li>A. ?? is not valid TypeScript</li>
+            <li>B. GitHub Actions vars.* returns "" for unset variables; || catches empty strings but ?? does not</li>
+            <li>C. || is faster than ?? at runtime</li>
+            <li>D. ?? only works with string types</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>4.</strong> The <code class="inline">beforeAll</code>/<code class="inline">afterAll</code> + <code class="inline">beforeEach</code>/<code class="inline">afterEach</code> pattern achieves:</p>
+          <ul class="quiz-opts">
+            <li>A. One browser start per test for full isolation</li>
+            <li>B. One browser per describe block, one fresh context per test — isolation without repeated startup cost</li>
+            <li>C. Full test parallelism across multiple browser processes</li>
+            <li>D. Automatic test retry on failure</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>5.</strong> <code class="inline">vibium.record()</code> is useful for CI-only failures because:</p>
+          <ul class="quiz-opts">
+            <li>A. It makes tests run faster in CI</li>
+            <li>B. It produces a visual replay of every step including DOM state, letting you see exactly what the browser showed at the moment of failure</li>
+            <li>C. It automatically retries the test on failure</li>
+            <li>D. It disables network requests so the test is deterministic</li>
+          </ul>
+        </div>
+
+        <div class="quiz-answers">Answers: 1-B &nbsp; 2-B &nbsp; 3-B &nbsp; 4-B &nbsp; 5-B</div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<div class="ch-nav">
+  <div class="ch-nav-inner">
+    <a class="ch-link" href="08-network.html">
+      <span class="ch-link-label">← Chapter 8</span>
+      <span class="ch-link-title">Network Interception</span>
+    </a>
+    <a class="ch-link next" href="10-ci-actions.html">
+      <span class="ch-link-label">Next — Chapter 10</span>
+      <span class="ch-link-title">The GitHub Actions Workflow →</span>
+    </a>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">Vibium Beginner Course · <em>A Daisy Lady Bug course</em></div>
+    <div class="footer-links">
+      <a href="https://www.daisyladybug.com/">daisyladybug.com</a>
+      <a href="https://automation-exercise.daisyladybug.com/">AUT</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

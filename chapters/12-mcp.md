@@ -1,4 +1,4 @@
-# Chapter 10: Introduction to MCP
+# Chapter 12: Introduction to MCP
 
 Every chapter until now has been about writing code that drives the browser. You write the steps. You define the selectors. You control every action. In this final chapter we look at something fundamentally different: the Model Context Protocol, where you describe what you want in natural language and an AI agent figures out the steps.
 
@@ -200,61 +200,6 @@ Use Claude Desktop (with Vibium MCP configured) to generate a test for the `/che
 4. Run the test with `npx tsx` and confirm it passes
 
 Then reflect: which parts did the agent get right, and which parts needed correction before the test would run?
-
----
-
-## Solution
-
-```typescript
-import { browser as vibium } from 'vibium'
-import assert from 'node:assert/strict'
-
-const AUT = 'https://automation-exercise.daisyladybug.com'
-
-// These are the validation error messages discovered via MCP exploration.
-// Adjust the list based on what your agent actually found.
-const EXPECTED_ERRORS = [
-  '✗ First name required',
-  '✗ Last name required',
-  '✗ Valid email required',
-  '✗ Valid phone required',
-  '✗ Address required',
-]
-
-async function testCheckoutValidationMCP() {
-  const browser = await vibium.start({ headless: false })
-  const context = await browser.newContext()
-  const page = await context.newPage()
-
-  try {
-    // Need a product in cart before checkout is accessible
-    await page.go(`${AUT}/products/prod_001`)
-    const addToCart = await page.find({ role: 'button', text: 'Add to Cart' })
-    await addToCart.click()
-
-    await page.go(`${AUT}/checkout`)
-    const submit = await page.find({ role: 'button', text: 'Place Order' })
-    await submit.click()
-
-    // Assert at least 5 of the errors the MCP agent identified
-    for (const message of EXPECTED_ERRORS) {
-      const el = await page.find({ text: message })
-      assert.ok(await el.isVisible(), `error visible: ${message}`)
-    }
-
-    console.log('testCheckoutValidationMCP passed.')
-  } finally {
-    await browser.stop()
-  }
-}
-
-testCheckoutValidationMCP().catch(err => {
-  console.error('Test failed:', err.message)
-  process.exit(1)
-})
-```
-
-**Reflection notes:** The MCP agent typically gets the page structure right but may use slightly different text for element descriptions than what the DOM actually contains. The most common correction needed is adjusting the exact validation error message text — the agent might describe them differently from their literal DOM text. Always verify against the actual rendered text using `vibium find text "✗ First"` in the CLI before finalising assertions.
 
 ---
 
