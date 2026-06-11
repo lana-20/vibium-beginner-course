@@ -15,9 +15,6 @@ RUN npm install -g vibium && vibium install
 RUN CHROME=$(find /root/.cache/vibium -name "chrome" -not -name "chromedriver" | head -1) \
     && mv "$CHROME" "${CHROME}.real" \
     && printf '#!/bin/sh\nexec "%s.real" --no-sandbox --disable-dev-shm-usage "$@"\n' "$CHROME" > "$CHROME" \
-    && chmod +x "$CHROME" \
-    && chmod 755 /root /root/.cache \
-    && chmod -R a+rX /root/.cache/vibium
+    && chmod +x "$CHROME"
 
 ENV HOME=/root
-ENV CI=true
