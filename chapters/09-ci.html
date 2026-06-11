@@ -258,13 +258,14 @@
     <div class="section-block">
       <div class="section-eyebrow">9.5</div>
       <h2 class="section-heading">Environment <em>Variables</em></h2>
-      <p>Hard-coding URLs in test code creates a problem: running tests against a staging environment or a preview deployment requires code changes. Use environment variables instead. The <code class="inline">??</code> operator means: use the env var if it's set, fall back to the default URL otherwise.</p>
+      <p>Hard-coding URLs in test code creates a problem: running tests against a staging environment or a preview deployment requires code changes. Use environment variables instead — but use <code class="inline">||</code>, not <code class="inline">??</code>.</p>
       <div class="code-panel">
         <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">env-aware AUT URL</span></div>
         <div class="code-body"><pre>
 <span class="k">const</span> AUT = process.env.AUT_BASE_URL
-  ?? <span class="s">'https://automation-exercise.daisyladybug.com'</span></pre></div>
+  || <span class="s">'https://automation-exercise.daisyladybug.com'</span></pre></div>
       </div>
+      <div class="warning"><p><strong>Why <code class="inline">||</code> and not <code class="inline">??</code>:</strong> GitHub Actions <code class="inline">vars.*</code> returns an empty string <code class="inline">""</code> when a variable is not configured. The <code class="inline">??</code> operator only falls back for <code class="inline">null</code> and <code class="inline">undefined</code> — it passes <code class="inline">""</code> through, leaving you with an empty URL and a confusing failure. <code class="inline">||</code> catches any falsy value, so the fallback always works whether the variable is unset or blank.</p></div>
       <div class="warning"><p><strong>Secrets vs vars:</strong> Use <code class="inline">secrets.*</code> for API keys and passwords — never <code class="inline">vars.*</code>. GitHub masks secrets in logs; vars are visible.</p></div>
       <div class="callout"><p><strong>Local .env file:</strong> Add a <code class="inline">.env</code> file to your gitignore and use a package like <code class="inline">dotenv</code> to load it locally. Never commit <code class="inline">.env</code> files.</p></div>
     </div>
