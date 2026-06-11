@@ -1,7 +1,7 @@
 import { describe, it, beforeEach, afterEach, expect } from 'vitest'
 import { browser as vibium } from 'vibium'
 
-const AUT = process.env.AUT_BASE_URL ?? 'https://automation-exercise.daisyladybug.com'
+const AUT = process.env.AUT_BASE_URL || 'https://automation-exercise.daisyladybug.com'
 const headless = process.env.CI === 'true'
 
 describe('Smoke tests (CI-ready)', () => {
@@ -15,7 +15,7 @@ describe('Smoke tests (CI-ready)', () => {
   })
 
   afterEach(async () => {
-    await browser.close()
+    await browser.stop()
   })
 
   it('homepage loads and shows hero', async () => {
@@ -26,8 +26,8 @@ describe('Smoke tests (CI-ready)', () => {
 
   it('products page shows 12 products', async () => {
     await page.go(`${AUT}/products`)
-    const count = await page.count('a[href*="/products/prod_"]')
-    expect(count).toBe(12)
+    const items = await page.findAll('a[href*="/products/prod_"]')
+    expect(items.length).toBe(12)
   })
 
   it('product detail page loads', async () => {

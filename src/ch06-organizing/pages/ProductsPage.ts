@@ -8,22 +8,23 @@ export class ProductsPage {
   }
 
   async search(query: string) {
-    const input = await this.page.find({ css: "input[placeholder='Search products...']" })
+    const input = await this.page.find("input[placeholder='Search products...']")
     await input.fill(query)
   }
 
   async filterByCategory(category: string) {
-    const select = await this.page.find({ css: 'select:first-of-type' })
-    await select.select(category)
+    const select = await this.page.find('select:first-of-type')
+    await select.selectOption(category)
   }
 
   async sortBy(option: string) {
-    const select = await this.page.find({ css: 'select:last-of-type' })
-    await select.select(option)
+    const select = await this.page.find('select:last-of-type')
+    await select.selectOption(option)
   }
 
   async productCount() {
-    return this.page.count('a[href*="/products/prod_"]')
+    const items = await this.page.findAll('a[href*="/products/prod_"]')
+    return items.length
   }
 
   async isProductVisible(name: string) {

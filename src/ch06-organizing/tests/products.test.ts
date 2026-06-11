@@ -16,7 +16,7 @@ describe('Products page', () => {
   })
 
   afterEach(async () => {
-    await browser.close()
+    await browser.stop()
   })
 
   it('shows 12 products by default', async () => {
@@ -29,7 +29,7 @@ describe('Products page', () => {
     const products = new ProductsPage(page)
     await products.goto()
     await products.filterByCategory('Electronics')
-    await page.waitForText('SHOWING 3 OF 12 PRODUCTS')
+    await page.find({ text: 'SHOWING 3 OF 12 PRODUCTS' })
     expect(await products.isProductVisible('Wireless Headphones')).toBe(true)
     expect(await products.isProductVisible('Blue Cotton T-Shirt')).toBe(false)
   })
@@ -46,7 +46,7 @@ describe('Products page', () => {
     const products = new ProductsPage(page)
     await products.goto()
     await products.clickProduct('Wireless Headphones')
-    await page.waitForURL('**/products/prod_001')
+    await page._waitForURL('**/products/prod_001')
     expect((await page.url()).includes('/products/prod_001')).toBe(true)
   })
 
@@ -57,7 +57,7 @@ describe('Products page', () => {
 
     const cart = new CartPage(page)
     await cart.goto()
-    await page.waitForText('1 ITEM · 1 PRODUCT')
+    await page.find({ text: '1 ITEM · 1 PRODUCT' })
     expect(await (await page.find({ text: '1 ITEM · 1 PRODUCT' })).isVisible()).toBe(true)
   })
 })
