@@ -36,10 +36,22 @@ jobs:
       - name: Start Vibium daemon
         run: vibium daemon start
 
+      - name: Verify vibium binary
+        run: |
+          echo "=== @vibium packages ==="
+          ls node_modules/@vibium/ 2>/dev/null || echo "(none)"
+          echo "=== linux-x64 binary ==="
+          ls node_modules/@vibium/linux-x64/bin/ 2>/dev/null || echo "(not found)"
+          echo "=== chrome location ==="
+          find node_modules/@vibium/linux-x64 -name "chrome" -o -name "chrome-linux" 2>/dev/null | head -5 || echo "(not found)"
+          echo "=== vibium version ==="
+          vibium version 2>&1 || echo "(daemon version failed)"
+
       - name: Run tests
         run: npm run test:ci
         env:
           CI: true
+          VIBIUM_DEBUG: "1"
           AUT_BASE_URL: ${{ vars.AUT_BASE_URL }}
 
       - name: Stop Vibium daemon
