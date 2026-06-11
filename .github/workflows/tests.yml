@@ -23,6 +23,22 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Debug Chrome
+        run: |
+          echo "whoami: $(whoami), uid: $(id -u)"
+          echo "HOME=$HOME"
+          CHROME=$(find /root/.cache/vibium -name "chrome" -not -name "chromedriver" 2>/dev/null | head -1)
+          echo "Chrome wrapper: $CHROME"
+          ls -la "$CHROME" 2>/dev/null || echo "not found"
+          echo "--- wrapper contents ---"
+          cat "$CHROME" 2>/dev/null || echo "cannot read"
+          echo "--- chrome.real stat ---"
+          ls -la "${CHROME}.real" 2>/dev/null || echo "not found"
+          echo "--- running chrome ---"
+          "$CHROME" --headless --no-sandbox --disable-dev-shm-usage --version 2>&1 || echo "exit code: $?"
+        env:
+          HOME: /root
+
       - name: Start Vibium daemon
         run: vibium daemon start
         env:
