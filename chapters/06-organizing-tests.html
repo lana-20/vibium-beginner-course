@@ -102,6 +102,21 @@
     .footer-links { display: flex; gap: 20px; }
     .footer-links a { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); transition: color 150ms; }
     .footer-links a:hover { color: var(--fg-2); }
+    /* Exercise & Quiz blocks */
+    .exercise-block, .quiz-block { background: rgba(255,255,255,0.03); border: 1px solid var(--border-mid); border-radius: var(--r-xl); padding: 28px 32px; margin: 32px 0 0; }
+    .exercise-block { border-left: 3px solid var(--mint); }
+    .quiz-block { border-left: 3px solid var(--coral); }
+    .block-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 14px; }
+    .exercise-block .block-label { color: var(--mint-light); }
+    .quiz-block .block-label { color: var(--coral-light); }
+    .block-title { font-family: var(--font-display); font-size: 20px; font-weight: 400; letter-spacing: -0.01em; margin-bottom: 16px; }
+    .quiz-q { margin-bottom: 22px; }
+    .quiz-q p { margin-bottom: 8px; }
+    .quiz-opts { list-style: none; padding: 0; margin: 0 0 4px; display: flex; flex-direction: column; gap: 6px; }
+    .quiz-opts li { font-size: 14px; color: var(--fg-2); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); }
+    .quiz-answers { font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .exercise-block ol, .exercise-block ul { padding-left: 22px; margin: 8px 0 12px; }
+    .exercise-block li { font-size: 15px; color: var(--fg-2); line-height: 1.6; margin-bottom: 6px; }
   </style>
 </head>
 <body>
@@ -317,6 +332,121 @@
 <span class="k">await</span> browser.<span class="fn">stop</span>()</pre></div>
       </div>
       <p>Within a single Vitest suite, Vitest's parallel test runner handles this for you automatically — each test in the suite gets its own <code class="inline">beforeEach</code>-created context, and Vitest runs them concurrently. But if you need to orchestrate multiple browser sessions within a single test (for example, testing a real-time chat feature where two users must be active simultaneously), the multi-context pattern above is the right approach.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">6.6</div>
+      <h2 class="section-heading">Using <code class="inline" style="font-size:inherit">vibium.record()</code> <em>inside Vitest</em></h2>
+      <p>In Chapter 3 you saw <code class="inline">vibium.record()</code> used in a standalone script. In a Vitest suite, the browser lifecycle is managed by <code class="inline">beforeEach</code>/<code class="inline">afterEach</code>, so the wiring looks different. Here's the pattern:</p>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">record() wired into beforeEach / afterEach</span></div>
+        <div class="code-body"><pre>
+<span class="k">import</span> { browser <span class="k">as</span> vibium } <span class="k">from</span> <span class="s">'vibium'</span>
+<span class="k">import</span> { beforeEach, afterEach } <span class="k">from</span> <span class="s">'vitest'</span>
+<span class="k">import type</span> { Browser, Page } <span class="k">from</span> <span class="s">'vibium'</span>
+
+<span class="k">let</span> browser: Browser
+<span class="k">let</span> page: Page
+<span class="k">let</span> stopRecording: (() => Promise&lt;<span class="k">string</span>&gt;) | <span class="k">null</span> = <span class="k">null</span>
+
+<span class="fn">beforeEach</span>(<span class="k">async</span> () => {
+  <span class="k">const</span> recording = <span class="k">await</span> vibium.<span class="fn">record</span>({ headless: <span class="k">true</span> })
+  browser = recording.browser
+  stopRecording = recording.stop
+  <span class="k">const</span> context = <span class="k">await</span> browser.<span class="fn">newContext</span>()
+  page = <span class="k">await</span> context.<span class="fn">newPage</span>()
+})
+
+<span class="fn">afterEach</span>(<span class="k">async</span> () => {
+  <span class="k">await</span> browser.<span class="fn">stop</span>()
+  <span class="k">if</span> (stopRecording) {
+    <span class="k">const</span> url = <span class="k">await</span> <span class="fn">stopRecording</span>()
+    console.<span class="fn">log</span>(<span class="s">'Recording:'</span>, url)
+    stopRecording = <span class="k">null</span>
+  }
+})</pre></div>
+      </div>
+      <p>Two things to notice. <code class="inline">stop()</code> is called <em>after</em> <code class="inline">browser.stop()</code> — the browser must close before the recording can be finalized and uploaded. And <code class="inline">stopRecording</code> is held in the outer scope so <code class="inline">afterEach</code> can reach it whether the test passed or failed.</p>
+      <p>In CI, the recording URL appears in the step logs. When a test fails, open the URL at <strong>player.vibium.dev</strong> and scrub to the failing assertion — you'll see exactly what was on screen at that moment. For day-to-day local development, keep <code class="inline">vibium.start()</code>. Switch to <code class="inline">vibium.record()</code> when debugging a CI-only failure.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">Practice</div>
+      <h2 class="section-heading">Exercise &amp; Quiz</h2>
+
+      <div class="exercise-block">
+        <div class="block-label">Exercise</div>
+        <p class="block-title">CartPage Object + Two Vitest Tests</p>
+        <p>Add a <code class="inline">CartPage</code> class to the page objects from this chapter. It should have at least three methods:</p>
+        <ol>
+          <li><code class="inline">goto()</code> — navigates to <code class="inline">/cart</code></li>
+          <li><code class="inline">getItemCount()</code> — returns the text of the cart item count element</li>
+          <li><code class="inline">getSubtotal()</code> — returns the text of the subtotal value element</li>
+        </ol>
+        <p>Then write a Vitest test file with two tests using both <code class="inline">ProductsPage</code> and <code class="inline">CartPage</code>:</p>
+        <ol>
+          <li><strong>searches and finds a product</strong> — uses <code class="inline">ProductsPage</code> to search for <code class="inline">'yoga'</code>, asserts <code class="inline">'Yoga Mat'</code> is visible</li>
+          <li><strong>adds a product and checks cart</strong> — navigates to a product detail page, clicks "Add to Cart", creates a <code class="inline">CartPage</code>, calls <code class="inline">goto()</code>, and asserts <code class="inline">getItemCount()</code> is not empty</li>
+        </ol>
+        <p>Use <code class="inline">beforeEach</code>/<code class="inline">afterEach</code> for browser lifecycle. Every assertion must have a label.</p>
+      </div>
+
+      <div class="quiz-block">
+        <div class="block-label">Quiz</div>
+        <p class="block-title">5 Questions</p>
+
+        <div class="quiz-q">
+          <p><strong>1.</strong> The main purpose of a Page Object class is:</p>
+          <ul class="quiz-opts">
+            <li>A. To run tests faster by caching DOM lookups</li>
+            <li>B. To centralize selectors and interaction logic so tests don't hardcode them</li>
+            <li>C. To replace <code class="inline">beforeEach</code> and <code class="inline">afterEach</code></li>
+            <li>D. To add type safety to assertion calls</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>2.</strong> <code class="inline">beforeEach</code> and <code class="inline">afterEach</code> in Vitest enforce test atomicity by:</p>
+          <ul class="quiz-opts">
+            <li>A. Running tests sequentially so they cannot interfere</li>
+            <li>B. Creating a fresh browser context before each test and closing it after</li>
+            <li>C. Resetting the application state on the server</li>
+            <li>D. Skipping tests that depend on each other</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>3.</strong> A Vitest test is identified in output by:</p>
+          <ul class="quiz-opts">
+            <li>A. The test file name only</li>
+            <li>B. The <code class="inline">describe</code> block name and the <code class="inline">it</code> string, combined</li>
+            <li>C. The line number of the <code class="inline">it</code> call</li>
+            <li>D. The variable name of the <code class="inline">page</code> object</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>4.</strong> The Page Object Pattern follows Single Responsibility by ensuring:</p>
+          <ul class="quiz-opts">
+            <li>A. Each test file imports exactly one Page Object</li>
+            <li>B. Selectors live in Page Objects and assertions live in test functions</li>
+            <li>C. Page Objects never use <code class="inline">async/await</code></li>
+            <li>D. Tests cannot share Page Object instances</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>5.</strong> <code class="inline">Promise.all([ctx1.newPage(), ctx2.newPage()])</code> is useful when you need to:</p>
+          <ul class="quiz-opts">
+            <li>A. Run two tests in the same browser context</li>
+            <li>B. Create two pages that share cookies</li>
+            <li>C. Simulate two independent users acting simultaneously in one browser</li>
+            <li>D. Run Vitest tests in parallel processes</li>
+          </ul>
+        </div>
+
+        <div class="quiz-answers">Answers: 1-B &nbsp; 2-B &nbsp; 3-B &nbsp; 4-B &nbsp; 5-C</div>
+      </div>
     </div>
 
   </div>

@@ -243,3 +243,69 @@ const [download] = await Promise.all([
 One mental model for remembering the rule: captures are *subscriptions*. You subscribe to an event channel before the event fires. If you subscribe after the event, you've already missed it. `Promise.all` is the mechanism that lets you subscribe and fire at the same time.
 
 In the next chapter we go one level deeper — intercepting HTTP requests before they reach the server, returning synthetic data, and simulating error conditions. Network interception is how you write tests that are fast, reliable, and don't depend on external services being available.
+
+---
+
+## Exercise
+
+Write three separate test functions, one for each capture type. Each test should use `Promise.all` with a fire-and-forget click inside the second argument.
+
+**Test 1: `testDeleteConfirmation`**
+- Navigate to the cart page (add a product first if needed)
+- Use `page.capture.dialog('dismiss')` to cancel a delete confirmation
+- Click a "Remove" or "Delete" button that triggers an alert
+- Assert that `result.type === 'confirm'` (or `'alert'`)
+- Assert that the item is still in the cart after dismissing
+
+**Test 2: `testConsoleErrors`**
+- Navigate to a page
+- Use `page.capture.console()` to collect messages during a page interaction
+- Perform any interaction that might log to the console
+- Assert that `messages` is an array (even if empty)
+
+**Test 3: `testDownload`**
+- Navigate to a page that has a CSV download link
+- Use `page.capture.download('/tmp/vibium-downloads')` to intercept the download
+- Click the download trigger
+- Assert `download.suggestedFilename` ends with `'.csv'`
+
+---
+
+## Quiz
+
+**1.** Why must the click inside a `Promise.all` capture be fire-and-forget (no `await` on the click)?
+
+- A. `await` inside `Promise.all` is a syntax error
+- B. Awaiting the click would block until the dialog is handled, creating a deadlock — the capture promise can't resolve because the click never completes
+- C. Fire-and-forget clicks run faster than awaited clicks
+- D. The Vibium API requires it for dialog captures only
+
+**2.** `page.capture.dialog('accept')` vs `page.capture.dialog('dismiss')` — what is the difference?
+
+- A. `accept` clicks OK; `dismiss` clicks Cancel or closes the dialog
+- B. `accept` intercepts only alerts; `dismiss` intercepts only confirms
+- C. They are identical — both close the dialog
+- D. `dismiss` is for file dialogs; `accept` is for browser alerts
+
+**3.** The `result` from `page.capture.dialog()` contains:
+
+- A. The HTML of the page after the dialog closed
+- B. The button text that was clicked
+- C. The dialog type and message text
+- D. Whether the user accepted or dismissed
+
+**4.** Console captures collect:
+
+- A. Only `console.error` calls
+- B. Only `console.log` calls from your test code
+- C. All browser console messages — log, warn, error, info — that fire while the capture is active
+- D. Only messages that occur before the trigger click
+
+**5.** What does `download.suggestedFilename` contain?
+
+- A. The full path to the file on disk
+- B. The MIME type of the downloaded file
+- C. The filename the browser assigned to the download, as it would appear in the download bar
+- D. The URL of the file that was downloaded
+
+**Answers:** 1-B, 2-A, 3-C, 4-C, 5-C

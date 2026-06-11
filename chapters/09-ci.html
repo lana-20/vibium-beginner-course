@@ -104,6 +104,21 @@
     .footer-links { display: flex; gap: 20px; }
     .footer-links a { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); transition: color 150ms; }
     .footer-links a:hover { color: var(--fg-2); }
+    /* Exercise & Quiz blocks */
+    .exercise-block, .quiz-block { background: rgba(255,255,255,0.03); border: 1px solid var(--border-mid); border-radius: var(--r-xl); padding: 28px 32px; margin: 32px 0 0; }
+    .exercise-block { border-left: 3px solid var(--mint); }
+    .quiz-block { border-left: 3px solid var(--coral); }
+    .block-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 14px; }
+    .exercise-block .block-label { color: var(--mint-light); }
+    .quiz-block .block-label { color: var(--coral-light); }
+    .block-title { font-family: var(--font-display); font-size: 20px; font-weight: 400; letter-spacing: -0.01em; margin-bottom: 16px; }
+    .quiz-q { margin-bottom: 22px; }
+    .quiz-q p { margin-bottom: 8px; }
+    .quiz-opts { list-style: none; padding: 0; margin: 0 0 4px; display: flex; flex-direction: column; gap: 6px; }
+    .quiz-opts li { font-size: 14px; color: var(--fg-2); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); }
+    .quiz-answers { font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .exercise-block ol, .exercise-block ul { padding-left: 22px; margin: 8px 0 12px; }
+    .exercise-block li { font-size: 15px; color: var(--fg-2); line-height: 1.6; margin-bottom: 6px; }
   </style>
 </head>
 <body>
@@ -340,6 +355,83 @@ console.<span class="fn">log</span>(<span class="s">'Recording:'</span>, url)
         <div class="assert-item"><div class="assert-num">3</div><div class="assert-text"><strong>Break a test.</strong> Change one assertion to assert the wrong value. Push. Watch the Actions tab go red.</div></div>
         <div class="assert-item"><div class="assert-num">4</div><div class="assert-text"><strong>Find the recording URL</strong> in the failing step's log output. Open <strong>player.vibium.dev</strong> — scrub to the assertion failure.</div></div>
         <div class="assert-item"><div class="assert-num">5</div><div class="assert-text"><strong>Fix it, push again.</strong> Watch it go green. That's the full CI feedback loop.</div></div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">Practice</div>
+      <h2 class="section-heading">Exercise &amp; Quiz</h2>
+
+      <div class="exercise-block">
+        <div class="block-label">Exercise</div>
+        <p class="block-title">Set Up CI and Watch It Fail</p>
+        <p>Set up CI for your course project. If you haven't pushed to GitHub yet, do so with <code class="inline">git init</code>, <code class="inline">git add</code>, <code class="inline">git commit</code>, and <code class="inline">git remote add origin</code>. Then:</p>
+        <ol>
+          <li>Create <code class="inline">.github/workflows/tests.yml</code> using the container workflow from this chapter, referencing <code class="inline">ghcr.io/lana-20/vibium-ci:latest</code></li>
+          <li>Push and confirm the Actions tab goes green</li>
+          <li>Introduce a deliberate assertion failure (wrong expected value), push, and confirm it goes red</li>
+          <li>Add <code class="inline">vibium.record()</code> to the failing test, push, and find the <code class="inline">player.vibium.dev</code> URL in the CI logs</li>
+          <li>Open the recording, scrub to the failure, and read the actual vs expected value in the DOM panel</li>
+          <li>Revert, push, confirm CI goes green</li>
+        </ol>
+        <p>Write down what you see in the DOM panel during step 5 — the actual vs expected value.</p>
+      </div>
+
+      <div class="quiz-block">
+        <div class="block-label">Quiz</div>
+        <p class="block-title">5 Questions</p>
+
+        <div class="quiz-q">
+          <p><strong>1.</strong> Why does the Vibium daemon need to be started explicitly in GitHub Actions but not locally?</p>
+          <ul class="quiz-opts">
+            <li>A. The daemon is not supported on Linux</li>
+            <li>B. Locally, <code class="inline">vibium.start()</code> auto-starts the daemon; in CI there is no daemon running yet when the container starts</li>
+            <li>C. GitHub Actions blocks all background processes</li>
+            <li>D. The daemon must be started on a different port in CI</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>2.</strong> The <code class="inline">if: always()</code> condition on the daemon stop step means:</p>
+          <ul class="quiz-opts">
+            <li>A. Stop the daemon after every individual test</li>
+            <li>B. Run the stop step even if earlier steps failed — ensuring cleanup regardless of test outcome</li>
+            <li>C. Run the step only when all tests pass</li>
+            <li>D. Always use <code class="inline">vibium daemon stop</code> instead of the CLI flag</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>3.</strong> Which Docker flag is required because Chrome disables the sandbox when running as root?</p>
+          <ul class="quiz-opts">
+            <li>A. <code class="inline">--disable-dev-shm-usage</code></li>
+            <li>B. <code class="inline">--headless</code></li>
+            <li>C. <code class="inline">--no-sandbox</code></li>
+            <li>D. <code class="inline">--disable-gpu</code></li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>4.</strong> <code class="inline">vibium.record()</code> is most valuable in CI because:</p>
+          <ul class="quiz-opts">
+            <li>A. It makes tests run faster by caching browser state</li>
+            <li>B. It captures DOM state and network events at every step, giving you a visual replay of failures that only occur in CI</li>
+            <li>C. It automatically retries flaky tests</li>
+            <li>D. It uploads test results to Vibium's dashboard</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>5.</strong> The <code class="inline">ENV HOME=/root</code> line in <code class="inline">Dockerfile.ci</code> is necessary because:</p>
+          <ul class="quiz-opts">
+            <li>A. Root is the only user allowed to run Chrome</li>
+            <li>B. Node.js calls <code class="inline">os.homedir()</code> internally; it must return the directory where Chrome was downloaded</li>
+            <li>C. The daemon writes logs to <code class="inline">$HOME</code></li>
+            <li>D. Without it, the container runs as an anonymous user with no filesystem access</li>
+          </ul>
+        </div>
+
+        <div class="quiz-answers">Answers: 1-B &nbsp; 2-B &nbsp; 3-C &nbsp; 4-B &nbsp; 5-B</div>
       </div>
     </div>
 

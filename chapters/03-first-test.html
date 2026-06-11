@@ -105,6 +105,21 @@
     .footer-links { display: flex; gap: 20px; }
     .footer-links a { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); transition: color 150ms; }
     .footer-links a:hover { color: var(--fg-2); }
+    /* Exercise & Quiz blocks */
+    .exercise-block, .quiz-block { background: rgba(255,255,255,0.03); border: 1px solid var(--border-mid); border-radius: var(--r-xl); padding: 28px 32px; margin: 32px 0 0; }
+    .exercise-block { border-left: 3px solid var(--mint); }
+    .quiz-block { border-left: 3px solid var(--coral); }
+    .block-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 14px; }
+    .exercise-block .block-label { color: var(--mint-light); }
+    .quiz-block .block-label { color: var(--coral-light); }
+    .block-title { font-family: var(--font-display); font-size: 20px; font-weight: 400; letter-spacing: -0.01em; margin-bottom: 16px; }
+    .quiz-q { margin-bottom: 22px; }
+    .quiz-q p { margin-bottom: 8px; }
+    .quiz-opts { list-style: none; padding: 0; margin: 0 0 4px; display: flex; flex-direction: column; gap: 6px; }
+    .quiz-opts li { font-size: 14px; color: var(--fg-2); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); }
+    .quiz-answers { font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .exercise-block ol, .exercise-block ul { padding-left: 22px; margin: 8px 0 12px; }
+    .exercise-block li { font-size: 15px; color: var(--fg-2); line-height: 1.6; margin-bottom: 6px; }
   </style>
 </head>
 <body>
@@ -345,6 +360,83 @@ console.<span class="fn">log</span>(<span class="s">'Recording:'</span>, url)
       </div>
       <p><code class="inline">stop()</code> returns a URL at <strong>player.vibium.dev</strong>. Open it in any browser and you get an interactive replay — scrub forward and backward through every step, inspect the DOM at each point, and see which network requests fired. Think of it as a time machine for your test run.</p>
       <p>This is similar in spirit to Playwright's trace recorder, but built directly into the API. The most valuable use case is debugging CI failures: when a test passes locally but fails in CI, add <code class="inline">vibium.record()</code> to the CI run, get the URL from the logs, and replay exactly what happened. We'll revisit this in Chapter 9.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">Practice</div>
+      <h2 class="section-heading">Exercise &amp; Quiz</h2>
+
+      <div class="exercise-block">
+        <div class="block-label">Exercise</div>
+        <p class="block-title">Test the Products Page</p>
+        <p>Write a complete test for the <code class="inline">/products</code> page. Name the function <code class="inline">testProductsPage</code>. It should:</p>
+        <ol>
+          <li>Navigate to <code class="inline">automation-exercise.daisyladybug.com/products</code></li>
+          <li>Assert the page title equals <code class="inline">'automation-exercise | E-commerce Testing Sandbox'</code></li>
+          <li>Find the heading with text <code class="inline">'Products'</code> and assert it is visible</li>
+          <li>Find any product name visible on the page (e.g. <code class="inline">'Wireless Headphones'</code>) and assert it is visible</li>
+          <li>Find the search input using <code class="inline">"input[placeholder='Search products...']"</code> and assert it is enabled</li>
+          <li>Assert that the category select dropdown is visible using <code class="inline">'select:first-of-type'</code></li>
+        </ol>
+        <p>Use <code class="inline">try/finally</code>, label every assertion, and end with <code class="inline">.catch(err =&gt; { process.exit(1) })</code>. Then introduce a deliberate failure, run it, read the error, and fix it.</p>
+      </div>
+
+      <div class="quiz-block">
+        <div class="block-label">Quiz</div>
+        <p class="block-title">5 Questions</p>
+
+        <div class="quiz-q">
+          <p><strong>1.</strong> What does <code class="inline">assert.ok(value, label)</code> check?</p>
+          <ul class="quiz-opts">
+            <li>A. That <code class="inline">value</code> strictly equals <code class="inline">true</code></li>
+            <li>B. That <code class="inline">value</code> is truthy — anything other than <code class="inline">false</code>, <code class="inline">null</code>, <code class="inline">undefined</code>, <code class="inline">0</code>, or <code class="inline">""</code></li>
+            <li>C. That <code class="inline">value</code> is not null or undefined only</li>
+            <li>D. That <code class="inline">value</code> equals the string <code class="inline">"ok"</code></li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>2.</strong> Why must every standalone test script call <code class="inline">process.exit(1)</code> on failure?</p>
+          <ul class="quiz-opts">
+            <li>A. It is required for async functions to resolve</li>
+            <li>B. To log the error to a file</li>
+            <li>C. To ensure CI receives a non-zero exit code and marks the build as failed</li>
+            <li>D. To prevent the Vibium daemon from remaining alive</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>3.</strong> The third argument to <code class="inline">assert.equal(actual, expected, 'label')</code> is:</p>
+          <ul class="quiz-opts">
+            <li>A. A comparison mode flag</li>
+            <li>B. A custom error class</li>
+            <li>C. A timeout in milliseconds</li>
+            <li>D. A label that appears in the error message when the assertion fails</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>4.</strong> What does <code class="inline">vibium.record()</code> return that <code class="inline">vibium.start()</code> does not?</p>
+          <ul class="quiz-opts">
+            <li>A. A headless browser instance</li>
+            <li>B. A <code class="inline">stop</code> function that uploads the session and returns a player URL</li>
+            <li>C. A browser with network interception pre-configured</li>
+            <li>D. A browser that runs in a separate process</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>5.</strong> <code class="inline">headless: false</code> causes Vibium to:</p>
+          <ul class="quiz-opts">
+            <li>A. Disable network requests during the test</li>
+            <li>B. Run the browser without JavaScript enabled</li>
+            <li>C. Skip the daemon startup step</li>
+            <li>D. Open a visible browser window on your screen</li>
+          </ul>
+        </div>
+
+        <div class="quiz-answers">Answers: 1-B &nbsp; 2-C &nbsp; 3-D &nbsp; 4-B &nbsp; 5-D</div>
+      </div>
     </div>
 
   </div>

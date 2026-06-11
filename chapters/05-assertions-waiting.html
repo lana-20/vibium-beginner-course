@@ -109,6 +109,21 @@
     .footer-links { display: flex; gap: 20px; }
     .footer-links a { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); transition: color 150ms; }
     .footer-links a:hover { color: var(--fg-2); }
+    /* Exercise & Quiz blocks */
+    .exercise-block, .quiz-block { background: rgba(255,255,255,0.03); border: 1px solid var(--border-mid); border-radius: var(--r-xl); padding: 28px 32px; margin: 32px 0 0; }
+    .exercise-block { border-left: 3px solid var(--mint); }
+    .quiz-block { border-left: 3px solid var(--coral); }
+    .block-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 14px; }
+    .exercise-block .block-label { color: var(--mint-light); }
+    .quiz-block .block-label { color: var(--coral-light); }
+    .block-title { font-family: var(--font-display); font-size: 20px; font-weight: 400; letter-spacing: -0.01em; margin-bottom: 16px; }
+    .quiz-q { margin-bottom: 22px; }
+    .quiz-q p { margin-bottom: 8px; }
+    .quiz-opts { list-style: none; padding: 0; margin: 0 0 4px; display: flex; flex-direction: column; gap: 6px; }
+    .quiz-opts li { font-size: 14px; color: var(--fg-2); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); }
+    .quiz-answers { font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .exercise-block ol, .exercise-block ul { padding-left: 22px; margin: 8px 0 12px; }
+    .exercise-block li { font-size: 15px; color: var(--fg-2); line-height: 1.6; margin-bottom: 6px; }
   </style>
 </head>
 <body>
@@ -300,6 +315,103 @@ assert.<span class="fn">ok</span>(<span class="k">await</span> (<span class="k">
 assert.<span class="fn">ok</span>(<span class="k">await</span> (<span class="k">await</span> page.<span class="fn">find</span>({ text: <span class="s">'$175.98'</span> })).<span class="fn">isVisible</span>(), <span class="s">'total'</span>)</pre></div>
       </div>
       <div class="callout"><p><strong>Why two find({ text }) calls?</strong> The subtotal and total are computed separately. Polling for the subtotal doesn't guarantee the total has updated too — poll for each value you intend to assert.</p></div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">5.6</div>
+      <h2 class="section-heading">Understanding <em>Flaky Tests</em></h2>
+      <p>A test is <strong>flaky</strong> if it passes sometimes and fails other times on the same code, without you changing anything. Flakiness is the most common pain point in browser test automation — and it's almost always a timing issue, not a real bug.</p>
+      <p>The most frequent cause: asserting immediately after an action that causes a DOM update. The test passes when the update is fast, fails when it's slow. The fix is always the same — insert <code class="inline">page.find({ text })</code> or <code class="inline">page._waitForURL()</code> between the action and the assertion.</p>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">flaky vs stable</span></div>
+        <div class="code-body"><pre>
+<span class="c">// Flaky: asserts before React re-renders</span>
+<span class="k">await</span> addToCart.<span class="fn">click</span>()
+assert.<span class="fn">ok</span>(<span class="k">await</span> badge.<span class="fn">isVisible</span>(), <span class="s">'cart badge'</span>)  <span class="c">// may fire before badge appears</span>
+
+<span class="c">// Stable: waits for the observable outcome first</span>
+<span class="k">await</span> addToCart.<span class="fn">click</span>()
+<span class="k">await</span> page.<span class="fn">find</span>({ text: <span class="s">'1 item'</span> })  <span class="c">// blocks until DOM reflects the action</span>
+assert.<span class="fn">ok</span>(<span class="k">await</span> badge.<span class="fn">isVisible</span>(), <span class="s">'cart badge'</span>)</pre></div>
+      </div>
+      <p>Two other common causes: <strong>element found before it's interactive</strong> — <code class="inline">find()</code> returns as soon as the element exists in the DOM, not when it's ready to receive input; use <code class="inline">element.isEnabled()</code> before filling if you see silent fill failures. <strong>Environment timing differences</strong> — CI containers are slower than your laptop; tests that reliably pass locally may intermittently time out in CI. Do not add <code class="inline">sleep()</code> calls to fix this — find the DOM state that indicates the page has settled and wait for that instead.</p>
+      <div class="callout"><p><strong>Flaky vs broken:</strong> Run the test ten times in a row. If it fails consistently in the same place, it's a real bug. If it fails one in five runs, it's a timing issue. These require different fixes. When you can't reproduce flakiness locally, add <code class="inline">vibium.record()</code> and run it in CI until you capture a failing run — the recording shows exactly what was on screen at the moment of failure.</p></div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">Practice</div>
+      <h2 class="section-heading">Exercise &amp; Quiz</h2>
+
+      <div class="exercise-block">
+        <div class="block-label">Exercise</div>
+        <p class="block-title">Filter + Cart Total</p>
+        <p>Write a test called <code class="inline">testProductFilter</code> that:</p>
+        <ol>
+          <li>Navigates to <code class="inline">/products</code></li>
+          <li>Selects "Electronics" from the category dropdown using <code class="inline">selectOption</code></li>
+          <li>Uses <code class="inline">page.find({ text: 'Wireless Headphones' })</code> to wait for a filtered result</li>
+          <li>Asserts that <code class="inline">'Wireless Headphones'</code> is visible</li>
+          <li>Counts visible product cards using <code class="inline">(await page.findAll('.product-card')).length</code> and asserts the count is greater than 0</li>
+        </ol>
+        <p>Then write a second test called <code class="inline">testCartTotal</code> that adds a product to the cart, navigates to <code class="inline">/cart</code>, uses <code class="inline">page.find({ text })</code> to wait for the subtotal, and asserts the subtotal element is visible.</p>
+      </div>
+
+      <div class="quiz-block">
+        <div class="block-label">Quiz</div>
+        <p class="block-title">5 Questions</p>
+
+        <div class="quiz-q">
+          <p><strong>1.</strong> Why is <code class="inline">page.find({ text: 'Updated: 5 items' })</code> better than reading text immediately after a click?</p>
+          <ul class="quiz-opts">
+            <li>A. <code class="inline">find</code> is faster than reading text directly</li>
+            <li>B. <code class="inline">find</code> waits for the text to appear in the DOM; the direct read may catch stale state before the update</li>
+            <li>C. Direct text reads are deprecated in Vibium</li>
+            <li>D. They are equivalent — use whichever is shorter</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>2.</strong> <code class="inline">assert.equal(actual, expected)</code> fails when:</p>
+          <ul class="quiz-opts">
+            <li>A. The values are equal by reference but not by value</li>
+            <li>B. The values are not strictly equal (<code class="inline">!==</code>)</li>
+            <li>C. The actual value is <code class="inline">null</code></li>
+            <li>D. The expected value is a string</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>3.</strong> <code class="inline">element.isVisible()</code> returns <code class="inline">false</code> when the element is:</p>
+          <ul class="quiz-opts">
+            <li>A. Found in the DOM but has <code class="inline">display: none</code></li>
+            <li>B. Found in the DOM and is on screen</li>
+            <li>C. Found anywhere in the document tree</li>
+            <li>D. The only element matching the selector</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>4.</strong> When you need to assert that an element does NOT exist on the page, the right approach is:</p>
+          <ul class="quiz-opts">
+            <li>A. <code class="inline">assert.equal(await element.isVisible(), false)</code></li>
+            <li>B. Call <code class="inline">page.find()</code> and catch the error if it throws</li>
+            <li>C. Use <code class="inline">(await page.findAll(selector)).length === 0</code></li>
+            <li>D. Call <code class="inline">page.find()</code> and check <code class="inline">isVisible()</code> returns false</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>5.</strong> The key reason to call <code class="inline">page.find({ text })</code> before asserting on dynamic values is:</p>
+          <ul class="quiz-opts">
+            <li>A. It logs the assertion to the console</li>
+            <li>B. It prevents the element from disappearing during the assertion</li>
+            <li>C. It blocks until the text appears in the DOM, so the assertion fires on settled state</li>
+            <li>D. It is required before any <code class="inline">assert.equal</code> call</li>
+          </ul>
+        </div>
+
+        <div class="quiz-answers">Answers: 1-B &nbsp; 2-B &nbsp; 3-A &nbsp; 4-C &nbsp; 5-C</div>
+      </div>
     </div>
 
   </div>

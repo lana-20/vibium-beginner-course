@@ -346,4 +346,101 @@ await browser.stop()
 
 Within a Vitest suite, Vitest handles this for you — each `it` block gets its own `beforeEach`-created context, and Vitest runs tests concurrently. But if you need to orchestrate multiple browser sessions *within a single test* — for example, testing a real-time feature where two users must be active simultaneously — the multi-context pattern is the right approach. Two contexts, one browser, complete isolation between them.
 
+---
+
+## Using vibium.record() inside Vitest
+
+In Chapter 3 you saw `vibium.record()` in a standalone script — swap `vibium.start()` for `vibium.record()`, call `stop()` at the end, log the URL. In a Vitest suite, the lifecycle is managed by `beforeEach`/`afterEach`, not by a single function that runs top to bottom. Here's how to wire it in:
+
+```typescript
+import { browser as vibium } from 'vibium'
+import { beforeEach, afterEach } from 'vitest'
+import type { Browser, Page } from 'vibium'
+
+let browser: Browser
+let page: Page
+let stopRecording: (() => Promise<string>) | null = null
+
+beforeEach(async () => {
+  const recording = await vibium.record({ headless: true })
+  browser = recording.browser
+  stopRecording = recording.stop
+  const context = await browser.newContext()
+  page = await context.newPage()
+})
+
+afterEach(async () => {
+  await browser.stop()
+  if (stopRecording) {
+    const url = await stopRecording()
+    console.log('Recording:', url)
+    stopRecording = null
+  }
+})
+```
+
+Two things to notice. First, `stop()` is called *after* `browser.stop()` — the browser must close before the recording can be finalized and uploaded. Second, `stopRecording` is held in the outer scope so `afterEach` can reach it regardless of whether the test passed or failed.
+
+In CI, the recording URL appears in the step logs. When a test fails, open the URL and scrub to the failing assertion. You'll see exactly what was on screen at that moment — which DOM node was missing, which value was wrong, which element wasn't visible. This is the complete observability loop: Vitest reports which test failed, the recording shows why.
+
+For day-to-day local development, keep `vibium.start()` — you can watch the browser directly. Switch the suite to `vibium.record()` when you're debugging a CI-only failure or want a permanent record of a test run.
+
 In the next chapter we'll look at captures — intercepting browser dialogs, console output, and file downloads. These are the scenarios that require the most careful timing, and we'll see a pattern that looks a bit different from what we've done so far.
+
+---
+
+## Exercise
+
+Add a `CartPage` class to the page objects you built in this chapter. It should have at least three methods:
+
+1. `goto()` — navigates to `/cart`
+2. `getItemCount()` — returns the text of the cart item count element
+3. `getSubtotal()` — returns the text of the subtotal value element
+
+Then write a Vitest test file with two tests that use both `ProductsPage` and `CartPage`:
+
+1. **`searches and finds a product`** — uses `ProductsPage` to search for `'yoga'`, asserts `'Yoga Mat'` is visible
+2. **`adds a product and checks cart`** — navigates to a product detail page, clicks "Add to Cart", creates a `CartPage`, calls `goto()`, and asserts `getItemCount()` is not empty
+
+Use `beforeEach`/`afterEach` for browser lifecycle. Every assertion must have a label.
+
+---
+
+## Quiz
+
+**1.** The main purpose of a Page Object class is:
+
+- A. To run tests faster by caching DOM lookups
+- B. To centralize selectors and interaction logic so tests don't hardcode them
+- C. To replace `beforeEach` and `afterEach`
+- D. To add type safety to assertion calls
+
+**2.** `beforeEach` and `afterEach` in Vitest enforce test atomicity by:
+
+- A. Running tests sequentially so they cannot interfere
+- B. Creating a fresh browser context before each test and closing it after
+- C. Resetting the application state on the server
+- D. Skipping tests that depend on each other
+
+**3.** A Vitest test is identified in output by:
+
+- A. The test file name only
+- B. The `describe` block name and the `it` string, combined
+- C. The line number of the `it` call
+- D. The variable name of the `page` object
+
+**4.** The Page Object Pattern follows Single Responsibility by ensuring:
+
+- A. Each test file imports exactly one Page Object
+- B. Selectors live in Page Objects and assertions live in test functions
+- C. Page Objects never use `async/await`
+- D. Tests cannot share Page Object instances
+
+**5.** `Promise.all([ctx1.newPage(), ctx2.newPage()])` is useful when you need to:
+
+- A. Run two tests in the same browser context
+- B. Create two pages that share cookies
+- C. Simulate two independent users acting simultaneously in one browser
+- D. Run Vitest tests in parallel processes
+
+**Answers:** 1-B, 2-B, 3-B, 4-B, 5-C

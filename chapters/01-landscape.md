@@ -65,3 +65,56 @@ There isn't one right tool for all situations, and I want to be honest about tha
 We're using Vibium because it sits at a genuinely new point in the landscape — designed for a world where automation scripts are written by both humans and AI agents, and where the boundary between "running a test" and "running an agent that can test" is blurring. Understanding Vibium gives you both a capable, practical testing tool for today and a foundation for where the whole industry is heading.
 
 In the next chapter, we'll open up the hood and look at how Vibium actually works — the object model, the interfaces, and the core patterns you'll use throughout every chapter in this course. Let's get into it.
+
+---
+
+## Exercise
+
+Search a job board (LinkedIn, Indeed, or similar) for two open roles: one "QA Engineer" and one "Test Automation Engineer." For each posting, note which testing tools are mentioned by name. Then answer these questions in writing:
+
+1. Which tools appear most often across both postings?
+2. Which tool from this chapter is not mentioned? Why might that be?
+3. Based on the job requirements, which tool do you think the team is using for CI — and what in the posting suggests that?
+
+There's no code to write here. The goal is to connect the landscape you just read about to the real market. Come back to this list at the end of the course.
+
+---
+
+## Quiz
+
+**1.** Which browser automation tool uses the W3C WebDriver standard?
+
+- A. Cypress
+- B. Playwright
+- C. Selenium
+- D. Vibium
+
+**2.** WebDriver BiDi improves on classic WebDriver by adding:
+
+- A. Support for more programming languages
+- B. A bidirectional event channel for real-time browser observation
+- C. Automatic test generation
+- D. Cross-browser support for WebKit
+
+**3.** Cypress runs tests differently from Selenium and Playwright because it:
+
+- A. Uses a compiled binary to control the browser
+- B. Relies on the Chrome DevTools Protocol
+- C. Runs tests inside the browser alongside the application
+- D. Requires a separate WebDriver server process
+
+**4.** Which Vibium interface would you use to explore a page from the terminal before writing any code?
+
+- A. TypeScript client
+- B. MCP server
+- C. WebDriver BiDi adapter
+- D. CLI
+
+**5.** Playwright's cross-browser support is architecturally notable because it:
+
+- A. Uses the W3C WebDriver standard for all browsers
+- B. Relies on unofficial browser patches and the Chrome DevTools Protocol
+- C. Runs tests inside each browser's JavaScript engine
+- D. Delegates to Selenium for non-Chromium browsers
+
+**Answers:** 1-C, 2-B, 3-C, 4-D, 5-B

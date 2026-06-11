@@ -224,4 +224,95 @@ One last thing for this chapter. When you're chasing a timing-related failure �
 
 We'll see this again in Chapter 9 when we talk about CI observability.
 
+---
+
+## Understanding flaky tests
+
+A test is **flaky** if it passes sometimes and fails other times on the same code, without you changing anything. Flakiness is the most common pain point in browser test automation — and it's almost always a timing issue, not a real bug.
+
+Here's what causes it and how to diagnose each case.
+
+**Race between action and DOM update.** You click a button and immediately assert on a value that the click updates. The test passes when the update is fast, fails when it's slow. The fix is always the same: insert `page.find({ text })` or `page._waitForURL()` between the action and the assertion. Never assert immediately after an action that causes a DOM change.
+
+```typescript
+// Flaky: asserts before React re-renders
+await addToCart.click()
+assert.ok(await badge.isVisible(), 'cart badge')  // ← may fire before badge appears
+
+// Stable: waits for the observable outcome
+await addToCart.click()
+await page.find({ text: '1 item' })  // ← blocks until the DOM reflects the action
+assert.ok(await badge.isVisible(), 'cart badge')
+```
+
+**Element found before it's interactive.** `find()` returns as soon as the element exists in the DOM — but that's not the same as it being ready to receive input. On slow machines or CI, an input might be in the DOM but not yet enabled. Use `element.isEnabled()` if you're seeing `fill()` or `click()` silently fail on elements that intermittently aren't ready.
+
+**Environment-specific timing.** Tests that pass locally but fail in CI are almost always timing issues — CI containers have less memory and slower I/O than your laptop. Do not add `sleep()` calls to fix these. Instead, find the DOM state that indicates the page has settled, and wait for that. Arbitrary sleeps hide the symptom; they don't fix the root cause.
+
+**Truly flaky vs broken.** To distinguish an intermittent timing failure from a genuine bug, run the test ten times in a row (`vitest --repeat 10` or a loop in your shell). If it fails consistently — every run, in the same place — it's a real failure. If it fails one in five times, it's flaky. These require different responses: consistent failures need a code fix; flaky tests need a wait strategy adjustment.
+
+When you can't reproduce flakiness locally, add `vibium.record()` to the test and run it in CI until you capture a failing run. The recording at `player.vibium.dev` shows you the DOM state at every step — you'll see exactly what was on screen at the moment the assertion fired.
+
 In the next chapter, we're going to organize everything we've built so far into a real test suite — introducing Vitest, page objects, and the framework patterns that make a test codebase maintainable as it grows.
+
+---
+
+## Exercise
+
+Write a test called `testProductFilter` that:
+
+1. Navigates to `/products`
+2. Selects "Electronics" from the category dropdown using `selectOption`
+3. Uses `page.find({ text: 'Wireless Headphones' })` to wait for a result that should be visible after filtering
+4. Asserts that `'Wireless Headphones'` is visible
+5. Finds any element whose text would only appear in Electronics (e.g. a product name) and asserts it is visible
+6. Uses `(await page.findAll('.product-card')).length` to count visible products and asserts the count is greater than 0
+
+Then write a **second test** called `testCartTotal` (separate function) that:
+
+1. Navigates to a product page and reads the product price text using `element.text()`
+2. Adds the product to the cart
+3. Navigates to `/cart`
+4. Uses `page.find({ text })` to wait for the cart subtotal to appear
+5. Asserts the subtotal element is visible
+
+---
+
+## Quiz
+
+**1.** Why is `page.find({ text: 'Updated: 5 items' })` better than `assert.ok(await label.text(), ...)` immediately after a click?
+
+- A. `find` is faster than reading text directly
+- B. `find` waits for the text to appear in the DOM; the direct read may catch stale state before the update
+- C. Direct text reads are deprecated in Vibium
+- D. They are equivalent — use whichever is shorter
+
+**2.** `assert.equal(actual, expected)` fails when:
+
+- A. The values are equal by reference but not by value
+- B. The values are not strictly equal (`!==`)
+- C. The actual value is `null`
+- D. The expected value is a string
+
+**3.** `element.isVisible()` returns `false` when the element is:
+
+- A. Found in the DOM but has `display: none`
+- B. Found in the DOM and is on screen
+- C. Found anywhere in the document tree
+- D. The only element matching the selector
+
+**4.** When you need to assert that an element does NOT exist on the page, the right approach is:
+
+- A. `assert.equal(await element.isVisible(), false)`
+- B. Call `page.find()` and catch the error if it throws
+- C. Use `(await page.findAll(selector)).length === 0`
+- D. Call `page.find()` and check `isVisible()` returns false
+
+**5.** The key reason to call `page.find({ text })` before asserting on dynamic values is:
+
+- A. It logs the assertion to the console
+- B. It prevents the element from disappearing during the assertion
+- C. It blocks until the text appears in the DOM, so the assertion fires on settled state
+- D. It is required before any `assert.equal` call
+
+**Answers:** 1-B, 2-B, 3-A, 4-C, 5-C

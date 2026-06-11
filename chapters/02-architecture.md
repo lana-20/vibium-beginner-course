@@ -4,6 +4,46 @@ In Chapter 1 we talked about *what* Vibium is — one of several browser automat
 
 ---
 
+## Meet the app
+
+Every chapter in this course tests the same application: **automation-exercise.daisyladybug.com**. This is a fully functional e-commerce sandbox — built specifically as a testing target, so every page has stable, meaningful behavior you can assert on.
+
+Before you write a single line of test code, open the app in your browser and click around. Understanding what you're testing changes how you think about the tests.
+
+Here's what you'll find:
+
+**Homepage (`/`)**
+The landing page has a hero section with the site heading and a CTA link ("Explore Products"), and a Featured Products section below it showing a subset of the catalogue. The page title reads `automation-exercise | E-commerce Testing Sandbox`. This is the page you'll first navigate to in Chapter 3.
+
+**Products page (`/products`)**
+A filterable catalogue of 12 products across four categories: Electronics, Apparel, Home, and Books. There's a text search input that filters in real time as you type, a category dropdown (`select:first-of-type`), and a sort dropdown (`select:last-of-type`). Each product card links to a detail page. This page is the main subject of Chapters 4, 5, and 6.
+
+**Product detail page (`/products/:id`)**
+Each product has its own page with a name, price, description, and an "Add to Cart" button. Clicking it adds the item to the cart and updates the cart badge in the navigation. The product IDs follow the pattern `prod_001` through `prod_012`. Chapter 4 uses `prod_001` (Wireless Headphones, $79.99) and `prod_007` (Coffee Maker).
+
+**Cart (`/cart`)**
+Shows all items currently in the cart, with quantity controls (increase/decrease) and a running total. The cart summary shows item count, subtotal, shipping ($16), and total. Clicking the quantity controls triggers live DOM updates — asserting on these correctly is the subject of Chapter 5.
+
+**Checkout (`/checkout`)**
+A single-page form with twelve required fields across three groups: personal info (first name, last name, email, phone), shipping address (address, city, state, ZIP), and payment (cardholder name, card number, expiry, CVC). Every field validates on submit. Submitting an empty form shows twelve error messages. A valid submission navigates to the confirmation page. Chapter 4 covers this form end to end.
+
+**Confirmation (`/confirmation`)**
+The order success page, reached after a valid checkout submission. The URL is what you assert on — if the browser lands here, the checkout flow completed successfully.
+
+---
+
+The app has no login, no server-side rate limiting, and no external dependencies. Tests against it are deterministic: the same inputs always produce the same outputs. That makes it a good learning target. The patterns you develop here — form filling, dynamic assertion, navigation flows — apply directly to production apps with more complex behaviour.
+
+Throughout the course, you'll refer to the base URL as a constant:
+
+```typescript
+const AUT = 'https://automation-exercise.daisyladybug.com'
+```
+
+Every `page.go()` call in every example prefixes a path with this constant. If you ever need to run tests against a local copy, you'd change this one line.
+
+---
+
 ## The three interfaces
 
 Let me start by making the three-interface story concrete, because it comes up constantly.
@@ -178,3 +218,62 @@ exploreApp()
 Run this and you'll see the browser open, navigate home, then click through to the products page. The `try/finally` pattern is something you'll write in every test in this course. `browser.stop()` in `finally` means the browser always cleans up — whether the test passed, failed, or threw an unexpected error.
 
 In the next chapter, we turn this foundation into a real test with assertions, proper failure handling, and a structure you can run reliably in CI. Let's go write it.
+
+---
+
+## Exercise
+
+Write a script called `02-explore.ts` that walks the full Browser → Context → Page → Element hierarchy and logs something at each level:
+
+1. Create a browser with `headless: false`
+2. Create a context and a page
+3. Navigate to `automation-exercise.daisyladybug.com`
+4. Log the page title using `page.title()`
+5. Find the "Products" navigation link using `{ role: 'link', text: 'Products' }` and log its `href` attribute
+6. Click the link and wait for `page._waitForURL('**/products')`
+7. Log the new URL with `page.url()`
+8. Find the first product link on the page and log its text
+9. Close the browser in `finally`
+
+Expected terminal output: the homepage title, the Products href, the products URL, and one product name — all in sequence with no errors.
+
+---
+
+## Quiz
+
+**1.** What is the correct order of the Vibium object hierarchy?
+
+- A. Context → Browser → Element → Page
+- B. Page → Browser → Context → Element
+- C. Browser → Context → Page → Element
+- D. Browser → Page → Context → Element
+
+**2.** Two `BrowserContext` objects created from the same browser instance:
+
+- A. Share cookies and localStorage
+- B. Share authentication state but not cookies
+- C. Are completely isolated — no shared state
+- D. Run in separate browser processes
+
+**3.** `page.find({ text: 'Add to Cart' })` without a `role` key returns:
+
+- A. All elements on the page containing that text
+- B. The innermost element containing that text
+- C. The outermost element containing that text
+- D. An error, because `role` is required
+
+**4.** Which of these is a Vibium "capture" rather than an action or wait?
+
+- A. `page.go(url)`
+- B. `page.find({ text })`
+- C. `element.click()`
+- D. `page.capture.dialog('accept')`
+
+**5.** Why does `browser.stop()` belong in a `finally` block rather than at the end of the `try` block?
+
+- A. `finally` runs faster than `try`
+- B. `finally` runs whether the test passes, fails, or throws — ensuring the browser always closes
+- C. The Vibium API requires it
+- D. It prevents the daemon from restarting
+
+**Answers:** 1-C, 2-C, 3-C, 4-D, 5-B

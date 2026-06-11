@@ -118,6 +118,21 @@
     .footer-links { display: flex; gap: 20px; }
     .footer-links a { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); transition: color 150ms; }
     .footer-links a:hover { color: var(--fg-2); }
+    /* Exercise & Quiz blocks */
+    .exercise-block, .quiz-block { background: rgba(255,255,255,0.03); border: 1px solid var(--border-mid); border-radius: var(--r-xl); padding: 28px 32px; margin: 32px 0 0; }
+    .exercise-block { border-left: 3px solid var(--mint); }
+    .quiz-block { border-left: 3px solid var(--coral); }
+    .block-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 14px; }
+    .exercise-block .block-label { color: var(--mint-light); }
+    .quiz-block .block-label { color: var(--coral-light); }
+    .block-title { font-family: var(--font-display); font-size: 20px; font-weight: 400; letter-spacing: -0.01em; margin-bottom: 16px; }
+    .quiz-q { margin-bottom: 22px; }
+    .quiz-q p { margin-bottom: 8px; }
+    .quiz-opts { list-style: none; padding: 0; margin: 0 0 4px; display: flex; flex-direction: column; gap: 6px; }
+    .quiz-opts li { font-size: 14px; color: var(--fg-2); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); }
+    .quiz-answers { font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .exercise-block ol, .exercise-block ul { padding-left: 22px; margin: 8px 0 12px; }
+    .exercise-block li { font-size: 15px; color: var(--fg-2); line-height: 1.6; margin-bottom: 6px; }
   </style>
 </head>
 <body>
@@ -333,6 +348,84 @@ assert.<span class="fn">ok</span>(<span class="k">await</span> (<span class="k">
 <span class="k">const</span> submit = <span class="k">await</span> page.<span class="fn">find</span>({ role: <span class="s">'button'</span>, text: <span class="s">'Place Order'</span> })
 <span class="k">await</span> submit.<span class="fn">click</span>()
 <span class="k">await</span> page.<span class="fn">_waitForURL</span>(<span class="s">'**/confirmation'</span>)</pre></div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">Practice</div>
+      <h2 class="section-heading">Exercise &amp; Quiz</h2>
+
+      <div class="exercise-block">
+        <div class="block-label">Exercise</div>
+        <p class="block-title">Search + Checkout + Validation</p>
+        <p>Write a test called <code class="inline">testSearchAndCheckout</code> that:</p>
+        <ol>
+          <li>Navigates to <code class="inline">/products</code> and searches for <code class="inline">'yoga'</code></li>
+          <li>Asserts that <code class="inline">'Yoga Mat'</code> is visible and <code class="inline">'Wireless Headphones'</code> is not visible</li>
+          <li>Navigates to <code class="inline">'/products/prod_007'</code> and adds it to the cart</li>
+          <li>Navigates to <code class="inline">/checkout</code></li>
+          <li>Fills all 12 checkout fields using the <code class="inline">fieldMap</code> loop pattern with your own data</li>
+          <li>Clicks "Place Order" and waits for <code class="inline">_waitForURL('**/confirmation')</code></li>
+          <li>Asserts that the current URL includes <code class="inline">'/confirmation'</code></li>
+        </ol>
+        <p>Then write a second test called <code class="inline">testValidationErrors</code> (separate function, separate browser) that adds a product, navigates to checkout, clicks "Place Order" without filling anything, and asserts at least three validation error messages are visible.</p>
+      </div>
+
+      <div class="quiz-block">
+        <div class="block-label">Quiz</div>
+        <p class="block-title">5 Questions</p>
+
+        <div class="quiz-q">
+          <p><strong>1.</strong> What is the difference between <code class="inline">element.fill(text)</code> and <code class="inline">element.type(text)</code>?</p>
+          <ul class="quiz-opts">
+            <li>A. <code class="inline">fill()</code> triggers keyboard events; <code class="inline">type()</code> sets the value silently</li>
+            <li>B. <code class="inline">fill()</code> clears the field first then types; <code class="inline">type()</code> appends without clearing</li>
+            <li>C. They are identical — <code class="inline">type()</code> is an alias</li>
+            <li>D. <code class="inline">type()</code> supports special keys like Tab; <code class="inline">fill()</code> does not</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>2.</strong> To select the "Electronics" option from a <code class="inline">&lt;select&gt;</code> dropdown, you call:</p>
+          <ul class="quiz-opts">
+            <li>A. <code class="inline">element.fill('Electronics')</code></li>
+            <li>B. <code class="inline">element.click('Electronics')</code></li>
+            <li>C. <code class="inline">element.choose('Electronics')</code></li>
+            <li>D. <code class="inline">element.selectOption('Electronics')</code></li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>3.</strong> The main benefit of the <code class="inline">fieldMap</code> pattern is:</p>
+          <ul class="quiz-opts">
+            <li>A. It is faster than individual <code class="inline">fill()</code> calls</li>
+            <li>B. It prevents validation errors from appearing</li>
+            <li>C. It separates test data from the fill logic so both can change independently</li>
+            <li>D. It handles select dropdowns automatically</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>4.</strong> After clicking "Place Order" to submit a checkout form, the correct next step is:</p>
+          <ul class="quiz-opts">
+            <li>A. Sleep for 2 seconds then assert</li>
+            <li>B. Immediately assert the URL with <code class="inline">page.url()</code></li>
+            <li>C. Call <code class="inline">page._waitForURL('**/confirmation')</code> before asserting</li>
+            <li>D. Check <code class="inline">element.isEnabled()</code> on the submit button</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>5.</strong> <code class="inline">element.value()</code> is different from <code class="inline">element.text()</code> because:</p>
+          <ul class="quiz-opts">
+            <li>A. <code class="inline">value()</code> reads the <code class="inline">aria-label</code> attribute; <code class="inline">text()</code> reads visible content</li>
+            <li>B. <code class="inline">value()</code> reads the current value of an input field; <code class="inline">text()</code> reads the element's rendered text content</li>
+            <li>C. <code class="inline">value()</code> only works on select dropdowns</li>
+            <li>D. They return the same thing for all element types</li>
+          </ul>
+        </div>
+
+        <div class="quiz-answers">Answers: 1-B &nbsp; 2-D &nbsp; 3-C &nbsp; 4-C &nbsp; 5-B</div>
       </div>
     </div>
 

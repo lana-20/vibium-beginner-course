@@ -290,3 +290,61 @@ This is similar in spirit to Playwright's trace recorder, but you don't need to 
 For local development, keep `vibium.start()` as you've been doing — you can see the browser directly. Switch to `vibium.record()` when you need to share a test run with a teammate, or when you want a permanent record of what a passing test looks like so you can compare it later against a failure.
 
 In the next chapter we'll move from reading the page to interacting with it — filling in search fields, driving dropdowns, submitting forms, and asserting validation behavior. Forms are where most real-world testing happens, so that's an important one.
+
+---
+
+## Exercise
+
+Write a complete test for the `/products` page. Name the function `testProductsPage`. It should:
+
+1. Navigate to `automation-exercise.daisyladybug.com/products`
+2. Assert the page title equals `'automation-exercise | E-commerce Testing Sandbox'`
+3. Find the heading with text `'Products'` and assert it is visible
+4. Find any product name visible on the page (e.g. `'Wireless Headphones'`) and assert it is visible
+5. Find the search input using `"input[placeholder='Search products...']"` and assert it is enabled
+6. Assert that the category select dropdown is visible using `'select:first-of-type'`
+
+Use `try/finally`, label every assertion, and end with `.catch(err => { process.exit(1) })`.
+
+Then introduce a deliberate failure in one assertion — wrong expected value — run the script, read the error output, then fix it.
+
+---
+
+## Quiz
+
+**1.** What does `assert.ok(value, label)` check?
+
+- A. That `value` strictly equals `true`
+- B. That `value` is truthy — anything other than `false`, `null`, `undefined`, `0`, or `""`
+- C. That `value` is not null or undefined only
+- D. That `value` equals the string `"ok"`
+
+**2.** Why must every standalone test script call `process.exit(1)` on failure?
+
+- A. It is required for async functions to resolve
+- B. To log the error to a file
+- C. To ensure CI receives a non-zero exit code and marks the build as failed
+- D. To prevent the Vibium daemon from remaining alive
+
+**3.** The third argument to `assert.equal(actual, expected, 'label')` is:
+
+- A. A comparison mode flag
+- B. A custom error class
+- C. A timeout in milliseconds
+- D. A label that appears in the error message when the assertion fails
+
+**4.** What does `vibium.record()` return that `vibium.start()` does not?
+
+- A. A headless browser instance
+- B. A `stop` function that uploads the session and returns a player URL
+- C. A browser with network interception pre-configured
+- D. A browser that runs in a separate process
+
+**5.** `headless: false` causes Vibium to:
+
+- A. Disable network requests during the test
+- B. Run the browser without JavaScript enabled
+- C. Skip the daemon startup step
+- D. Open a visible browser window on your screen
+
+**Answers:** 1-B, 2-C, 3-D, 4-B, 5-D

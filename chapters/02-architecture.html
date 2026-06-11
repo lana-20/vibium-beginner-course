@@ -115,6 +115,29 @@
     .footer-links { display: flex; gap: 20px; }
     .footer-links a { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); transition: color 150ms; }
     .footer-links a:hover { color: var(--fg-2); }
+    /* Page map */
+    .page-map { display: flex; flex-direction: column; gap: 0; margin: 24px 0; border: 1px solid var(--border); border-radius: var(--r-xl); overflow: hidden; }
+    .page-row { display: grid; grid-template-columns: 140px 1fr; gap: 0; border-bottom: 1px solid var(--border); }
+    .page-row:last-child { border-bottom: none; }
+    .page-path { padding: 14px 18px; background: rgba(255,255,255,0.03); border-right: 1px solid var(--border); display: flex; align-items: flex-start; }
+    .page-path code { white-space: nowrap; }
+    .page-desc { padding: 14px 18px; font-size: 14px; color: var(--fg-2); line-height: 1.6; }
+    .page-desc strong { color: var(--off-white); }
+    /* Exercise & Quiz blocks */
+    .exercise-block, .quiz-block { background: rgba(255,255,255,0.03); border: 1px solid var(--border-mid); border-radius: var(--r-xl); padding: 28px 32px; margin: 32px 0 0; }
+    .exercise-block { border-left: 3px solid var(--mint); }
+    .quiz-block { border-left: 3px solid var(--coral); }
+    .block-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 14px; }
+    .exercise-block .block-label { color: var(--mint-light); }
+    .quiz-block .block-label { color: var(--coral-light); }
+    .block-title { font-family: var(--font-display); font-size: 20px; font-weight: 400; letter-spacing: -0.01em; margin-bottom: 16px; }
+    .quiz-q { margin-bottom: 22px; }
+    .quiz-q p { margin-bottom: 8px; }
+    .quiz-opts { list-style: none; padding: 0; margin: 0 0 4px; display: flex; flex-direction: column; gap: 6px; }
+    .quiz-opts li { font-size: 14px; color: var(--fg-2); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); }
+    .quiz-answers { font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .exercise-block ol, .exercise-block ul { padding-left: 22px; margin: 8px 0 12px; }
+    .exercise-block li { font-size: 15px; color: var(--fg-2); line-height: 1.6; margin-bottom: 6px; }
   </style>
 </head>
 <body>
@@ -155,6 +178,49 @@
 
 <main class="content">
   <div class="container">
+
+    <div class="section-block">
+      <div class="section-eyebrow">The app</div>
+      <h2 class="section-heading">Meet the <em>Application Under Test</em></h2>
+      <p>Every chapter in this course tests the same application: <strong><a href="https://automation-exercise.daisyladybug.com" target="_blank" rel="noopener">automation-exercise.daisyladybug.com</a></strong>. Open it in your browser now and click around before reading further. Understanding what you're testing changes how you think about the tests.</p>
+      <p>It's a fully functional e-commerce sandbox — built specifically as a testing target. No login, no external dependencies, no rate limiting. The same inputs always produce the same outputs. Here's the map:</p>
+      <div class="page-map">
+        <div class="page-row">
+          <div class="page-path"><code class="inline">/</code></div>
+          <div class="page-desc"><strong>Homepage.</strong> Hero heading, "Explore Products" CTA, Featured Products section. Page title: <code class="inline">automation-exercise | E-commerce Testing Sandbox</code>. First tested in Chapter 3.</div>
+        </div>
+        <div class="page-row">
+          <div class="page-path"><code class="inline">/products</code></div>
+          <div class="page-desc"><strong>Catalogue.</strong> 12 products. Text search input, category dropdown (All / Electronics / Apparel / Home / Books), sort dropdown. Filters update the list in real time. Main subject of Chapters 4, 5, and 6.</div>
+        </div>
+        <div class="page-row">
+          <div class="page-path"><code class="inline">/products/:id</code></div>
+          <div class="page-desc"><strong>Product detail.</strong> Name, price, description, "Add to Cart" button. IDs run <code class="inline">prod_001</code>–<code class="inline">prod_012</code>. Chapter 4 uses <code class="inline">prod_001</code> (Wireless Headphones, $79.99) and <code class="inline">prod_007</code> (Coffee Maker).</div>
+        </div>
+        <div class="page-row">
+          <div class="page-path"><code class="inline">/cart</code></div>
+          <div class="page-desc"><strong>Cart.</strong> Item list with quantity controls. Live-updating subtotal, $16 shipping, total. Quantity increase/decrease triggers DOM re-renders — the subject of Chapter 5's waiting exercises.</div>
+        </div>
+        <div class="page-row">
+          <div class="page-path"><code class="inline">/checkout</code></div>
+          <div class="page-desc"><strong>Checkout form.</strong> 12 required fields: first name, last name, email, phone, address, city, state, ZIP, cardholder name, card number, expiry, CVC. All validate on submit. Empty submit shows 12 error messages. Chapter 4 walks this flow end to end.</div>
+        </div>
+        <div class="page-row">
+          <div class="page-path"><code class="inline">/confirmation</code></div>
+          <div class="page-desc"><strong>Order confirmation.</strong> The success page after a valid checkout. Asserting on the URL pattern <code class="inline">**/confirmation</code> is how we verify the checkout completed.</div>
+        </div>
+      </div>
+      <p>Throughout the course, every <code class="inline">page.go()</code> call prefixes a path with a single constant:</p>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">AUT constant — used in every chapter</span></div>
+        <div class="code-body"><pre><span class="k">const</span> AUT = <span class="s">'https://automation-exercise.daisyladybug.com'</span>
+
+<span class="c">// usage</span>
+<span class="k">await</span> page.<span class="fn">go</span>(<span class="s">`${AUT}/products`</span>)
+<span class="k">await</span> page.<span class="fn">go</span>(<span class="s">`${AUT}/products/prod_001`</span>)
+<span class="k">await</span> page.<span class="fn">go</span>(<span class="s">`${AUT}/checkout`</span>)</pre></div>
+      </div>
+    </div>
 
     <div class="section-block">
       <div class="section-eyebrow">2.1</div>
@@ -304,6 +370,86 @@ console.<span class="fn">log</span>(dialog.message)
 <span class="k">await</span> page.<span class="fn">route</span>(<span class="s">'**/api/products'</span>, route =&gt; {
   route.<span class="fn">fulfill</span>({ status: <span class="n">200</span>, body: JSON.<span class="fn">stringify</span>({ products: [] }) })
 })</pre></div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">Practice</div>
+      <h2 class="section-heading">Exercise &amp; Quiz</h2>
+
+      <div class="exercise-block">
+        <div class="block-label">Exercise</div>
+        <p class="block-title">Walk the Full Hierarchy</p>
+        <p>Write a script called <code class="inline">02-explore.ts</code> that walks the full Browser → Context → Page → Element hierarchy and logs something at each level:</p>
+        <ol>
+          <li>Create a browser with <code class="inline">headless: false</code></li>
+          <li>Create a context and a page</li>
+          <li>Navigate to <code class="inline">automation-exercise.daisyladybug.com</code></li>
+          <li>Log the page title using <code class="inline">page.title()</code></li>
+          <li>Find the "Products" navigation link using <code class="inline">{ role: 'link', text: 'Products' }</code> and log its <code class="inline">href</code> attribute</li>
+          <li>Click the link and wait for <code class="inline">page._waitForURL('**/products')</code></li>
+          <li>Log the new URL with <code class="inline">page.url()</code></li>
+          <li>Find the first product link on the page and log its text</li>
+          <li>Close the browser in <code class="inline">finally</code></li>
+        </ol>
+        <p>Expected terminal output: the homepage title, the Products href, the products URL, and one product name — all in sequence with no errors.</p>
+      </div>
+
+      <div class="quiz-block">
+        <div class="block-label">Quiz</div>
+        <p class="block-title">5 Questions</p>
+
+        <div class="quiz-q">
+          <p><strong>1.</strong> What is the correct order of the Vibium object hierarchy?</p>
+          <ul class="quiz-opts">
+            <li>A. Context → Browser → Element → Page</li>
+            <li>B. Page → Browser → Context → Element</li>
+            <li>C. Browser → Context → Page → Element</li>
+            <li>D. Browser → Page → Context → Element</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>2.</strong> Two <code class="inline">BrowserContext</code> objects created from the same browser instance:</p>
+          <ul class="quiz-opts">
+            <li>A. Share cookies and localStorage</li>
+            <li>B. Share authentication state but not cookies</li>
+            <li>C. Are completely isolated — no shared state</li>
+            <li>D. Run in separate browser processes</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>3.</strong> <code class="inline">page.find({ text: 'Add to Cart' })</code> without a <code class="inline">role</code> key returns:</p>
+          <ul class="quiz-opts">
+            <li>A. All elements on the page containing that text</li>
+            <li>B. The innermost element containing that text</li>
+            <li>C. The outermost element containing that text</li>
+            <li>D. An error, because <code class="inline">role</code> is required</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>4.</strong> Which of these is a Vibium "capture" rather than an action or wait?</p>
+          <ul class="quiz-opts">
+            <li>A. <code class="inline">page.go(url)</code></li>
+            <li>B. <code class="inline">page.find({ text })</code></li>
+            <li>C. <code class="inline">element.click()</code></li>
+            <li>D. <code class="inline">page.capture.dialog('accept')</code></li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>5.</strong> Why does <code class="inline">browser.stop()</code> belong in a <code class="inline">finally</code> block rather than at the end of the <code class="inline">try</code> block?</p>
+          <ul class="quiz-opts">
+            <li>A. <code class="inline">finally</code> runs faster than <code class="inline">try</code></li>
+            <li>B. <code class="inline">finally</code> runs whether the test passes, fails, or throws — ensuring the browser always closes</li>
+            <li>C. The Vibium API requires it</li>
+            <li>D. It prevents the daemon from restarting</li>
+          </ul>
+        </div>
+
+        <div class="quiz-answers">Answers: 1-C &nbsp; 2-C &nbsp; 3-C &nbsp; 4-D &nbsp; 5-B</div>
       </div>
     </div>
 

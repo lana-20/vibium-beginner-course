@@ -92,6 +92,22 @@
     .footer-links { display: flex; gap: 20px; }
     .footer-links a { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); transition: color 150ms; }
     .footer-links a:hover { color: var(--fg-2); }
+
+    /* Exercise & Quiz blocks */
+    .exercise-block, .quiz-block { background: rgba(255,255,255,0.03); border: 1px solid var(--border-mid); border-radius: var(--r-xl); padding: 28px 32px; margin: 32px 0 0; }
+    .exercise-block { border-left: 3px solid var(--mint); }
+    .quiz-block { border-left: 3px solid var(--coral); }
+    .block-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 14px; }
+    .exercise-block .block-label { color: var(--mint-light); }
+    .quiz-block .block-label { color: var(--coral-light); }
+    .block-title { font-family: var(--font-display); font-size: 20px; font-weight: 400; letter-spacing: -0.01em; margin-bottom: 16px; }
+    .quiz-q { margin-bottom: 22px; }
+    .quiz-q p { margin-bottom: 8px; }
+    .quiz-opts { list-style: none; padding: 0; margin: 0 0 4px; display: flex; flex-direction: column; gap: 6px; }
+    .quiz-opts li { font-size: 14px; color: var(--fg-2); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); }
+    .quiz-answers { font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .exercise-block ol, .exercise-block ul { padding-left: 22px; margin: 8px 0 12px; }
+    .exercise-block li { font-size: 15px; color: var(--fg-2); line-height: 1.6; margin-bottom: 6px; }
   </style>
 </head>
 <body>
@@ -207,6 +223,80 @@
       <p>There isn't one right tool for all situations, and I want to be honest about that. Playwright is an excellent, mature choice for teams that want broad language support and a well-established ecosystem. Selenium with BiDi is the right call when W3C standard compliance and enterprise compatibility are non-negotiable. Cypress serves frontend teams who want testing deeply integrated into their development workflow.</p>
       <p>We're using Vibium because it sits at a genuinely new point in the landscape — designed for a world where automation scripts are written by both humans and AI agents, and where the boundary between "running a test" and "running an agent that can test" is blurring. Understanding Vibium gives you both a capable, practical testing tool for today and a foundation for where the whole industry is heading.</p>
       <p>In the next chapter, we'll open up the hood and look at how Vibium actually works — the object model, the three interfaces, and the core patterns you'll use throughout every chapter in this course. Let's get into it.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">Practice</div>
+      <h2 class="section-heading">Exercise &amp; Quiz</h2>
+
+      <div class="exercise-block">
+        <div class="block-label">Exercise</div>
+        <p class="block-title">Job Board Research</p>
+        <p>Search a job board (LinkedIn, Indeed, or similar) for two open roles: one "QA Engineer" and one "Test Automation Engineer." For each posting, note which testing tools are mentioned by name. Then answer these questions in writing:</p>
+        <ol>
+          <li>Which tools appear most often across both postings?</li>
+          <li>Which tool from this chapter is not mentioned? Why might that be?</li>
+          <li>Based on the job requirements, which tool do you think the team is using for CI — and what in the posting suggests that?</li>
+        </ol>
+        <p>There's no code to write here. The goal is to connect the landscape you just read about to the real market. Come back to this list at the end of the course.</p>
+      </div>
+
+      <div class="quiz-block">
+        <div class="block-label">Quiz</div>
+        <p class="block-title">5 Questions</p>
+
+        <div class="quiz-q">
+          <p><strong>1.</strong> Which browser automation tool uses the W3C WebDriver standard?</p>
+          <ul class="quiz-opts">
+            <li>A. Cypress</li>
+            <li>B. Playwright</li>
+            <li>C. Selenium</li>
+            <li>D. Vibium</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>2.</strong> WebDriver BiDi improves on classic WebDriver by adding:</p>
+          <ul class="quiz-opts">
+            <li>A. Support for more programming languages</li>
+            <li>B. A bidirectional event channel for real-time browser observation</li>
+            <li>C. Automatic test generation</li>
+            <li>D. Cross-browser support for WebKit</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>3.</strong> Cypress runs tests differently from Selenium and Playwright because it:</p>
+          <ul class="quiz-opts">
+            <li>A. Uses a compiled binary to control the browser</li>
+            <li>B. Relies on the Chrome DevTools Protocol</li>
+            <li>C. Runs tests inside the browser alongside the application</li>
+            <li>D. Requires a separate WebDriver server process</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>4.</strong> Which Vibium interface would you use to explore a page from the terminal before writing any code?</p>
+          <ul class="quiz-opts">
+            <li>A. TypeScript client</li>
+            <li>B. MCP server</li>
+            <li>C. WebDriver BiDi adapter</li>
+            <li>D. CLI</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>5.</strong> Playwright's cross-browser support is architecturally notable because it:</p>
+          <ul class="quiz-opts">
+            <li>A. Uses the W3C WebDriver standard for all browsers</li>
+            <li>B. Relies on unofficial browser patches and the Chrome DevTools Protocol</li>
+            <li>C. Runs tests inside each browser's JavaScript engine</li>
+            <li>D. Delegates to Selenium for non-Chromium browsers</li>
+          </ul>
+        </div>
+
+        <div class="quiz-answers">Answers: 1-C &nbsp; 2-B &nbsp; 3-C &nbsp; 4-D &nbsp; 5-B</div>
+      </div>
     </div>
 
   </div>

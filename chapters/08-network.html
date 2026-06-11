@@ -103,6 +103,21 @@
     .footer-links { display: flex; gap: 20px; }
     .footer-links a { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); transition: color 150ms; }
     .footer-links a:hover { color: var(--fg-2); }
+    /* Exercise & Quiz blocks */
+    .exercise-block, .quiz-block { background: rgba(255,255,255,0.03); border: 1px solid var(--border-mid); border-radius: var(--r-xl); padding: 28px 32px; margin: 32px 0 0; }
+    .exercise-block { border-left: 3px solid var(--mint); }
+    .quiz-block { border-left: 3px solid var(--coral); }
+    .block-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 14px; }
+    .exercise-block .block-label { color: var(--mint-light); }
+    .quiz-block .block-label { color: var(--coral-light); }
+    .block-title { font-family: var(--font-display); font-size: 20px; font-weight: 400; letter-spacing: -0.01em; margin-bottom: 16px; }
+    .quiz-q { margin-bottom: 22px; }
+    .quiz-q p { margin-bottom: 8px; }
+    .quiz-opts { list-style: none; padding: 0; margin: 0 0 4px; display: flex; flex-direction: column; gap: 6px; }
+    .quiz-opts li { font-size: 14px; color: var(--fg-2); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); }
+    .quiz-answers { font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .exercise-block ol, .exercise-block ul { padding-left: 22px; margin: 8px 0 12px; }
+    .exercise-block li { font-size: 15px; color: var(--fg-2); line-height: 1.6; margin-bottom: 6px; }
   </style>
 </head>
 <body>
@@ -221,6 +236,79 @@ assert.<span class="fn">equal</span>(count, <span class="n">2</span>, <span clas
 })</pre></div>
       </div>
       <div class="callout"><p><strong>Partial intercepts</strong> are useful when you need to stub one API while the rest of the app (scripts, fonts, images, other APIs) loads normally from the real server.</p></div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">Practice</div>
+      <h2 class="section-heading">Exercise &amp; Quiz</h2>
+
+      <div class="exercise-block">
+        <div class="block-label">Exercise</div>
+        <p class="block-title">Three Network Intercept Tests</p>
+        <p>Write three separate test functions that use <code class="inline">page.route()</code>:</p>
+        <ol>
+          <li><strong>testEmptyProducts</strong> — use <code class="inline">route.fulfill()</code> to return an empty JSON array for <code class="inline">'**/api/products*'</code>; navigate to <code class="inline">/products</code>; assert a "no products" message is visible or the product count is 0</li>
+          <li><strong>testServerError</strong> — use <code class="inline">route.fulfill({ status: 500, ... })</code> to simulate a server error; navigate to <code class="inline">/products</code>; assert an error message or fallback UI is visible</li>
+          <li><strong>testPartialIntercept</strong> — use the <code class="inline">'**/*'</code> pattern with <code class="inline">route.continue()</code> for everything except the products API; override products to return one stubbed product; navigate to <code class="inline">/products</code>; assert the stubbed product name is visible and <code class="inline">'Wireless Headphones'</code> is NOT visible</li>
+        </ol>
+      </div>
+
+      <div class="quiz-block">
+        <div class="block-label">Quiz</div>
+        <p class="block-title">5 Questions</p>
+
+        <div class="quiz-q">
+          <p><strong>1.</strong> <code class="inline">route.fulfill({ status: 200, body: JSON.stringify([]) })</code> is different from <code class="inline">route.abort()</code> because:</p>
+          <ul class="quiz-opts">
+            <li>A. <code class="inline">fulfill</code> simulates a connection failure; <code class="inline">abort</code> returns a server response</li>
+            <li>B. <code class="inline">fulfill</code> returns a synthetic HTTP response; <code class="inline">abort</code> simulates a network-level connection failure</li>
+            <li>C. They produce the same browser behavior</li>
+            <li>D. <code class="inline">abort</code> works only with GET requests</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>2.</strong> Why should <code class="inline">page.route()</code> be called before <code class="inline">page.go()</code>?</p>
+          <ul class="quiz-opts">
+            <li>A. <code class="inline">page.route()</code> requires an active page load to register</li>
+            <li>B. The route handler must be in place before the requests it intercepts are made</li>
+            <li>C. Calling <code class="inline">page.route()</code> after <code class="inline">page.go()</code> throws an error</li>
+            <li>D. There is no ordering requirement — they can be called in any order</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>3.</strong> The <code class="inline">'**/*'</code> URL pattern in <code class="inline">page.route('**/*', handler)</code> matches:</p>
+          <ul class="quiz-opts">
+            <li>A. Only paths ending in a file extension</li>
+            <li>B. Only paths on the same domain as the AUT</li>
+            <li>C. All URLs regardless of host or path</li>
+            <li>D. Only API requests (paths starting with <code class="inline">/api</code>)</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>4.</strong> <code class="inline">route.continue()</code> inside a route handler means:</p>
+          <ul class="quiz-opts">
+            <li>A. Move to the next registered handler</li>
+            <li>B. Let the request proceed to the real server as if no route was registered</li>
+            <li>C. Retry the request after a 500ms delay</li>
+            <li>D. Cache the response for subsequent identical requests</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>5.</strong> The main advantage of using network interception for an "empty state" test is:</p>
+          <ul class="quiz-opts">
+            <li>A. It is faster because it avoids browser rendering</li>
+            <li>B. The test does not depend on the server returning actual empty data, making it deterministic</li>
+            <li>C. It bypasses CORS restrictions</li>
+            <li>D. It works without a real server being configured at all</li>
+          </ul>
+        </div>
+
+        <div class="quiz-answers">Answers: 1-B &nbsp; 2-B &nbsp; 3-C &nbsp; 4-B &nbsp; 5-B</div>
+      </div>
     </div>
 
   </div>

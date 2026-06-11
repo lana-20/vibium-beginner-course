@@ -103,6 +103,21 @@
     .footer-links { display: flex; gap: 20px; }
     .footer-links a { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); transition: color 150ms; }
     .footer-links a:hover { color: var(--fg-2); }
+    /* Exercise & Quiz blocks */
+    .exercise-block, .quiz-block { background: rgba(255,255,255,0.03); border: 1px solid var(--border-mid); border-radius: var(--r-xl); padding: 28px 32px; margin: 32px 0 0; }
+    .exercise-block { border-left: 3px solid var(--mint); }
+    .quiz-block { border-left: 3px solid var(--coral); }
+    .block-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 14px; }
+    .exercise-block .block-label { color: var(--mint-light); }
+    .quiz-block .block-label { color: var(--coral-light); }
+    .block-title { font-family: var(--font-display); font-size: 20px; font-weight: 400; letter-spacing: -0.01em; margin-bottom: 16px; }
+    .quiz-q { margin-bottom: 22px; }
+    .quiz-q p { margin-bottom: 8px; }
+    .quiz-opts { list-style: none; padding: 0; margin: 0 0 4px; display: flex; flex-direction: column; gap: 6px; }
+    .quiz-opts li { font-size: 14px; color: var(--fg-2); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); }
+    .quiz-answers { font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .exercise-block ol, .exercise-block ul { padding-left: 22px; margin: 8px 0 12px; }
+    .exercise-block li { font-size: 15px; color: var(--fg-2); line-height: 1.6; margin-bottom: 6px; }
   </style>
 </head>
 <body>
@@ -233,6 +248,79 @@ assert.<span class="fn">ok</span>(warns[<span class="n">0</span>].text.<span cla
 
 assert.<span class="fn">equal</span>(download.suggestedFilename, <span class="s">'products.csv'</span>)
 assert.<span class="fn">ok</span>(fs.<span class="fn">existsSync</span>(path.<span class="fn">join</span>(downloadDir, download.suggestedFilename)))</pre></div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">Practice</div>
+      <h2 class="section-heading">Exercise &amp; Quiz</h2>
+
+      <div class="exercise-block">
+        <div class="block-label">Exercise</div>
+        <p class="block-title">Three Capture Tests</p>
+        <p>Write three separate test functions, one for each capture type. Each must use <code class="inline">Promise.all</code> with a fire-and-forget click inside the second argument.</p>
+        <ol>
+          <li><strong>testDeleteConfirmation</strong> — use <code class="inline">page.capture.dialog('dismiss')</code> to cancel a delete confirmation; assert <code class="inline">result.type</code> is <code class="inline">'confirm'</code> or <code class="inline">'alert'</code>; assert the item is still in the cart after dismissing</li>
+          <li><strong>testConsoleErrors</strong> — navigate to a page, use <code class="inline">page.capture.console()</code>, perform any interaction, assert <code class="inline">messages</code> is an array (even if empty)</li>
+          <li><strong>testDownload</strong> — navigate to a page with a CSV download link, use <code class="inline">page.capture.download('/tmp/vibium-downloads')</code>, click the trigger, assert <code class="inline">download.suggestedFilename</code> ends with <code class="inline">'.csv'</code></li>
+        </ol>
+      </div>
+
+      <div class="quiz-block">
+        <div class="block-label">Quiz</div>
+        <p class="block-title">5 Questions</p>
+
+        <div class="quiz-q">
+          <p><strong>1.</strong> Why must the click inside a <code class="inline">Promise.all</code> capture be fire-and-forget?</p>
+          <ul class="quiz-opts">
+            <li>A. <code class="inline">await</code> inside <code class="inline">Promise.all</code> is a syntax error</li>
+            <li>B. Awaiting the click would block until the dialog is handled, creating a deadlock — the capture promise can't resolve because the click never completes</li>
+            <li>C. Fire-and-forget clicks run faster than awaited clicks</li>
+            <li>D. The Vibium API requires it for dialog captures only</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>2.</strong> <code class="inline">page.capture.dialog('accept')</code> vs <code class="inline">page.capture.dialog('dismiss')</code> — what is the difference?</p>
+          <ul class="quiz-opts">
+            <li>A. <code class="inline">accept</code> clicks OK; <code class="inline">dismiss</code> clicks Cancel or closes the dialog</li>
+            <li>B. <code class="inline">accept</code> intercepts only alerts; <code class="inline">dismiss</code> intercepts only confirms</li>
+            <li>C. They are identical — both close the dialog</li>
+            <li>D. <code class="inline">dismiss</code> is for file dialogs; <code class="inline">accept</code> is for browser alerts</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>3.</strong> The <code class="inline">result</code> from <code class="inline">page.capture.dialog()</code> contains:</p>
+          <ul class="quiz-opts">
+            <li>A. The HTML of the page after the dialog closed</li>
+            <li>B. The button text that was clicked</li>
+            <li>C. The dialog type and message text</li>
+            <li>D. Whether the user accepted or dismissed</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>4.</strong> Console captures collect:</p>
+          <ul class="quiz-opts">
+            <li>A. Only <code class="inline">console.error</code> calls</li>
+            <li>B. Only <code class="inline">console.log</code> calls from your test code</li>
+            <li>C. All browser console messages — log, warn, error, info — that fire while the capture is active</li>
+            <li>D. Only messages that occur before the trigger click</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>5.</strong> What does <code class="inline">download.suggestedFilename</code> contain?</p>
+          <ul class="quiz-opts">
+            <li>A. The full path to the file on disk</li>
+            <li>B. The MIME type of the downloaded file</li>
+            <li>C. The filename the browser assigned to the download, as it would appear in the download bar</li>
+            <li>D. The URL of the file that was downloaded</li>
+          </ul>
+        </div>
+
+        <div class="quiz-answers">Answers: 1-B &nbsp; 2-A &nbsp; 3-C &nbsp; 4-C &nbsp; 5-C</div>
       </div>
     </div>
 

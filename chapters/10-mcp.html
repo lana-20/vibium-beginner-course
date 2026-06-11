@@ -119,6 +119,21 @@
     .footer-links { display: flex; gap: 20px; }
     .footer-links a { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); transition: color 150ms; }
     .footer-links a:hover { color: var(--fg-2); }
+    /* Exercise & Quiz blocks */
+    .exercise-block, .quiz-block { background: rgba(255,255,255,0.03); border: 1px solid var(--border-mid); border-radius: var(--r-xl); padding: 28px 32px; margin: 32px 0 0; }
+    .exercise-block { border-left: 3px solid var(--mint); }
+    .quiz-block { border-left: 3px solid var(--coral); }
+    .block-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 14px; }
+    .exercise-block .block-label { color: var(--mint-light); }
+    .quiz-block .block-label { color: var(--coral-light); }
+    .block-title { font-family: var(--font-display); font-size: 20px; font-weight: 400; letter-spacing: -0.01em; margin-bottom: 16px; }
+    .quiz-q { margin-bottom: 22px; }
+    .quiz-q p { margin-bottom: 8px; }
+    .quiz-opts { list-style: none; padding: 0; margin: 0 0 4px; display: flex; flex-direction: column; gap: 6px; }
+    .quiz-opts li { font-size: 14px; color: var(--fg-2); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); }
+    .quiz-answers { font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .exercise-block ol, .exercise-block ul { padding-left: 22px; margin: 8px 0 12px; }
+    .exercise-block li { font-size: 15px; color: var(--fg-2); line-height: 1.6; margin-bottom: 6px; }
   </style>
 </head>
 <body>
@@ -276,6 +291,81 @@ assert.<span class="fn">equal</span>(count, <span class="n">3</span>)</pre></div
         <div class="toc-item"><span class="toc-num">Ch 8</span><span class="toc-title">Network interception — stub, abort, partial</span></div>
         <div class="toc-item"><span class="toc-num">Ch 9</span><span class="toc-title">Running in CI — headless, exit codes, GitHub Actions</span></div>
         <div class="toc-item"><span class="toc-num">Ch 10</span><span class="toc-title">Introduction to MCP — agent-driven automation</span></div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">Practice</div>
+      <h2 class="section-heading">Exercise &amp; Quiz</h2>
+
+      <div class="exercise-block">
+        <div class="block-label">Exercise</div>
+        <p class="block-title">MCP-Assisted Checkout Test</p>
+        <p>Use Claude Desktop (with Vibium MCP configured) to generate a test for the checkout page:</p>
+        <ol>
+          <li>Ask Claude: <em>"Navigate to automation-exercise.daisyladybug.com/products, add any product to the cart, then explore the checkout page. List every form field by name, and check whether a validation error appears for each field when you submit the form empty."</em></li>
+          <li>Let the agent explore the page and report back</li>
+          <li>Take the agent's output and write a TypeScript test called <code class="inline">testCheckoutValidationMCP</code> that adds a product, navigates to <code class="inline">/checkout</code>, clicks "Place Order" without filling anything, and asserts at least 5 of the validation error messages the agent found are visible</li>
+          <li>Run the test with <code class="inline">npx tsx</code> and confirm it passes</li>
+        </ol>
+        <p>Reflect: which parts did the agent get right, and which parts needed correction before the test would run?</p>
+      </div>
+
+      <div class="quiz-block">
+        <div class="block-label">Quiz</div>
+        <p class="block-title">5 Questions</p>
+
+        <div class="quiz-q">
+          <p><strong>1.</strong> MCP stands for:</p>
+          <ul class="quiz-opts">
+            <li>A. Multi-Channel Protocol</li>
+            <li>B. Model Context Protocol</li>
+            <li>C. Managed Compute Platform</li>
+            <li>D. Module Control Proxy</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>2.</strong> Vibium's MCP server lets AI agents automate browsers by:</p>
+          <ul class="quiz-opts">
+            <li>A. Generating Playwright code that the agent then executes</li>
+            <li>B. Exposing Vibium's browser tools as callable MCP tool definitions that the agent invokes directly</li>
+            <li>C. Providing a REST API that Claude calls via HTTP</li>
+            <li>D. Running a headless browser inside the Claude Desktop process</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>3.</strong> The main difference between the Vibium TypeScript client and the MCP interface is:</p>
+          <ul class="quiz-opts">
+            <li>A. MCP is faster because it skips the TypeScript compilation step</li>
+            <li>B. TypeScript gives you deterministic, version-controlled tests; MCP gives AI agents real-time exploratory access to the same browser engine</li>
+            <li>C. The TypeScript client supports more browser APIs than MCP</li>
+            <li>D. MCP only works with Claude; the TypeScript client works with any agent</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>4.</strong> In a hybrid workflow, the best use of MCP is:</p>
+          <ul class="quiz-opts">
+            <li>A. Running regression tests in CI</li>
+            <li>B. Exploratory investigation — discovering what's on a page, generating draft assertions, identifying edge cases — before handing off to TypeScript</li>
+            <li>C. Replacing <code class="inline">beforeEach</code> and <code class="inline">afterEach</code> in Vitest</li>
+            <li>D. Debugging TypeScript test failures by replaying recordings</li>
+          </ul>
+        </div>
+
+        <div class="quiz-q">
+          <p><strong>5.</strong> On macOS, the Vibium MCP server config path in Claude Desktop is:</p>
+          <ul class="quiz-opts">
+            <li>A. <code class="inline">~/.config/claude/mcp_servers.json</code></li>
+            <li>B. <code class="inline">~/Library/Application Support/Claude/claude_desktop_config.json</code></li>
+            <li>C. <code class="inline">~/.claude/mcp_config.json</code></li>
+            <li>D. <code class="inline">~/Library/Preferences/Claude/mcp_servers.json</code></li>
+          </ul>
+        </div>
+
+        <div class="quiz-answers">Answers: 1-B &nbsp; 2-B &nbsp; 3-B &nbsp; 4-B &nbsp; 5-B</div>
       </div>
     </div>
 

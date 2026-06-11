@@ -208,4 +208,66 @@ Walk through this test and you should feel comfortable with every line. We start
 
 This is an **integration test** — it's testing a real user flow from end to end. It touches multiple pages, real DOM interactions, and real navigation. It's also atomic: it sets up its own cart state, doesn't depend on any other test, and cleans up the browser in `finally`.
 
+---
+
+## Exercise
+
+Write a test called `testSearchAndCheckout` that:
+
+1. Navigates to `/products` and searches for `'yoga'`
+2. Asserts that `'Yoga Mat'` is visible and `'Wireless Headphones'` is not visible
+3. Navigates to `'/products/prod_007'` (Coffee Maker) and adds it to the cart
+4. Navigates to `/checkout`
+5. Fills all 12 checkout fields using the `fieldMap` loop pattern with your own data
+6. Clicks "Place Order" and waits for `_waitForURL('**/confirmation')`
+7. Asserts that the current URL includes `'/confirmation'`
+
+Then write a **second test** called `testValidationErrors` (separate function, separate browser) that:
+
+1. Navigates to a product page and adds it to cart
+2. Navigates to `/checkout`
+3. Clicks "Place Order" without filling any fields
+4. Asserts that at least three of the twelve validation error messages are visible
+
+---
+
+## Quiz
+
+**1.** What is the difference between `element.fill(text)` and `element.type(text)`?
+
+- A. `fill()` triggers keyboard events; `type()` sets the value silently
+- B. `fill()` clears the field first then types; `type()` appends without clearing
+- C. They are identical — `type()` is an alias
+- D. `type()` supports special keys like Tab; `fill()` does not
+
+**2.** To select the "Electronics" option from a `<select>` dropdown, you call:
+
+- A. `element.fill('Electronics')`
+- B. `element.click('Electronics')`
+- C. `element.choose('Electronics')`
+- D. `element.selectOption('Electronics')`
+
+**3.** The main benefit of the `fieldMap` pattern is:
+
+- A. It is faster than individual `fill()` calls
+- B. It prevents validation errors from appearing
+- C. It separates test data from the fill logic so both can change independently
+- D. It handles select dropdowns automatically
+
+**4.** After clicking "Place Order" to submit a checkout form, the correct next step is:
+
+- A. Sleep for 2 seconds then assert
+- B. Immediately assert the URL with `page.url()`
+- C. Call `page._waitForURL('**/confirmation')` before asserting
+- D. Check `element.isEnabled()` on the submit button
+
+**5.** `element.value()` is different from `element.text()` because:
+
+- A. `value()` reads the `aria-label` attribute; `text()` reads visible content
+- B. `value()` reads the current value of an input field; `text()` reads the element's rendered text content
+- C. `value()` only works on select dropdowns
+- D. They return the same thing for all element types
+
+**Answers:** 1-B, 2-D, 3-C, 4-C, 5-B
+
 In the next chapter, we'll look much more closely at assertions and waiting — specifically how to assert on dynamic state like cart totals that update after you interact with the page.

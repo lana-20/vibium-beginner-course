@@ -183,3 +183,61 @@ In **Chapter 9** you took the suite to CI — headless env vars, the Vibium daem
 And now in **Chapter 10** you saw the third interface — MCP for agent-driven exploration and test generation, and how TypeScript and MCP complement each other in a real workflow.
 
 The patterns you've learned — async/await with `try/finally`, `waitFor*` before assertions, Page Objects for DRY selectors, `Promise.all` for captures, atomic tests with `beforeEach`/`afterEach` — these compose directly into production test suites. Take them with you.
+
+---
+
+## Exercise
+
+Use Claude Desktop (with Vibium MCP configured) to generate a test for the `/checkout` page.
+
+1. In Claude Desktop, ask: *"Navigate to automation-exercise.daisyladybug.com/products, add any product to the cart, then explore the checkout page. List every form field by name, and check whether a validation error appears for each field when you submit the form empty."*
+2. Let the agent explore the page and report back
+3. Take the agent's output and write a corresponding TypeScript test called `testCheckoutValidationMCP` that:
+   - Adds a product to the cart
+   - Navigates to `/checkout`
+   - Clicks "Place Order" without filling anything
+   - Asserts that at least 5 of the validation error messages the agent found are visible
+4. Run the test with `npx tsx` and confirm it passes
+
+Then reflect: which parts did the agent get right, and which parts needed correction before the test would run?
+
+---
+
+## Quiz
+
+**1.** MCP stands for:
+
+- A. Multi-Channel Protocol
+- B. Model Context Protocol
+- C. Managed Compute Platform
+- D. Module Control Proxy
+
+**2.** Vibium's MCP server lets AI agents automate browsers by:
+
+- A. Generating Playwright code that the agent then executes
+- B. Exposing Vibium's browser tools as callable MCP tool definitions that the agent invokes directly
+- C. Providing a REST API that Claude calls via HTTP
+- D. Running a headless browser inside the Claude Desktop process
+
+**3.** The main difference between the Vibium TypeScript client and the MCP interface is:
+
+- A. MCP is faster because it skips the TypeScript compilation step
+- B. TypeScript gives you deterministic, version-controlled tests; MCP gives AI agents real-time exploratory access to the same browser engine
+- C. The TypeScript client supports more browser APIs than MCP
+- D. MCP only works with Claude; the TypeScript client works with any agent
+
+**4.** In a hybrid workflow, the best use of MCP is:
+
+- A. Running regression tests in CI
+- B. Exploratory investigation — discovering what's on a page, generating draft assertions, identifying edge cases — before handing off to TypeScript
+- C. Replacing `beforeEach` and `afterEach` in Vitest
+- D. Debugging TypeScript test failures by replaying recordings
+
+**5.** On macOS, the Vibium MCP server config path in Claude Desktop is:
+
+- A. `~/.config/claude/mcp_servers.json`
+- B. `~/Library/Application Support/Claude/claude_desktop_config.json`
+- C. `~/.claude/mcp_config.json`
+- D. `~/Library/Preferences/Claude/mcp_servers.json`
+
+**Answers:** 1-B, 2-B, 3-B, 4-B, 5-B

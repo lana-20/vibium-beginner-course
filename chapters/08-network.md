@@ -183,3 +183,67 @@ Use real requests when:
 Most test suites use both. Unit-level behavior tests use interception. Smoke tests and critical path tests use real requests.
 
 In the next chapter we'll look at running your tests in CI — configuring headless mode, managing the Vibium daemon lifecycle in GitHub Actions, and using recordings to debug failures that only appear in CI.
+
+---
+
+## Exercise
+
+Write three separate test functions that use `page.route()`:
+
+**Test 1: `testEmptyProducts`**
+- Use `route.fulfill()` to return an empty JSON array (`[]`) for `'**/api/products*'`
+- Navigate to `/products`
+- Assert that a "no products" or empty-state message is visible (or assert the product count is 0 using `findAll`)
+
+**Test 2: `testServerError`**
+- Use `route.fulfill({ status: 500, ... })` to simulate a server error on the products API
+- Navigate to `/products`
+- Assert that an error message or fallback UI is visible
+
+**Test 3: `testPartialIntercept`**
+- Use the `'**/*'` pattern with `route.continue()` to let all requests through except the products API
+- Override the products API to return a single product: `[{ id: 'prod_stub', name: 'Stubbed Product', price: 1 }]`
+- Navigate to `/products`
+- Assert that `'Stubbed Product'` is visible
+- Assert that `'Wireless Headphones'` is NOT visible (use `findAll` and check length)
+
+---
+
+## Quiz
+
+**1.** `route.fulfill({ status: 200, body: JSON.stringify([]) })` is different from `route.abort()` because:
+
+- A. `fulfill` simulates a connection failure; `abort` returns a server response
+- B. `fulfill` returns a synthetic HTTP response; `abort` simulates a network-level connection failure
+- C. They produce the same browser behavior
+- D. `abort` works only with GET requests
+
+**2.** Why should `page.route()` be called before `page.go()`?
+
+- A. `page.route()` requires an active page load to register
+- B. The route handler must be in place before the requests it intercepts are made
+- C. Calling `page.route()` after `page.go()` throws an error
+- D. There is no ordering requirement — they can be called in any order
+
+**3.** The `'**/*'` URL pattern in `page.route('**/*', handler)` matches:
+
+- A. Only paths ending in a file extension
+- B. Only paths on the same domain as the AUT
+- C. All URLs regardless of host or path
+- D. Only API requests (paths starting with `/api`)
+
+**4.** `route.continue()` inside a route handler means:
+
+- A. Move to the next registered handler
+- B. Let the request proceed to the real server as if no route was registered
+- C. Retry the request after a 500ms delay
+- D. Cache the response for subsequent identical requests
+
+**5.** The main advantage of using network interception for an "empty state" test is:
+
+- A. It is faster because it avoids browser rendering
+- B. The test does not depend on the server returning actual empty data, making it deterministic
+- C. It bypasses CORS restrictions
+- D. It works without a real server being configured at all
+
+**Answers:** 1-B, 2-B, 3-C, 4-B, 5-B
