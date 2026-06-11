@@ -133,11 +133,12 @@
   <div class="hero-inner">
     <div class="hero-eyebrow">Chapter 9</div>
     <h1 class="hero-title">Running in <em>CI</em></h1>
-    <p class="hero-desc">Tests that only run on your laptop aren't tests — they're demos. Configure headless mode, exit codes, environment variables, and a complete GitHub Actions workflow.</p>
+    <p class="hero-desc">Tests that only run on your laptop aren't tests — they're demos. Configure headless mode, browser sharing, environment variables, a pre-baked Docker CI image, and a complete GitHub Actions workflow.</p>
     <div class="hero-meta">
       <span class="meta-item"><span class="meta-dot"></span>DevOps</span>
       <span class="meta-item"><span class="meta-dot"></span>GitHub Actions</span>
-      <span class="meta-item"><span class="meta-dot"></span>~20 min</span>
+      <span class="meta-item"><span class="meta-dot"></span>Docker</span>
+      <span class="meta-item"><span class="meta-dot"></span>~25 min</span>
     </div>
   </div>
 </section>
@@ -179,8 +180,39 @@
     </div>
 
     <div class="section-block">
+      <div class="section-eyebrow">9.3b — Browser Sharing</div>
+      <h2 class="section-heading">One Browser, <em>Many Tests</em></h2>
+      <p>Starting a fresh browser for every test is simple but slow — each start and stop costs a few seconds. Share one browser across all tests in a suite using <code class="inline">beforeAll</code>/<code class="inline">afterAll</code>, and open a fresh context per test with <code class="inline">beforeEach</code>/<code class="inline">afterEach</code>. This is the same pattern Playwright uses for multiple tabs: one browser, isolated contexts.</p>
+      <div class="code-panel">
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">shared browser, isolated contexts</span></div>
+        <div class="code-body"><pre>
+<span class="fn">describe</span>(<span class="s">'Products page'</span>, () => {
+  <span class="k">let</span> browser<span class="t">: Awaited&lt;ReturnType&lt;typeof vibium.start&gt;&gt;</span>
+  <span class="k">let</span> context<span class="t">: any</span>
+  <span class="k">let</span> page<span class="t">: any</span>
+
+  <span class="fn">beforeAll</span>(<span class="k">async</span> () => {
+    browser = <span class="k">await</span> vibium.<span class="fn">start</span>({ headless: process.env.CI === <span class="s">'true'</span> })
+  })
+  <span class="fn">afterAll</span>(<span class="k">async</span> () => { <span class="k">await</span> browser.<span class="fn">stop</span>() })
+
+  <span class="fn">beforeEach</span>(<span class="k">async</span> () => {
+    context = <span class="k">await</span> browser.<span class="fn">newContext</span>()  <span class="c">// fresh cookies, storage</span>
+    page = <span class="k">await</span> context.<span class="fn">newPage</span>()
+  })
+  <span class="fn">afterEach</span>(<span class="k">async</span> () => { <span class="k">await</span> context.<span class="fn">close</span>() })
+
+  <span class="fn">it</span>(<span class="s">'shows 12 products'</span>, <span class="k">async</span> () => { <span class="c">/* ... */</span> })
+  <span class="fn">it</span>(<span class="s">'filters by category'</span>, <span class="k">async</span> () => { <span class="c">/* ... */</span> })
+})</pre></div>
+      </div>
+      <p><code class="inline">beforeAll</code> starts one browser for the whole block. Each test gets a fresh <code class="inline">newContext()</code> — cookies, localStorage, and navigation history are fully isolated. <code class="inline">afterEach</code> closes the context so state never bleeds between tests. <code class="inline">afterAll</code> stops the browser once every test in the suite has finished.</p>
+    </div>
+
+    <div class="section-block">
       <div class="section-eyebrow">9.4</div>
       <h2 class="section-heading">The GitHub Actions <em>Workflow</em></h2>
+      <p>The <code class="inline">container</code> key tells GitHub Actions to run every step inside a pre-built Docker image. That image — <code class="inline">ghcr.io/lana-20/vibium-ci:latest</code> — already has Chrome downloaded and patched. <code class="inline">HOME: /root</code> appears on every Vibium step because the image was built as root: Chrome lives at <code class="inline">/root/.cache/vibium</code> and the Node.js API needs to know where to look.</p>
       <div class="code-panel">
         <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file"><em>.github/workflows/</em>tests.yml</span></div>
         <div class="code-body"><pre>
@@ -191,10 +223,12 @@
     <span class="yaml-key">branches:</span> <span class="yaml-val">[main]</span>
   <span class="yaml-key">pull_request:</span>
     <span class="yaml-key">branches:</span> <span class="yaml-val">[main]</span>
+  <span class="yaml-key">workflow_dispatch:</span>         <span class="yaml-c"># manual trigger from the Actions tab</span>
 
 <span class="yaml-key">jobs:</span>
   <span class="yaml-key">test:</span>
     <span class="yaml-key">runs-on:</span> <span class="yaml-val">ubuntu-latest</span>
+    <span class="yaml-key">container:</span> <span class="yaml-val">ghcr.io/lana-20/vibium-ci:latest</span>
     <span class="yaml-key">steps:</span>
       <span class="yaml-key">- uses:</span> <span class="yaml-val">actions/checkout@v4</span>
       <span class="yaml-key">- uses:</span> <span class="yaml-val">actions/setup-node@v4</span>
@@ -203,18 +237,21 @@
           <span class="yaml-key">cache:</span> <span class="yaml-val">'npm'</span>
       <span class="yaml-key">- name:</span> <span class="yaml-val">Install dependencies</span>
         <span class="yaml-key">run:</span> <span class="yaml-val">npm ci</span>
-      <span class="yaml-key">- name:</span> <span class="yaml-val">Install Vibium</span>
-        <span class="yaml-key">run:</span> <span class="yaml-val">npm install -g vibium</span>
       <span class="yaml-key">- name:</span> <span class="yaml-val">Start Vibium daemon</span>
         <span class="yaml-key">run:</span> <span class="yaml-val">vibium daemon start</span>
+        <span class="yaml-key">env:</span>
+          <span class="yaml-key">HOME:</span> <span class="yaml-val">/root</span>
       <span class="yaml-key">- name:</span> <span class="yaml-val">Run tests</span>
-        <span class="yaml-key">run:</span> <span class="yaml-val">npm test</span>
+        <span class="yaml-key">run:</span> <span class="yaml-val">npm run test:ci</span>
         <span class="yaml-key">env:</span>
           <span class="yaml-key">CI:</span> <span class="yaml-val">true</span>
+          <span class="yaml-key">HOME:</span> <span class="yaml-val">/root</span>
           <span class="yaml-key">AUT_BASE_URL:</span> <span class="yaml-val">${{ vars.AUT_BASE_URL }}</span>
       <span class="yaml-key">- name:</span> <span class="yaml-val">Stop Vibium daemon</span>
         <span class="yaml-key">if:</span> <span class="yaml-val">always()</span>
-        <span class="yaml-key">run:</span> <span class="yaml-val">vibium daemon stop</span></pre></div>
+        <span class="yaml-key">run:</span> <span class="yaml-val">vibium daemon stop</span>
+        <span class="yaml-key">env:</span>
+          <span class="yaml-key">HOME:</span> <span class="yaml-val">/root</span></pre></div>
       </div>
     </div>
 
@@ -253,37 +290,36 @@ console.<span class="fn">log</span>(<span class="s">'Recording:'</span>, url)
 
     <div class="section-block">
       <div class="section-eyebrow">9.7 — Docker</div>
-      <h2 class="section-heading">Containerizing with <em>Docker</em></h2>
-      <p>Environment differences cause CI-only failures. Your laptop runs Node 22; the CI runner uses Node 20. Docker packages your entire test environment — Node version, dependencies, Vibium — into a reproducible image that runs identically everywhere.</p>
+      <h2 class="section-heading">Pre-Baking a <em>CI Image</em></h2>
+      <p>The default approach downloads Chrome on every run — about 300 MB, which costs 20–30 seconds. The better approach: bake Chrome into a Docker image, push it once to a registry, and pull it on every run. Chrome is always there. No download, no wait.</p>
       <div class="code-panel">
-        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">Dockerfile</span></div>
+        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">Dockerfile.ci</span></div>
         <div class="code-body"><pre>
 <span class="k">FROM</span> node:20-slim
 
-<span class="k">RUN</span> npm install -g vibium
+<span class="k">RUN</span> apt-get update &amp;&amp; apt-get install -y --no-install-recommends \
+    libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 \
+    libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 \
+    libxrandr2 libgbm1 libasound2 libnspr4 libnss3 \
+    libcairo2 libpango-1.0-0 libpangocairo-1.0-0 \
+    libx11-6 libx11-xcb1 libxcb1 libxcursor1 libxext6 \
+    libxi6 libxrender1 libxtst6 libdbus-1-3 \
+    fonts-liberation ca-certificates \
+    &amp;&amp; rm -rf /var/lib/apt/lists/*
 
-<span class="k">WORKDIR</span> /app
-<span class="k">COPY</span> package*.json ./
-<span class="k">RUN</span> npm ci
+<span class="k">RUN</span> npm install -g vibium &amp;&amp; vibium install
 
-<span class="k">COPY</span> . .
+<span class="k">RUN</span> CHROME=$(find /root/.cache/vibium -name <span class="s">"chrome"</span> -not -name <span class="s">"chromedriver"</span> | head -1) \
+    &amp;&amp; mv <span class="s">"$CHROME"</span> <span class="s">"${CHROME}.real"</span> \
+    &amp;&amp; printf <span class="s">'#!/bin/sh\nexec "%s.real" --no-sandbox --disable-dev-shm-usage "$@"\n'</span> <span class="s">"$CHROME"</span> > <span class="s">"$CHROME"</span> \
+    &amp;&amp; chmod +x <span class="s">"$CHROME"</span>
 
-<span class="k">ENV</span> CI=true
-<span class="k">CMD</span> ["npm", "test"]</pre></div>
+<span class="k">ENV</span> HOME=/root</pre></div>
       </div>
-      <p><code class="inline">ENV CI=true</code> means headless mode is automatic — no display server needed. The <code class="inline">CMD</code> runs the tests. Build and run it locally:</p>
-      <div class="shell-panel"><pre><span class="prompt">$ </span>docker build -t vibium-tests .
-<span class="prompt">$ </span>docker run --rm vibium-tests</pre></div>
-      <p>Exit code 0 on pass, exit code 1 on failure — exactly what CI systems need. In GitHub Actions, replace the daemon lifecycle steps with two Docker steps:</p>
-      <div class="code-panel">
-        <div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">Docker-based workflow steps</span></div>
-        <div class="code-body"><pre>
-<span class="yaml-key">- name:</span> <span class="yaml-val">Build test image</span>
-  <span class="yaml-key">run:</span> <span class="yaml-val">docker build -t vibium-tests .</span>
-
-<span class="yaml-key">- name:</span> <span class="yaml-val">Run tests in container</span>
-  <span class="yaml-key">run:</span> <span class="yaml-val">docker run --rm vibium-tests</span></pre></div>
-      </div>
+      <p>The long <code class="inline">apt-get install</code> list is the exact set of system libraries Chrome for Testing needs on Debian Bookworm. The non-obvious one is <code class="inline">libcairo2</code> — Chrome uses Cairo for 2D rendering even in headless mode. If it's missing, Chrome exits immediately with exit code 1 and no output. Silent failures like this are only diagnosed by running Chrome directly with output captured.</p>
+      <p>The wrapper script solves two Linux container constraints. <strong>AppArmor</strong> on Ubuntu CI runners blocks Chrome's process sandbox — <code class="inline">--no-sandbox</code> bypasses it. <strong>Docker's <code class="inline">/dev/shm</code></strong> is limited to 64 MB; Chrome exhausts it rendering pages — <code class="inline">--disable-dev-shm-usage</code> redirects to <code class="inline">/tmp</code>. The wrapper renames the real binary to <code class="inline">chrome.real</code> and replaces it with a shell script that injects both flags transparently.</p>
+      <p><code class="inline">ENV HOME=/root</code> ensures Node.js finds Chrome at <code class="inline">/root/.cache/vibium</code> — where <code class="inline">vibium install</code> put it when the image was built as root.</p>
+      <div class="callout"><p><strong>Auto-rebuild:</strong> A second workflow (<code class="inline">build-ci-image.yml</code>) watches for changes to <code class="inline">Dockerfile.ci</code> and rebuilds the image automatically. Update the Dockerfile, push — the next test run picks up the new image.</p></div>
     </div>
 
     <div class="section-block">
