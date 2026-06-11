@@ -36,17 +36,13 @@ jobs:
       - name: Start Vibium daemon
         run: vibium daemon start
 
-      - name: Verify vibium binary
+      - name: Test Chrome binary directly
         run: |
-          echo "=== linux-x64 binary ==="
-          ls node_modules/@vibium/linux-x64/bin/
-          echo "=== chrome in home ==="
-          find ~/.vibium -name "chrome" 2>/dev/null | head -5 || echo "(~/.vibium not found)"
-          find ~/.local -name "chrome" 2>/dev/null | head -5 || echo "(~/.local not found)"
-          echo "=== run vibium install ==="
-          node_modules/@vibium/linux-x64/bin/vibium install 2>&1 | tail -5
-          echo "=== chrome after install ==="
-          find ~/.vibium -name "chrome" 2>/dev/null | head -5 || echo "(still not found)"
+          CHROME=/home/runner/.cache/vibium/chrome-for-testing/149.0.7827.55/chrome
+          echo "--- without --no-sandbox ---"
+          timeout 3 $CHROME --headless --dump-dom about:blank 2>&1 | head -5 || echo "exit: $?"
+          echo "--- with --no-sandbox ---"
+          timeout 3 $CHROME --headless --no-sandbox --dump-dom about:blank 2>&1 | head -5 || echo "exit: $?"
 
       - name: Run tests
         run: npm run test:ci
