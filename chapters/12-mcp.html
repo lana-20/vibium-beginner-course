@@ -312,6 +312,55 @@ is not visible after the search.</pre></div>
 
         <div class="quiz-answers">Answers: 1-B &nbsp; 2-B &nbsp; 3-B &nbsp; 4-B &nbsp; 5-B</div>
       </div>
+
+      <details class="solution-block">
+        <summary>Solution</summary>
+        <div class="solution-body">
+<div class="code-panel" style="margin:16px 0"><div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">typescript</span></div><div class="code-body"><pre>import { browser as vibium } from 'vibium'
+import assert from 'node:assert/strict'
+
+const AUT = 'https://automation-exercise.daisyladybug.com'
+
+const EXPECTED_ERRORS = [
+  '✗ First name required',
+  '✗ Last name required',
+  '✗ Valid email required',
+  '✗ Valid phone required',
+  '✗ Address required',
+]
+
+async function testCheckoutValidationMCP() {
+  const browser = await vibium.start({ headless: false })
+  const context = await browser.newContext()
+  const page = await context.newPage()
+
+  try {
+    await page.go(`${AUT}/products/prod_001`)
+    const addToCart = await page.find({ role: 'button', text: 'Add to Cart' })
+    await addToCart.click()
+
+    await page.go(`${AUT}/checkout`)
+    const submit = await page.find({ role: 'button', text: 'Place Order' })
+    await submit.click()
+
+    for (const message of EXPECTED_ERRORS) {
+      const el = await page.find({ text: message })
+      assert.ok(await el.isVisible(), `error visible: ${message}`)
+    }
+
+    console.log('testCheckoutValidationMCP passed.')
+  } finally {
+    await browser.stop()
+  }
+}
+
+testCheckoutValidationMCP().catch(err => {
+  console.error('Test failed:', err.message)
+  process.exit(1)
+})</pre></div></div>
+<p><strong>Reflection:</strong> The MCP agent typically gets the page structure right but may describe validation error text differently from the literal DOM text. The most common correction is adjusting exact error message strings — verify against the DOM using <code class="inline">vibium find text "✗ First"</code> in the CLI before finalising assertions.</p>
+        </div>
+      </details>
     </div>
 
   </div>

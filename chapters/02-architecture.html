@@ -138,6 +138,15 @@
     .quiz-answers { font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
     .exercise-block ol, .exercise-block ul { padding-left: 22px; margin: 8px 0 12px; }
     .exercise-block li { font-size: 15px; color: var(--fg-2); line-height: 1.6; margin-bottom: 6px; }
+    /* Solution block */
+    .solution-block { background: rgba(184,134,42,0.04); border: 1px solid var(--border-mid); border-left: 3px solid var(--gold); border-radius: var(--r-xl); margin: 20px 0 0; overflow: hidden; }
+    .solution-block > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; padding: 18px 28px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-light); }
+    .solution-block > summary::-webkit-details-marker { display: none; }
+    .solution-block > summary::before { content: '▶'; font-size: 9px; }
+    .solution-block[open] > summary::before { content: '▼'; }
+    .solution-body { padding: 4px 28px 24px; }
+    .solution-body p { font-size: 15px; }
+    .solution-body .callout { margin: 12px 0; }
   </style>
 </head>
 <body>
@@ -456,6 +465,51 @@ console.<span class="fn">log</span>(dialog.message)
         <div class="quiz-answers">Answers: 1-C &nbsp; 2-C &nbsp; 3-C &nbsp; 4-D &nbsp; 5-B</div>
       </div>
     </div>
+
+
+
+      <details class="solution-block">
+        <summary>Solution</summary>
+        <div class="solution-body">
+<div class="code-panel" style="margin:16px 0"><div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">typescript</span></div><div class="code-body"><pre>import { browser as vibium } from 'vibium'
+
+const AUT = 'https://automation-exercise.daisyladybug.com'
+
+async function main() {
+  const browser = await vibium.start({ headless: false })
+  const context = await browser.newContext()
+  const page = await context.newPage()
+
+  try {
+    // Level 1: Browser — created above
+    // Level 2: Context — created above
+    // Level 3: Page
+    await page.go(AUT)
+    console.log('Title:', await page.title())
+
+    // Level 4: Element
+    const productsLink = await page.find({ role: 'link', text: 'Products' })
+    console.log('Products href:', await productsLink.attr('href'))
+
+    await productsLink.click()
+    await page._waitForURL('**/products')
+    console.log('URL:', await page.url())
+
+    const firstProduct = await page.find('a[href*="/products/prod_"]')
+    console.log('First product:', await firstProduct.text())
+  } finally {
+    await browser.stop()
+  }
+}
+
+main()</pre></div></div>
+<p>Expected terminal output:</p>
+<div class="code-panel" style="margin:16px 0"><div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">code</span></div><div class="code-body"><pre>Title: automation-exercise | E-commerce Testing Sandbox
+Products href: /products
+URL: https://automation-exercise.daisyladybug.com/products
+First product: Wireless Headphones</pre></div></div>
+        </div>
+      </details>
 
   </div>
 </main>

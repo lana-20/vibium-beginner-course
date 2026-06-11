@@ -15,16 +15,18 @@
     "ch05:state": "npx tsx src/ch05-assertions/01-element-state.ts",
     "ch05:waits": "npx tsx src/ch05-assertions/02-waits.ts",
     "ch05:totals": "npx tsx src/ch05-assertions/03-cart-totals.ts",
+    "ch06:suite": "vitest run src/ch06-organizing/tests/",
     "ch07:dialog": "npx tsx src/ch07-captures/01-dialog.ts",
     "ch07:console": "npx tsx src/ch07-captures/02-console.ts",
     "ch07:download": "npx tsx src/ch07-captures/03-download.ts",
     "ch08:stub": "npx tsx src/ch08-network/01-stub-response.ts",
     "ch08:abort": "npx tsx src/ch08-network/02-abort.ts",
     "ch08:partial": "npx tsx src/ch08-network/03-partial-intercept.ts",
+    "ch09:smoke": "vitest run src/ch09-ci/ci-example.test.ts",
+    "ch12:compare": "npx tsx src/ch10-mcp/typescript-vs-mcp.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:ci": "vitest run --reporter=verbose",
-    "ch10:compare": "npx tsx src/ch10-mcp/typescript-vs-mcp.ts"
+    "test:ci": "vitest run --reporter=verbose"
   },
   "dependencies": {
     "vibium": ">=26.0.0"

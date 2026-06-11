@@ -119,6 +119,10 @@
     .quiz-answers { font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
     .exercise-block ol, .exercise-block ul { padding-left: 22px; margin: 8px 0 12px; }
     .exercise-block li { font-size: 15px; color: var(--fg-2); line-height: 1.6; margin-bottom: 6px; }
+    .deprecation-banner { background: rgba(184,134,42,0.10); border-bottom: 1px solid rgba(184,134,42,0.35); padding: 14px 32px; display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+    .deprecation-banner p { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.04em; color: var(--gold-light); margin: 0; }
+    .deprecation-banner a { color: var(--gold); text-decoration: underline; text-underline-offset: 3px; }
+    .deprecation-banner a:hover { color: var(--gold-light); }
   </style>
 </head>
 <body>
@@ -147,6 +151,10 @@
     </div>
   </div>
 </nav>
+
+<div class="deprecation-banner">
+  <p>This page has been superseded. The CI content is now split across three chapters: <a href="09-ci-local.html">Ch 9 — CI Basics</a>, <a href="10-ci-actions.html">Ch 10 — GitHub Actions</a>, and <a href="11-ci-docker.html">Ch 11 — Docker CI</a>.</p>
+</div>
 
 <section class="hero">
   <div class="hero-inner">

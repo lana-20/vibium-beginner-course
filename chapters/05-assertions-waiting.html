@@ -124,6 +124,15 @@
     .quiz-answers { font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
     .exercise-block ol, .exercise-block ul { padding-left: 22px; margin: 8px 0 12px; }
     .exercise-block li { font-size: 15px; color: var(--fg-2); line-height: 1.6; margin-bottom: 6px; }
+    /* Solution block */
+    .solution-block { background: rgba(184,134,42,0.04); border: 1px solid var(--border-mid); border-left: 3px solid var(--gold); border-radius: var(--r-xl); margin: 20px 0 0; overflow: hidden; }
+    .solution-block > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; padding: 18px 28px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-light); }
+    .solution-block > summary::-webkit-details-marker { display: none; }
+    .solution-block > summary::before { content: '▶'; font-size: 9px; }
+    .solution-block[open] > summary::before { content: '▼'; }
+    .solution-body { padding: 4px 28px 24px; }
+    .solution-body p { font-size: 15px; }
+    .solution-body .callout { margin: 12px 0; }
   </style>
 </head>
 <body>
@@ -417,6 +426,70 @@ assert.<span class="fn">ok</span>(<span class="k">await</span> badge.<span class
         <div class="quiz-answers">Answers: 1-B &nbsp; 2-B &nbsp; 3-A &nbsp; 4-C &nbsp; 5-C</div>
       </div>
     </div>
+
+
+
+      <details class="solution-block">
+        <summary>Solution</summary>
+        <div class="solution-body">
+<div class="code-panel" style="margin:16px 0"><div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">typescript</span></div><div class="code-body"><pre>import { browser as vibium } from 'vibium'
+import assert from 'node:assert/strict'
+
+const AUT = 'https://automation-exercise.daisyladybug.com'
+
+async function testProductFilter() {
+  const browser = await vibium.start({ headless: false })
+  const context = await browser.newContext()
+  const page = await context.newPage()
+
+  try {
+    await page.go(`${AUT}/products`)
+
+    const category = await page.find('select:first-of-type')
+    await category.selectOption('Electronics')
+
+    // find() waits for the result to appear after filtering
+    const headphones = await page.find({ text: 'Wireless Headphones' })
+    assert.ok(await headphones.isVisible(), 'Wireless Headphones visible after Electronics filter')
+
+    const productCount = (await page.findAll('a[href*="/products/prod_"]')).length
+    assert.ok(productCount &gt; 0, 'at least one product visible after filter')
+
+    console.log(`testProductFilter passed. ${productCount} product(s) in Electronics.`)
+  } finally {
+    await browser.stop()
+  }
+}
+
+async function testCartTotal() {
+  const browser = await vibium.start({ headless: false })
+  const context = await browser.newContext()
+  const page = await context.newPage()
+
+  try {
+    await page.go(`${AUT}/products/prod_001`)
+    const addToCart = await page.find({ role: 'button', text: 'Add to Cart' })
+    await addToCart.click()
+
+    await page.go(`${AUT}/cart`)
+
+    // wait for the cart summary to render
+    const summary = await page.find({ text: '1 item · 1 product' })
+    assert.ok(await summary.isVisible(), 'cart summary visible')
+
+    const subtotalEl = await page.find({ text: '$79.99' })
+    assert.ok(await subtotalEl.isVisible(), 'subtotal visible')
+
+    console.log('testCartTotal passed.')
+  } finally {
+    await browser.stop()
+  }
+}
+
+Promise.all([testProductFilter(), testCartTotal()])
+  .catch(err =&gt; { console.error('Test failed:', err.message); process.exit(1) })</pre></div></div>
+        </div>
+      </details>
 
   </div>
 </main>

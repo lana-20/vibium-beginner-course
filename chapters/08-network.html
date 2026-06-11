@@ -118,6 +118,15 @@
     .quiz-answers { font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
     .exercise-block ol, .exercise-block ul { padding-left: 22px; margin: 8px 0 12px; }
     .exercise-block li { font-size: 15px; color: var(--fg-2); line-height: 1.6; margin-bottom: 6px; }
+    /* Solution block */
+    .solution-block { background: rgba(184,134,42,0.04); border: 1px solid var(--border-mid); border-left: 3px solid var(--gold); border-radius: var(--r-xl); margin: 20px 0 0; overflow: hidden; }
+    .solution-block > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; padding: 18px 28px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-light); }
+    .solution-block > summary::-webkit-details-marker { display: none; }
+    .solution-block > summary::before { content: '▶'; font-size: 9px; }
+    .solution-block[open] > summary::before { content: '▼'; }
+    .solution-body { padding: 4px 28px 24px; }
+    .solution-body p { font-size: 15px; }
+    .solution-body .callout { margin: 12px 0; }
   </style>
 </head>
 <body>
@@ -314,6 +323,104 @@ assert.<span class="fn">equal</span>(count, <span class="n">2</span>, <span clas
         <div class="quiz-answers">Answers: 1-B &nbsp; 2-B &nbsp; 3-C &nbsp; 4-B &nbsp; 5-B</div>
       </div>
     </div>
+
+
+
+      <details class="solution-block">
+        <summary>Solution</summary>
+        <div class="solution-body">
+<div class="code-panel" style="margin:16px 0"><div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">typescript</span></div><div class="code-body"><pre>import { browser as vibium } from 'vibium'
+import assert from 'node:assert/strict'
+
+const AUT = 'https://automation-exercise.daisyladybug.com'
+
+async function testEmptyProducts() {
+  const browser = await vibium.start({ headless: false })
+  const context = await browser.newContext()
+  const page = await context.newPage()
+
+  try {
+    await page.route('**/api/products*', async route =&gt; {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([]),
+      })
+    })
+
+    await page.go(`${AUT}/products`)
+
+    const count = (await page.findAll('a[href*="/products/prod_"]')).length
+    assert.equal(count, 0, 'no products when API returns empty array')
+
+    console.log('testEmptyProducts passed.')
+  } finally {
+    await browser.stop()
+  }
+}
+
+async function testServerError() {
+  const browser = await vibium.start({ headless: false })
+  const context = await browser.newContext()
+  const page = await context.newPage()
+
+  try {
+    await page.route('**/api/products*', async route =&gt; {
+      await route.fulfill({
+        status: 500,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'Internal Server Error' }),
+      })
+    })
+
+    await page.go(`${AUT}/products`)
+
+    // The app should render some kind of error state or empty state
+    const count = (await page.findAll('a[href*="/products/prod_"]')).length
+    assert.equal(count, 0, 'no products shown on server error')
+
+    console.log('testServerError passed.')
+  } finally {
+    await browser.stop()
+  }
+}
+
+async function testPartialIntercept() {
+  const browser = await vibium.start({ headless: false })
+  const context = await browser.newContext()
+  const page = await context.newPage()
+
+  try {
+    await page.route('**/*', async route =&gt; {
+      if (route.request().url().includes('/api/products')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify([{ id: 'prod_stub', name: 'Stubbed Product', price: 1 }]),
+        })
+      } else {
+        await route.continue()
+      }
+    })
+
+    await page.go(`${AUT}/products`)
+
+    const stubbed = await page.find({ text: 'Stubbed Product' })
+    assert.ok(await stubbed.isVisible(), 'stubbed product visible')
+
+    const realCount = (await page.findAll('a[href*="/products/prod_"]')).length
+    assert.equal(realCount, 1, 'only stubbed product present, not real ones')
+
+    console.log('testPartialIntercept passed.')
+  } finally {
+    await browser.stop()
+  }
+}
+
+Promise.all([testEmptyProducts(), testServerError(), testPartialIntercept()])
+  .catch(err =&gt; { console.error('Test failed:', err.message); process.exit(1) })</pre></div></div>
+        </div>
+      </details>
 
   </div>
 </main>

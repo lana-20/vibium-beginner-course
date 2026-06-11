@@ -117,6 +117,15 @@
     .quiz-answers { font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
     .exercise-block ol, .exercise-block ul { padding-left: 22px; margin: 8px 0 12px; }
     .exercise-block li { font-size: 15px; color: var(--fg-2); line-height: 1.6; margin-bottom: 6px; }
+    /* Solution block */
+    .solution-block { background: rgba(184,134,42,0.04); border: 1px solid var(--border-mid); border-left: 3px solid var(--gold); border-radius: var(--r-xl); margin: 20px 0 0; overflow: hidden; }
+    .solution-block > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; padding: 18px 28px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-light); }
+    .solution-block > summary::-webkit-details-marker { display: none; }
+    .solution-block > summary::before { content: '▶'; font-size: 9px; }
+    .solution-block[open] > summary::before { content: '▼'; }
+    .solution-body { padding: 4px 28px 24px; }
+    .solution-body p { font-size: 15px; }
+    .solution-body .callout { margin: 12px 0; }
   </style>
 </head>
 <body>
@@ -452,6 +461,80 @@
         <div class="quiz-answers">Answers: 1-B &nbsp; 2-B &nbsp; 3-B &nbsp; 4-B &nbsp; 5-C</div>
       </div>
     </div>
+
+
+
+      <details class="solution-block">
+        <summary>Solution</summary>
+        <div class="solution-body">
+<div class="code-panel" style="margin:16px 0"><div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">typescript</span></div><div class="code-body"><pre>// src/ch06-organizing-tests/pages/CartPage.ts
+import type { Page } from 'vibium'
+
+const AUT = process.env.AUT_BASE_URL || 'https://automation-exercise.daisyladybug.com'
+
+export class CartPage {
+  constructor(private page: Page) {}
+
+  async goto() {
+    await this.page.go(`${AUT}/cart`)
+  }
+
+  async getItemCount() {
+    const summary = await this.page.find('.cart-summary-count, [class*="count"]')
+    return summary.text()
+  }
+
+  async getSubtotal() {
+    const el = await this.page.find('[class*="subtotal"], [data-testid="subtotal"]')
+    return el.text()
+  }
+}</pre></div></div>
+<div class="code-panel" style="margin:16px 0"><div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">typescript</span></div><div class="code-body"><pre>// src/ch06-organizing-tests/cart.test.ts
+import { browser as vibium } from 'vibium'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import type { Browser, Page } from 'vibium'
+import { ProductsPage } from './pages/ProductsPage'
+import { CartPage } from './pages/CartPage'
+
+const AUT = process.env.AUT_BASE_URL || 'https://automation-exercise.daisyladybug.com'
+
+let browser: Browser
+let page: Page
+
+beforeEach(async () =&gt; {
+  browser = await vibium.start({ headless: process.env.CI === 'true' })
+  const context = await browser.newContext()
+  page = await context.newPage()
+})
+
+afterEach(async () =&gt; {
+  await browser.stop()
+})
+
+describe('Products and Cart', () =&gt; {
+  it('searches and finds a product', async () =&gt; {
+    const products = new ProductsPage(page)
+    await products.goto()
+    await products.search('yoga')
+    const yogaMat = await page.find({ text: 'Yoga Mat' })
+    expect(await yogaMat.isVisible()).toBe(true)
+  })
+
+  it('adds a product and checks cart', async () =&gt; {
+    await page.go(`${AUT}/products/prod_001`)
+    const addBtn = await page.find({ role: 'button', text: 'Add to Cart' })
+    await addBtn.click()
+
+    const cart = new CartPage(page)
+    await cart.goto()
+    // wait for cart to render
+    const summary = await page.find({ text: '1 item' })
+    expect(await summary.isVisible()).toBe(true)
+  })
+})</pre></div></div>
+<div class="callout"><p><strong>Note on <code class="inline">getItemCount()</code> and <code class="inline">getSubtotal()</code>:</strong> The exact selector for cart totals depends on the app's DOM structure. Use the Vibium CLI (<code class="inline">vibium find text "1 item"</code>) against the live cart page to find the exact element and update the selectors accordingly.</p></div>
+        </div>
+      </details>
 
   </div>
 </main>

@@ -94,6 +94,15 @@
     .quiz-answers { font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
     .exercise-block ol, .exercise-block ul { padding-left: 22px; margin: 8px 0 12px; }
     .exercise-block li { font-size: 15px; color: var(--fg-2); line-height: 1.6; margin-bottom: 6px; }
+    /* Solution block */
+    .solution-block { background: rgba(184,134,42,0.04); border: 1px solid var(--border-mid); border-left: 3px solid var(--gold); border-radius: var(--r-xl); margin: 20px 0 0; overflow: hidden; }
+    .solution-block > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; padding: 18px 28px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-light); }
+    .solution-block > summary::-webkit-details-marker { display: none; }
+    .solution-block > summary::before { content: '▶'; font-size: 9px; }
+    .solution-block[open] > summary::before { content: '▼'; }
+    .solution-body { padding: 4px 28px 24px; }
+    .solution-body p { font-size: 15px; }
+    .solution-body .callout { margin: 12px 0; }
   </style>
 </head>
 <body>
@@ -287,6 +296,57 @@ jobs:
         <div class="quiz-answers">Answers: 1-B &nbsp; 2-B &nbsp; 3-B &nbsp; 4-B &nbsp; 5-B</div>
       </div>
     </div>
+
+
+
+      <details class="solution-block">
+        <summary>Solution</summary>
+        <div class="solution-body">
+<p>The solution for this chapter is the <code class="inline">.github/workflows/tests.yml</code> file itself. Here it is with inline comments explaining each decision:</p>
+<div class="code-panel" style="margin:16px 0"><div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">yaml</span></div><div class="code-body"><pre>name: Tests
+
+on:
+  push:
+    branches: [main]          # run on every push to main
+  pull_request:
+    branches: [main]          # run on PRs targeting main
+  workflow_dispatch:          # allow manual trigger from Actions tab
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container: ghcr.io/lana-20/vibium-ci:latest   # pre-baked Chrome
+
+    steps:
+      - uses: actions/checkout@v4                  # get the code
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'                             # cache node_modules for speed
+
+      - name: Install dependencies
+        run: npm ci                                # clean install from lockfile
+
+      - name: Start Vibium daemon
+        run: vibium daemon start
+        env:
+          HOME: /root                             # find Chrome at /root/.cache/vibium
+
+      - name: Run tests
+        run: npm run test:ci                       # vitest run --reporter=verbose
+        env:
+          CI: true                                # triggers headless mode in test code
+          HOME: /root
+          AUT_BASE_URL: ${{ vars.AUT_BASE_URL }}  # optional: override base URL
+
+      - name: Stop Vibium daemon
+        if: always()                              # run even if tests failed
+        run: vibium daemon stop
+        env:
+          HOME: /root</pre></div></div>
+        </div>
+      </details>
 
   </div>
 </main>

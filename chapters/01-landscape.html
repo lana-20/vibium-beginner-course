@@ -108,6 +108,15 @@
     .quiz-answers { font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
     .exercise-block ol, .exercise-block ul { padding-left: 22px; margin: 8px 0 12px; }
     .exercise-block li { font-size: 15px; color: var(--fg-2); line-height: 1.6; margin-bottom: 6px; }
+    /* Solution block */
+    .solution-block { background: rgba(184,134,42,0.04); border: 1px solid var(--border-mid); border-left: 3px solid var(--gold); border-radius: var(--r-xl); margin: 20px 0 0; overflow: hidden; }
+    .solution-block > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; padding: 18px 28px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-light); }
+    .solution-block > summary::-webkit-details-marker { display: none; }
+    .solution-block > summary::before { content: '▶'; font-size: 9px; }
+    .solution-block[open] > summary::before { content: '▼'; }
+    .solution-body { padding: 4px 28px 24px; }
+    .solution-body p { font-size: 15px; }
+    .solution-body .callout { margin: 12px 0; }
   </style>
 </head>
 <body>
@@ -302,6 +311,19 @@
         <div class="quiz-answers">Answers: 1-C &nbsp; 2-B &nbsp; 3-C &nbsp; 4-D &nbsp; 5-B</div>
       </div>
     </div>
+
+
+
+      <details class="solution-block">
+        <summary>Solution</summary>
+        <div class="solution-body">
+<p>This exercise has no code to run — it's a research task. A strong response includes:</p>
+<ol style="padding-left:22px;margin:10px 0"><li>**Tools appearing most often:** Selenium and Playwright appear in the majority of senior QA and automation engineer postings. Playwright has been gaining ground in new job listings since 2023.</li></ol>
+<ol style="padding-left:22px;margin:10px 0"><li>**Tool not mentioned:** Vibium is unlikely to appear in job postings yet — it's a newer entrant. That's expected and not a problem: the patterns you learn with Vibium (async/await, role-based locators, network interception, CI integration) are directly transferable to Playwright and Selenium.</li></ol>
+<ol style="padding-left:22px;margin:10px 0"><li>**CI tool:** If the posting mentions GitHub Actions, GitLab CI, or Jenkins alongside Playwright or Selenium, the test suite almost certainly runs headlessly on push. Keywords like "flaky tests," "test parallelism," or "Allure reports" confirm a mature CI setup.</li></ol>
+<p>Come back to your notes at the end of the course and see whether the landscape looks different from your perspective.</p>
+        </div>
+      </details>
 
   </div>
 </main>

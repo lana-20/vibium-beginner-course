@@ -118,6 +118,15 @@
     .quiz-answers { font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
     .exercise-block ol, .exercise-block ul { padding-left: 22px; margin: 8px 0 12px; }
     .exercise-block li { font-size: 15px; color: var(--fg-2); line-height: 1.6; margin-bottom: 6px; }
+    /* Solution block */
+    .solution-block { background: rgba(184,134,42,0.04); border: 1px solid var(--border-mid); border-left: 3px solid var(--gold); border-radius: var(--r-xl); margin: 20px 0 0; overflow: hidden; }
+    .solution-block > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; padding: 18px 28px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-light); }
+    .solution-block > summary::-webkit-details-marker { display: none; }
+    .solution-block > summary::before { content: '▶'; font-size: 9px; }
+    .solution-block[open] > summary::before { content: '▼'; }
+    .solution-body { padding: 4px 28px 24px; }
+    .solution-body p { font-size: 15px; }
+    .solution-body .callout { margin: 12px 0; }
   </style>
 </head>
 <body>
@@ -327,6 +336,104 @@ assert.<span class="fn">ok</span>(fs.<span class="fn">existsSync</span>(path.<sp
         <div class="quiz-answers">Answers: 1-B &nbsp; 2-A &nbsp; 3-C &nbsp; 4-C &nbsp; 5-C</div>
       </div>
     </div>
+
+
+
+      <details class="solution-block">
+        <summary>Solution</summary>
+        <div class="solution-body">
+<div class="code-panel" style="margin:16px 0"><div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">typescript</span></div><div class="code-body"><pre>import { browser as vibium } from 'vibium'
+import assert from 'node:assert/strict'
+import path from 'node:path'
+import fs from 'node:fs'
+
+const AUT = 'https://automation-exercise.daisyladybug.com'
+
+async function testDeleteConfirmation() {
+  const browser = await vibium.start({ headless: false })
+  const context = await browser.newContext()
+  const page = await context.newPage()
+
+  try {
+    // Add a product to cart first
+    await page.go(`${AUT}/products/prod_001`)
+    const addBtn = await page.find({ role: 'button', text: 'Add to Cart' })
+    await addBtn.click()
+    await page.go(`${AUT}/cart`)
+
+    const removeBtn = await page.find({ role: 'button', text: 'Remove' })
+
+    const [result] = await Promise.all([
+      page.capture.dialog('dismiss'),
+      (async () =&gt; { removeBtn.click() })(),
+    ])
+
+    assert.ok(
+      result.type === 'confirm' || result.type === 'alert',
+      `dialog type is confirm or alert (got: ${result.type})`
+    )
+
+    // Item should still be in cart after dismissing
+    const item = await page.find({ text: 'Wireless Headphones' })
+    assert.ok(await item.isVisible(), 'item still in cart after dismiss')
+
+    console.log('testDeleteConfirmation passed.')
+  } finally {
+    await browser.stop()
+  }
+}
+
+async function testConsoleErrors() {
+  const browser = await vibium.start({ headless: false })
+  const context = await browser.newContext()
+  const page = await context.newPage()
+
+  try {
+    const [messages] = await Promise.all([
+      page.capture.console(),
+      (async () =&gt; {
+        await page.go(`${AUT}/products`)
+        const search = await page.find("input[placeholder='Search products...']")
+        search.fill('test')
+      })(),
+    ])
+
+    assert.ok(Array.isArray(messages), 'messages is an array')
+    console.log(`testConsoleErrors passed. ${messages.length} console message(s) captured.`)
+  } finally {
+    await browser.stop()
+  }
+}
+
+async function testDownload() {
+  const downloadDir = '/tmp/vibium-downloads'
+  fs.mkdirSync(downloadDir, { recursive: true })
+
+  const browser = await vibium.start({ headless: false })
+  const context = await browser.newContext()
+  const page = await context.newPage()
+
+  try {
+    await page.go(AUT)
+    // Find a download link — adjust selector to match a link in the app
+    const downloadLink = await page.find({ role: 'link', text: 'Download CSV' })
+
+    const [download] = await Promise.all([
+      page.capture.download(downloadDir),
+      (async () =&gt; { downloadLink.click() })(),
+    ])
+
+    assert.ok(download.suggestedFilename.endsWith('.csv'), 'filename ends with .csv')
+    console.log('testDownload passed:', download.suggestedFilename)
+  } finally {
+    await browser.stop()
+  }
+}
+
+testDeleteConfirmation().catch(err =&gt; { console.error(err.message); process.exit(1) })</pre></div></div>
+<div class="callout"><p><strong>Note:</strong> The dialog test assumes there is a "Remove" button in the cart that triggers a browser confirm dialog. The download test requires a page with a "Download CSV" link — check the app for the correct trigger element. The console capture test always passes since it only asserts the return type.</p></div>
+        </div>
+      </details>
 
   </div>
 </main>

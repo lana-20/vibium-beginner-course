@@ -133,6 +133,15 @@
     .quiz-answers { font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
     .exercise-block ol, .exercise-block ul { padding-left: 22px; margin: 8px 0 12px; }
     .exercise-block li { font-size: 15px; color: var(--fg-2); line-height: 1.6; margin-bottom: 6px; }
+    /* Solution block */
+    .solution-block { background: rgba(184,134,42,0.04); border: 1px solid var(--border-mid); border-left: 3px solid var(--gold); border-radius: var(--r-xl); margin: 20px 0 0; overflow: hidden; }
+    .solution-block > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; padding: 18px 28px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-light); }
+    .solution-block > summary::-webkit-details-marker { display: none; }
+    .solution-block > summary::before { content: '▶'; font-size: 9px; }
+    .solution-block[open] > summary::before { content: '▼'; }
+    .solution-body { padding: 4px 28px 24px; }
+    .solution-body p { font-size: 15px; }
+    .solution-body .callout { margin: 12px 0; }
   </style>
 </head>
 <body>
@@ -432,6 +441,96 @@ assert.<span class="fn">ok</span>(<span class="k">await</span> (<span class="k">
         <div class="quiz-answers">Answers: 1-B &nbsp; 2-D &nbsp; 3-C &nbsp; 4-C &nbsp; 5-B</div>
       </div>
     </div>
+
+
+
+      <details class="solution-block">
+        <summary>Solution</summary>
+        <div class="solution-body">
+<div class="code-panel" style="margin:16px 0"><div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">typescript</span></div><div class="code-body"><pre>import { browser as vibium } from 'vibium'
+import assert from 'node:assert/strict'
+
+const AUT = 'https://automation-exercise.daisyladybug.com'
+
+const fieldMap: Record&lt;string, string&gt; = {
+  firstName: 'Alex', lastName: 'Rivera', email: 'alex@test.com',
+  phone: '5559876543', address: '789 Pine St', city: 'Seattle',
+  state: 'WA', zipCode: '98101', cardName: 'Alex Rivera',
+  cardNumber: '4111111111111111', cardExpiry: '06/27', cardCvc: '123',
+}
+
+async function testSearchAndCheckout() {
+  const browser = await vibium.start({ headless: false })
+  const context = await browser.newContext()
+  const page = await context.newPage()
+
+  try {
+    await page.go(`${AUT}/products`)
+    const search = await page.find("input[placeholder='Search products...']")
+    await search.fill('yoga')
+
+    const yogaMat = await page.find({ text: 'Yoga Mat' })
+    assert.ok(await yogaMat.isVisible(), 'Yoga Mat visible after search')
+
+    // Assert Wireless Headphones is not in filtered results
+    const filteredCount = (await page.findAll('a[href*="/products/prod_"]')).length
+    assert.ok(filteredCount &lt; 12, 'search narrowed results from 12')
+
+    await page.go(`${AUT}/products/prod_007`)
+    const addToCart = await page.find({ role: 'button', text: 'Add to Cart' })
+    await addToCart.click()
+
+    await page.go(`${AUT}/checkout`)
+    for (const [name, value] of Object.entries(fieldMap)) {
+      const field = await page.find(`input[name=${name}]`)
+      await field.fill(value)
+    }
+
+    const submit = await page.find({ role: 'button', text: 'Place Order' })
+    await submit.click()
+    await page._waitForURL('**/confirmation')
+    assert.ok((await page.url()).includes('/confirmation'), 'reached confirmation page')
+
+    console.log('testSearchAndCheckout passed.')
+  } finally {
+    await browser.stop()
+  }
+}
+
+async function testValidationErrors() {
+  const browser = await vibium.start({ headless: false })
+  const context = await browser.newContext()
+  const page = await context.newPage()
+
+  try {
+    await page.go(`${AUT}/products/prod_001`)
+    const addToCart = await page.find({ role: 'button', text: 'Add to Cart' })
+    await addToCart.click()
+
+    await page.go(`${AUT}/checkout`)
+    const submit = await page.find({ role: 'button', text: 'Place Order' })
+    await submit.click()
+
+    const firstError = await page.find({ text: '✗ First name required' })
+    assert.ok(await firstError.isVisible(), 'first name error visible')
+
+    const emailError = await page.find({ text: '✗ Valid email required' })
+    assert.ok(await emailError.isVisible(), 'email error visible')
+
+    const cardError = await page.find({ text: '✗ Valid card number required' })
+    assert.ok(await cardError.isVisible(), 'card number error visible')
+
+    console.log('testValidationErrors passed.')
+  } finally {
+    await browser.stop()
+  }
+}
+
+Promise.all([testSearchAndCheckout(), testValidationErrors()])
+  .catch(err =&gt; { console.error('Test failed:', err.message); process.exit(1) })</pre></div></div>
+<p>In the next chapter, we'll look much more closely at assertions and waiting — specifically how to assert on dynamic state like cart totals that update after you interact with the page.</p>
+        </div>
+      </details>
 
   </div>
 </main>

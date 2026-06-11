@@ -94,6 +94,15 @@
     .quiz-answers { font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
     .exercise-block ol, .exercise-block ul { padding-left: 22px; margin: 8px 0 12px; }
     .exercise-block li { font-size: 15px; color: var(--fg-2); line-height: 1.6; margin-bottom: 6px; }
+    /* Solution block */
+    .solution-block { background: rgba(184,134,42,0.04); border: 1px solid var(--border-mid); border-left: 3px solid var(--gold); border-radius: var(--r-xl); margin: 20px 0 0; overflow: hidden; }
+    .solution-block > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; padding: 18px 28px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-light); }
+    .solution-block > summary::-webkit-details-marker { display: none; }
+    .solution-block > summary::before { content: '▶'; font-size: 9px; }
+    .solution-block[open] > summary::before { content: '▼'; }
+    .solution-body { padding: 4px 28px 24px; }
+    .solution-body p { font-size: 15px; }
+    .solution-body .callout { margin: 12px 0; }
   </style>
 </head>
 <body>
@@ -310,6 +319,24 @@ jobs:
         <div class="quiz-answers">Answers: 1-B &nbsp; 2-B &nbsp; 3-B &nbsp; 4-B &nbsp; 5-B</div>
       </div>
     </div>
+
+
+
+      <details class="solution-block">
+        <summary>Solution</summary>
+        <div class="solution-body">
+<p>The solution for this chapter is operational rather than code-based. The expected output after completing the exercise is:</p>
+<ol style="padding-left:22px;margin:10px 0"><li>A `Dockerfile.ci` at your project root matching the one in this chapter</li>
+<li>A published image at `ghcr.io/YOUR_USERNAME/vibium-ci:latest` visible under your GitHub profile → Packages</li>
+<li>`tests.yml` referencing your image</li>
+<li>A green Actions run that shows "Pulling from ghcr.io/YOUR_USERNAME/vibium-ci" in the "Set up job" step</li>
+<li>A `build-ci-image.yml` that triggers when `Dockerfile.ci` changes</li></ol>
+<p>To verify the image is correct, you can run it locally and test Chrome:</p>
+<div class="code-panel" style="margin:16px 0"><div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">bash</span></div><div class="code-body"><pre>docker run --rm ghcr.io/YOUR_USERNAME/vibium-ci:latest \
+  /bin/sh -c 'vibium --version &amp;&amp; echo "Chrome OK"'</pre></div></div>
+<p>If Chrome is found and the version prints, the image is working.</p>
+        </div>
+      </details>
 
   </div>
 </main>
