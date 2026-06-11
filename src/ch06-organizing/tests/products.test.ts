@@ -29,7 +29,7 @@ describe('Products page', () => {
     const products = new ProductsPage(page)
     await products.goto()
     await products.filterByCategory('Electronics')
-    await page.find({ text: 'SHOWING 3 OF 12 PRODUCTS' })
+    await page.find({ text: 'Showing 3 of 12 products' })
     expect(await products.isProductVisible('Wireless Headphones')).toBe(true)
     expect(await products.isProductVisible('Blue Cotton T-Shirt')).toBe(false)
   })
@@ -54,10 +54,11 @@ describe('Products page', () => {
     await page.go(`${AUT}/products/prod_001`)
     const addBtn = await page.find({ role: 'button', text: 'Add to Cart' })
     await addBtn.click()
+    await page.find({ text: '1' }, { timeout: 5000 })  // wait for cart badge
 
     const cart = new CartPage(page)
     await cart.goto()
-    await page.find({ text: '1 ITEM · 1 PRODUCT' })
-    expect(await (await page.find({ text: '1 ITEM · 1 PRODUCT' })).isVisible()).toBe(true)
+    await page.find({ text: '1 item · 1 product' })
+    expect(await (await page.find({ text: '1 item · 1 product' })).isVisible()).toBe(true)
   })
 })

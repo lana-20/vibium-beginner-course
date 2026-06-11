@@ -13,8 +13,12 @@ export class ProductsPage {
   }
 
   async filterByCategory(category: string) {
-    const select = await this.page.find('select:first-of-type')
-    await select.selectOption(category)
+    await this.page.evaluate(`
+      const sel = document.querySelector('select');
+      sel.value = '${category}';
+      sel.dispatchEvent(new Event('change', { bubbles: true }));
+      sel.dispatchEvent(new Event('input', { bubbles: true }));
+    `)
   }
 
   async sortBy(option: string) {
