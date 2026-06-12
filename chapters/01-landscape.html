@@ -248,7 +248,7 @@
         <div class="tool-card vibium">
           <div class="tool-name">Vibium</div>
           <div class="tool-tag">CLI · MCP · TypeScript / Python / Java · WebDriver BiDi</div>
-          <div class="tool-desc">Built for agent-driven testing from the ground up. Three interfaces — CLI, MCP server, and client libraries — sharing one engine built on WebDriver BiDi.</div>
+          <div class="tool-desc">The verification layer for coding agents. Three interfaces — CLI, MCP server, and client libraries — sharing one engine built on WebDriver BiDi, not a proprietary protocol.</div>
         </div>
       </div>
 
@@ -449,19 +449,19 @@
           </div>
         </div>
 
+        <div class="tl-era">
+          <div class="tl-era-line"></div>
+          <span class="tl-era-label">The Agentic Layer · 2026</span>
+          <div class="tl-era-line"></div>
+        </div>
+
         <div class="tl-item">
           <div class="tl-year-col">Dec 2025</div>
           <div class="tl-dot-col"><div class="tl-dot coral"></div></div>
           <div class="tl-card coral">
             <div class="tl-card-tool">Vibium</div>
-            <p class="tl-card-body">First public release (December 2025) — the first tool to treat WebDriver BiDi as its foundation rather than a retrofit. Three interfaces built in from the start: CLI, MCP server, and client libraries. Designed to be driven by humans and AI agents equally.</p>
+            <p class="tl-card-body">First public release (December 2025) — the verification layer for coding agents. The first browser automation tool built on WebDriver BiDi natively rather than as a retrofit. Three interfaces from day one: CLI, MCP server, and client libraries.</p>
           </div>
-        </div>
-
-        <div class="tl-era">
-          <div class="tl-era-line"></div>
-          <span class="tl-era-label">The Agentic Layer · 2026</span>
-          <div class="tl-era-line"></div>
         </div>
 
         <div class="tl-item">
@@ -516,7 +516,7 @@
       <h2 class="section-heading">Vibium</h2>
       <p>Vibium is the newest tool in this group, and it's the one that's genuinely designed for where the industry is going rather than where it's been. The first thing that makes Vibium unusual is that it exposes the same underlying browser engine through <strong>three distinct interfaces</strong>.</p>
       <p>The <strong>CLI</strong> is a standalone binary — you can drive a real browser from your terminal without writing any code. The <strong>MCP server</strong> implements the Model Context Protocol, an open standard for connecting AI assistants to tools — so any AI agent that speaks MCP can use Vibium to automate browsers. And the <strong>client libraries</strong> — for TypeScript, Python, and Java — give you a full programmatic API for writing tests.</p>
-      <p>All three interfaces share one underlying engine, and that engine is built on <strong>WebDriver BiDi</strong> — the same W3C standard we discussed in the Selenium section. Vibium contains a built-in BiDi proxy that speaks the standard bidirectional WebSocket protocol directly to the browser. This means Vibium inherits everything BiDi brings: event-driven real-time observation, network interception, and console monitoring — without depending on a proprietary Google protocol or unofficial browser patches. Chrome is fully supported today; additional browsers will follow as BiDi implementations mature across engines. Where Playwright reaches for CDP because it predates BiDi's maturity, and Selenium added BiDi as a retrofit in version 4, Vibium was designed after BiDi was viable and treats it as the foundation — not a later addition.</p>
+      <p>All three interfaces share one underlying engine, and that engine is built on <strong>WebDriver BiDi</strong> — the same W3C standard we discussed in the Selenium section. Vibium contains a built-in BiDi proxy that speaks the standard bidirectional WebSocket protocol directly to the browser. This means Vibium inherits everything BiDi brings: event-driven real-time observation, network interception, and console monitoring — without depending on a proprietary protocol controlled by a large corporation or unofficial browser patches. Chrome is fully supported today; additional browsers will follow as BiDi implementations mature across engines. Where Playwright reaches for CDP because it predates BiDi's maturity, and Selenium added BiDi as a retrofit in version 4, Vibium was designed after BiDi was viable and treats it as the only foundation — not a later addition.</p>
       <p>In this course we're using the TypeScript client. TypeScript is the natural choice: the web is a JavaScript environment, and TypeScript's static typing makes working with browser automation APIs much safer and more productive. You get autocomplete, you catch mistakes at compile time, and your intent is much clearer on the page.</p>
     </div>
 
@@ -524,7 +524,7 @@
       <div class="section-eyebrow">1.6</div>
       <h2 class="section-heading">Why <em>Vibium</em> for This Course?</h2>
       <p>There isn't one right tool for all situations, and I want to be honest about that. Playwright is an excellent, mature choice for teams that want broad language support and a well-established ecosystem. Selenium with BiDi is the right call when W3C standard compliance and enterprise compatibility are non-negotiable. Cypress serves frontend teams who want testing deeply integrated into their development workflow.</p>
-      <p>We're using Vibium because it sits at a genuinely new point in the landscape — designed for a world where automation scripts are written by both humans and AI agents, and where the boundary between "running a test" and "running an agent that can test" is blurring. Understanding Vibium gives you both a capable, practical testing tool for today and a foundation for where the whole industry is heading.</p>
+      <p>We're using Vibium because it sits at a genuinely new point in the landscape. Its primary purpose is to be the verification layer for coding agents — the infrastructure that lets an AI agent navigate to a page, check its work, and confirm the result. When you learn Vibium, you're not just learning another automation tool: you're learning the interface that agents use to close the loop. That's a different kind of foundation than any of the other tools in this chapter offer.</p>
       <p>In the next chapter, we'll open up the hood and look at how Vibium actually works — the object model, the three interfaces, and the core patterns you'll use throughout every chapter in this course. Let's get into it.</p>
     </div>
 

@@ -62,7 +62,7 @@ Beyond the three-interface design, Vibium's API is noticeably concise. Common op
 
 There isn't one right tool for all situations, and I want to be honest about that. Playwright is an excellent, mature choice for teams that want broad language support and a well-established ecosystem. Selenium with BiDi is the right call when W3C standard compliance and enterprise compatibility are non-negotiable requirements. Cypress serves frontend teams who want testing deeply integrated into their development workflow.
 
-We're using Vibium because it sits at a genuinely new point in the landscape — designed for a world where automation scripts are written by both humans and AI agents, and where the boundary between "running a test" and "running an agent that can test" is blurring. Understanding Vibium gives you both a capable, practical testing tool for today and a foundation for where the whole industry is heading.
+We're using Vibium because it sits at a genuinely new point in the landscape. Its primary purpose is to be the verification layer for coding agents — the infrastructure that lets an AI agent navigate to a page, check its work, and confirm the result. When you learn Vibium, you're not just learning another automation tool: you're learning the interface that agents use to close the loop. That's a different kind of foundation than any of the other tools in this chapter offer.
 
 In the next chapter, we'll open up the hood and look at how Vibium actually works — the object model, the interfaces, and the core patterns you'll use throughout every chapter in this course. Let's get into it.
 
