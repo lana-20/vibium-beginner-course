@@ -72,6 +72,8 @@
     .compare-card.ts .compare-label { color: var(--mint-light); }
     .compare-card.mcp .compare-label { color: var(--coral-light); }
     .compare-card pre { font-family: var(--font-mono); font-size: 12px; line-height: 1.7; color: var(--fg-2); }
+    .doc-link { color: var(--coral-light); text-decoration: underline; text-decoration-color: rgba(212,85,42,0.35); text-underline-offset: 2px; }
+    .doc-link:hover { color: var(--coral); }
 
     .iface-table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 14px; }
     .iface-table th { text-align: left; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg-3); padding: 8px 12px; border-bottom: 1px solid var(--border-mid); }
@@ -173,7 +175,7 @@
       <div class="section-eyebrow">12.2</div>
       <h2 class="section-heading">What <em>MCP</em> Is</h2>
       <p>The Model Context Protocol is an open standard — similar in purpose to what USB is for hardware. AI models speak MCP to connect to external tools. When Vibium runs as an MCP server, it exposes its browser automation capabilities — navigate, find, click, fill, screenshot, and more — as MCP tool calls. Any AI model that speaks MCP can invoke those tools.</p>
-      <p>From your perspective as a test engineer, this means you can open Claude Desktop, describe what you want to test, and watch Claude navigate a real browser, read the page, take actions, and report back. The AI handles selector discovery, action sequencing, and error recovery. You describe the outcome you want.</p>
+      <p>From your perspective as a test engineer, this means you can open Claude Desktop, describe what you want to test, and watch Claude navigate a real browser, read the page, take actions, and report back. The AI handles selector discovery, action sequencing, and error recovery. You describe the outcome you want. The complete MCP tool reference — 85 tools across 8 categories — is at <a href="https://www.daisyladybug.com/vibium/mcp/" class="doc-link" target="_blank" rel="noopener">daisyladybug.com/vibium/mcp</a>.</p>
     </div>
 
     <div class="section-block">
@@ -193,7 +195,7 @@
   }
 }</pre></div>
       </div>
-      <p>Restart Claude Desktop. You'll see the Vibium tools become available — look for the hammer icon. Claude Desktop starts the Vibium daemon automatically when it launches <code class="inline">vibium mcp</code>, so you don't need to run <code class="inline">vibium daemon start</code> separately here.</p>
+      <p>Restart Claude Desktop. You'll see the Vibium tools become available — look for the hammer icon. Claude Desktop starts the Vibium daemon automatically when it launches <code class="inline">vibium mcp</code>, so you don't need to run <code class="inline">vibium daemon start</code> separately here. The full list of available tools is at <a href="https://www.daisyladybug.com/vibium/mcp/" class="doc-link" target="_blank" rel="noopener">daisyladybug.com/vibium/mcp</a>.</p>
     </div>
 
     <div class="section-block">

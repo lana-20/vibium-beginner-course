@@ -99,6 +99,13 @@
     .arch-card.ts  .arch-label { color: var(--coral-light); }
     .arch-desc { font-size: 12px; color: var(--fg-3); line-height: 1.5; }
     .arch-engine { grid-column: 1 / -1; background: rgba(255,255,255,0.03); border: 1px dashed var(--border-mid); border-radius: var(--r-lg); padding: 12px; text-align: center; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg-3); }
+    .arch-lbl { font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; opacity: 0.65; margin-right: 10px; }
+    .arch-agents  { grid-column: 1 / -1; background: rgba(116,85,191,0.07); border: 1px solid rgba(116,85,191,0.18); border-radius: var(--r-lg); padding: 10px 16px; text-align: center; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; color: var(--violet-light); }
+    .arch-core    { grid-column: 1 / -1; background: rgba(255,255,255,0.03); border: 1px dashed var(--border-mid); border-radius: var(--r-lg); padding: 10px 16px; text-align: center; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; color: var(--fg-2); }
+    .arch-runtime { grid-column: 1 / -1; background: rgba(61,106,191,0.07); border: 1px solid rgba(61,106,191,0.18); border-radius: var(--r-lg); padding: 10px 16px; text-align: center; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; color: var(--steel-light); }
+    .arch-arrow   { grid-column: 1 / -1; text-align: center; font-family: var(--font-mono); font-size: 11px; color: var(--fg-3); padding: 3px 0; letter-spacing: 0.08em; }
+    .doc-link { color: var(--coral-light); text-decoration: underline; text-decoration-color: rgba(212,85,42,0.35); text-underline-offset: 2px; }
+    .doc-link:hover { color: var(--coral); }
 
     .ch-nav { padding: 48px 0; border-top: 1px solid var(--border); background: var(--bg-dark); }
     .ch-nav-inner { max-width: 760px; margin: 0 auto; padding: 0 32px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
@@ -241,6 +248,8 @@
       <p>In Chapter 1 we talked about what Vibium is. In this chapter I want to show you how it works. We're going to look at the object hierarchy that everything in this course builds on, walk through a live browser session from start to finish, and touch on the three categories of things you can do with a Vibium page. Understanding this architecture will make every chapter that follows much easier to reason about.</p>
       <p>Let me start by making the three-interface story concrete. When you install Vibium, you get access to the same browser engine through three different surfaces:</p>
       <div class="arch-grid">
+        <div class="arch-agents"><span class="arch-lbl">AI Agents</span>LLM / Agent &nbsp;·&nbsp; Claude Code &nbsp;·&nbsp; Codex &nbsp;·&nbsp; Gemini &nbsp;·&nbsp; etc.</div>
+        <div class="arch-arrow">↓ CLI (bash) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↓ MCP (stdio) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↓ async API</div>
         <div class="arch-card cli">
           <div class="arch-label">CLI</div>
           <div class="arch-desc">Standalone binary. One command at a time from the terminal. Great for exploration.</div>
@@ -253,9 +262,12 @@
           <div class="arch-label">Client Libraries</div>
           <div class="arch-desc">TypeScript, Python, Java. Full programmatic API. This is how tests are written.</div>
         </div>
-        <div class="arch-engine">↑ all three talk to the same underlying engine ↑</div>
+        <div class="arch-arrow">↓ all three interface with</div>
+        <div class="arch-core"><span class="arch-lbl">Core</span>Vibium binary &nbsp;—&nbsp; BiDi Proxy &nbsp;·&nbsp; CLI Commands &nbsp;·&nbsp; MCP Server</div>
+        <div class="arch-arrow">↓ WebSocket BiDi :9515</div>
+        <div class="arch-runtime"><span class="arch-lbl">Runtime</span>Chrome Browser</div>
       </div>
-      <p>All three interfaces talk to the same underlying browser engine and share the same behavior. What you learn about finding elements, filling forms, and waiting for page changes applies equally across all three.</p>
+      <p>All three interfaces share one core: a Vibium binary containing the BiDi proxy, CLI command processor, and MCP server. Beneath that, a single WebSocket BiDi connection to Chrome on port 9515. AI agents reach it via CLI (bash) or MCP (stdio); your TypeScript tests reach it via the async client library API. What you learn in this course — finding elements, filling forms, waiting for page changes — applies identically across all three. Full references: JavaScript client — <a href="https://www.daisyladybug.com/vibium/javascript/" class="doc-link" target="_blank" rel="noopener">daisyladybug.com/vibium/javascript</a> (68 methods · 10 categories); MCP server — <a href="https://www.daisyladybug.com/vibium/mcp/" class="doc-link" target="_blank" rel="noopener">daisyladybug.com/vibium/mcp</a> (85 tools · 8 categories).</p>
     </div>
 
     <div class="section-block">

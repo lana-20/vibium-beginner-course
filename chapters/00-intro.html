@@ -90,6 +90,16 @@
     .footer-links { display: flex; gap: 20px; }
     .footer-links a { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); transition: color 150ms; }
     .footer-links a:hover { color: var(--fg-2); }
+
+    .about-card { background: var(--card); border: 1px solid var(--border-mid); border-radius: var(--r-2xl); padding: 28px 32px; margin: 28px 0; }
+    .about-name { font-family: var(--font-display); font-size: 22px; font-weight: 400; letter-spacing: -0.01em; margin-bottom: 4px; }
+    .about-role { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--coral-light); margin-bottom: 16px; }
+    .about-links { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+    .about-link { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px; transition: all 150ms; }
+    .about-link:hover { color: var(--off-white); border-color: var(--border-mid); }
+    .about-inline { color: var(--coral-light); }
+    .about-quote { border-left: 2px solid var(--coral-light); margin: 16px 0; padding: 10px 16px; color: var(--fg-2); font-style: italic; font-size: 14px; line-height: 1.6; }
+    .about-quote cite { display: block; margin-top: 6px; font-style: normal; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; color: var(--fg-3); }
   </style>
 </head>
 <body>
@@ -218,6 +228,28 @@
       <p>The application you're testing throughout this course — automation-exercise.daisyladybug.com — is a purpose-built sandbox. It behaves predictably. Real-world applications don't always cooperate this nicely.</p>
       <p>The patterns you'll learn here are designed to be robust: explicit waits instead of sleeps, semantic locators instead of fragile CSS paths, Page Objects that isolate selectors from test logic. They hold up in production applications because they're based on observable DOM state rather than timing assumptions.</p>
       <p>When you apply these patterns to a real codebase and something doesn't work as expected, that's normal. The debugging tools — recordings, verbose logging, the CLI — are part of the course for exactly that reason. Let's get started.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">Your Instructor</div>
+      <h2 class="section-heading">About <em>Lana Begunova</em></h2>
+      <div class="about-card">
+        <div class="about-name">Lana Begunova</div>
+        <div class="about-role">AI · UI · API SDET &nbsp;·&nbsp; Founder, <a href="https://www.daisyladybug.com/" class="about-inline">Daisy Lady Bug</a> &nbsp;·&nbsp; Seattle, WA</div>
+        <p>Seven years as a Software Development Engineer in Test, building and maintaining automation frameworks across web and mobile — Selenium WebDriver (Java), Appium (Python), Playwright, Pytest, and BDD/Cucumber. Cross-browser and cross-platform testing on Android and iOS, TestNG parallel execution, JIRA defect workflows, and Agile teams.</p>
+        <p>Since late 2025, focused specifically on agent-driven testing: building with Vibium, researching WebDriver BiDi, running CLI-vs-MCP benchmarks across 100 QA practice sites, and publishing the results. Contributing writer for the Women in Technology publication on Medium, with technical series on Selenium WebDriver BiDi and Appium. Founder of <a href="https://www.daisyladybug.com/" class="about-inline">daisyladybug.com</a> — a test automation consultancy, newsletter, and courses platform.</p>
+        <blockquote class="about-quote">
+          "This release fixes a wide range of issues across the CLI, the MCP server, and the JavaScript, Python, and Java clients — most surfaced by systematic cross-client testing&hellip; This release was driven almost entirely by community bug reports. A huge thank-you to @lana-20 for an extraordinary amount of systematic, cross-client testing."
+          <cite>— Vibium v26.5.31 release notes, <a href="https://github.com/VibiumDev/vibium/releases/tag/v26.5.31" class="about-inline" target="_blank" rel="noopener">github.com/VibiumDev/vibium</a></cite>
+        </blockquote>
+        <p>Education: B.A. Political Science, UCLA; B.B.A. Finance, Tashkent State Technical University. Certifications include Anthropic Claude Code in Action (2026) and RAG-LLM Evaluation &amp; Test Automation.</p>
+        <div class="about-links">
+          <a class="about-link" href="https://www.daisyladybug.com/" target="_blank" rel="noopener">daisyladybug.com</a>
+          <a class="about-link" href="https://github.com/lana-20" target="_blank" rel="noopener">github.com/lana-20</a>
+          <a class="about-link" href="https://medium.com/@begunova" target="_blank" rel="noopener">medium.com/@begunova</a>
+          <a class="about-link" href="https://www.linkedin.com/in/lanabegunova/" target="_blank" rel="noopener">linkedin.com/in/lanabegunova</a>
+        </div>
+      </div>
     </div>
 
   </div>

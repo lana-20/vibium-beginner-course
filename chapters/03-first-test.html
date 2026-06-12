@@ -120,6 +120,13 @@
     .quiz-answers { font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
     .exercise-block ol, .exercise-block ul { padding-left: 22px; margin: 8px 0 12px; }
     .exercise-block li { font-size: 15px; color: var(--fg-2); line-height: 1.6; margin-bottom: 6px; }
+    .solution-block { background: rgba(184,134,42,0.04); border: 1px solid var(--border-mid); border-left: 3px solid var(--gold); border-radius: var(--r-xl); margin: 20px 0 0; overflow: hidden; }
+    .solution-block > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; padding: 18px 28px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-light); }
+    .solution-block > summary::-webkit-details-marker { display: none; }
+    .solution-block > summary::before { content: '▶'; font-size: 9px; }
+    .solution-block[open] > summary::before { content: '▼'; }
+    .solution-body { padding: 4px 28px 24px; }
+    .solution-body p { font-size: 15px; }
   </style>
 </head>
 <body>
@@ -441,6 +448,51 @@ console.<span class="fn">log</span>(<span class="s">'Recording:'</span>, url)
 
         <div class="quiz-answers">Answers: 1-B &nbsp; 2-C &nbsp; 3-D &nbsp; 4-B &nbsp; 5-D</div>
       </div>
+
+      <details class="solution-block">
+        <summary>Solution</summary>
+        <div class="solution-body">
+<div class="code-panel" style="margin:16px 0"><div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file"><em>ch03/</em>products-page.ts</span></div><div class="code-body"><pre><span class="k">import</span> { browser <span class="k">as</span> vibium } <span class="k">from</span> <span class="s">'vibium'</span>
+<span class="k">import</span> assert <span class="k">from</span> <span class="s">'node:assert/strict'</span>
+
+<span class="k">const</span> AUT = <span class="s">'https://automation-exercise.daisyladybug.com'</span>
+
+<span class="k">async function</span> <span class="fn">testProductsPage</span>() {
+  <span class="k">const</span> browser = <span class="k">await</span> vibium.<span class="fn">start</span>({ headless: <span class="k">false</span> })
+  <span class="k">const</span> context = <span class="k">await</span> browser.<span class="fn">newContext</span>()
+  <span class="k">const</span> page = <span class="k">await</span> context.<span class="fn">newPage</span>()
+
+  <span class="k">try</span> {
+    <span class="k">await</span> page.<span class="fn">go</span>(<span class="s">`<span class="k">${</span>AUT<span class="k">}</span>/products`</span>)
+
+    <span class="k">const</span> title = <span class="k">await</span> page.<span class="fn">title</span>()
+    assert.<span class="fn">equal</span>(title, <span class="s">'automation-exercise | E-commerce Testing Sandbox'</span>, <span class="s">'page title'</span>)
+
+    <span class="k">const</span> heading = <span class="k">await</span> page.<span class="fn">find</span>({ role: <span class="s">'heading'</span>, text: <span class="s">'Products'</span> })
+    assert.<span class="fn">ok</span>(<span class="k">await</span> heading.<span class="fn">isVisible</span>(), <span class="s">'Products heading visible'</span>)
+
+    <span class="k">const</span> headphones = <span class="k">await</span> page.<span class="fn">find</span>({ text: <span class="s">'Wireless Headphones'</span> })
+    assert.<span class="fn">ok</span>(<span class="k">await</span> headphones.<span class="fn">isVisible</span>(), <span class="s">'product name visible'</span>)
+
+    <span class="k">const</span> search = <span class="k">await</span> page.<span class="fn">find</span>(<span class="s">"input[placeholder='Search products...']"</span>)
+    assert.<span class="fn">ok</span>(<span class="k">await</span> search.<span class="fn">isEnabled</span>(), <span class="s">'search input enabled'</span>)
+
+    <span class="k">const</span> category = <span class="k">await</span> page.<span class="fn">find</span>(<span class="s">'select:first-of-type'</span>)
+    assert.<span class="fn">ok</span>(<span class="k">await</span> category.<span class="fn">isVisible</span>(), <span class="s">'category select visible'</span>)
+
+    console.<span class="fn">log</span>(<span class="s">'testProductsPage passed.'</span>)
+  } <span class="k">finally</span> {
+    <span class="k">await</span> browser.<span class="fn">stop</span>()
+  }
+}
+
+<span class="fn">testProductsPage</span>().<span class="fn">catch</span>(err => {
+  console.<span class="fn">error</span>(<span class="s">'Test failed:'</span>, err.message)
+  process.<span class="fn">exit</span>(<span class="n">1</span>)
+})</pre></div></div>
+<p>The deliberate-failure step: change <code class="inline">'Wireless Headphones'</code> to a string that doesn't exist on the page (e.g. <code class="inline">'Invisible Product'</code>). Vibium will throw a timeout error when <code class="inline">find</code> can't locate the element — you'll see the label and the selector in the output. Fix it by restoring the correct text, confirm green.</p>
+        </div>
+      </details>
     </div>
 
   </div>

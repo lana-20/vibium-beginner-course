@@ -20,7 +20,7 @@ Here's the limitation of classic WebDriver, and it's an important one: the proto
 
 That's the problem **WebDriver BiDi** was built to solve. BiDi stands for bidirectional. It's a newer W3C specification that adds a persistent, event-driven communication channel on top of classic WebDriver. Instead of sending commands and waiting for responses one at a time, your test code can subscribe to browser events — console messages, network activity, DOM changes — as they happen in real time. Selenium 4 added BiDi support, and all major browsers are actively implementing it now.
 
-So if you've heard the reputation that "Selenium is old and slow," that was earned by earlier versions. Modern BiDi-enabled Selenium is a genuinely capable, standards-compliant protocol. It's worth knowing.
+Selenium 4 (October 2021) was the first widely-used tool to adopt WebDriver BiDi. Chrome, Firefox, and Edge have full production BiDi implementations; Safari/WebKit is actively implementing individual commands but has no complete implementation yet. So if you've heard the reputation that "Selenium is old and slow," that was earned by earlier versions. Modern BiDi-enabled Selenium is a genuinely capable, standards-compliant tool. It's worth knowing.
 
 ---
 
@@ -82,12 +82,12 @@ There's no code to write here. The goal is to connect the landscape you just rea
 
 ## Quiz
 
-**1.** Which browser automation tool uses the W3C WebDriver standard?
+**1.** Which of the following correctly describes how Selenium and WebDriver BiDi relate?
 
-- A. Cypress
-- B. Playwright
-- C. Selenium
-- D. Vibium
+- A. Selenium was redesigned from the ground up to use BiDi as its core protocol
+- B. BiDi is a separate tool, maintained independently of Selenium
+- C. Selenium added BiDi support in version 4 — a new communication layer on top of the existing WebDriver protocol
+- D. Selenium dropped classic WebDriver in favour of BiDi starting with version 4
 
 **2.** WebDriver BiDi improves on classic WebDriver by adding:
 
@@ -117,7 +117,7 @@ There's no code to write here. The goal is to connect the landscape you just rea
 - C. Runs tests inside each browser's JavaScript engine
 - D. Delegates to Selenium for non-Chromium browsers
 
-**Answers:** 1-C, 2-B, 3-C, 4-D, 5-B
+**Answers:** 1-C  2-B  3-C  4-D  5-B
 
 ---
 

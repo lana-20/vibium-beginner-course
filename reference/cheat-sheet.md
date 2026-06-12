@@ -327,3 +327,13 @@ class ProductsPage {
 | Assert immediately after click | Wait for observable DOM change first |
 | `browser.stop()` in `try` | `browser.stop()` in `finally` |
 | Awaited click inside capture | Fire-and-forget click inside `Promise.all` |
+
+---
+
+## See Also
+
+| Resource | URL |
+|----------|-----|
+| Official JS API reference (68 methods · 10 categories) | [daisyladybug.com/vibium/javascript](https://www.daisyladybug.com/vibium/javascript/) |
+| Official MCP tool reference (85 tools · 8 categories) | [daisyladybug.com/vibium/mcp](https://www.daisyladybug.com/vibium/mcp/) |
+| Vibium architecture overview | [daisyladybug.com/vibium](https://www.daisyladybug.com/vibium/) |

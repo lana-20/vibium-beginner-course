@@ -139,6 +139,36 @@
     .solution-body { padding: 4px 28px 24px; }
     .solution-body p { font-size: 15px; }
     .solution-body .callout { margin: 12px 0; }
+    /* Timeline */
+    .tl-wrap { position: relative; margin-top: 36px; }
+    .tl-wrap::before { content: ''; position: absolute; left: 97px; top: 12px; bottom: 12px; width: 1px; background: linear-gradient(to bottom, transparent, var(--border-mid) 6%, var(--border-mid) 94%, transparent); pointer-events: none; }
+    .tl-era { display: flex; align-items: center; gap: 14px; margin: 36px 0 20px; }
+    .tl-era:first-child { margin-top: 4px; }
+    .tl-era-line { flex: 1; height: 1px; background: var(--border); }
+    .tl-era-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--fg-3); white-space: nowrap; }
+    .tl-item { display: grid; grid-template-columns: 70px 30px 1fr; column-gap: 12px; margin-bottom: 16px; align-items: start; opacity: 0; transform: translateY(14px); transition: opacity 0.45s ease, transform 0.45s ease; }
+    .tl-item.tl-visible { opacity: 1; transform: translateY(0); }
+    .tl-year-col { padding-top: 12px; text-align: right; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; color: var(--fg-3); line-height: 1.4; }
+    .tl-dot-col { display: flex; flex-direction: column; align-items: center; }
+    .tl-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 16px; flex-shrink: 0; position: relative; z-index: 1; }
+    .tl-dot.steel  { background: var(--steel);  box-shadow: 0 0 0 3px rgba(61,106,191,0.22); }
+    .tl-dot.mint   { background: var(--mint);   box-shadow: 0 0 0 3px rgba(74,168,165,0.22); }
+    .tl-dot.gold   { background: var(--gold);   box-shadow: 0 0 0 3px rgba(184,134,42,0.22); }
+    .tl-dot.coral  { background: var(--coral);  box-shadow: 0 0 0 3px rgba(212,85,42,0.22); }
+    .tl-dot.violet { background: var(--violet); box-shadow: 0 0 0 3px rgba(116,85,191,0.22); }
+    .tl-card { background: var(--card); border: 1px solid var(--border); border-left: 3px solid; border-radius: var(--r-lg); padding: 12px 16px; }
+    .tl-card.steel  { border-left-color: var(--steel); }
+    .tl-card.mint   { border-left-color: var(--mint); }
+    .tl-card.gold   { border-left-color: var(--gold); }
+    .tl-card.coral  { border-left-color: var(--coral); }
+    .tl-card.violet { border-left-color: var(--violet); }
+    .tl-card-tool { font-family: var(--font-display); font-size: 15px; letter-spacing: -0.01em; margin-bottom: 5px; color: var(--off-white); }
+    .tl-card-body { font-size: 13px; color: var(--fg-2); line-height: 1.6; margin: 0; }
+    @media (max-width: 520px) {
+      .tl-wrap::before { display: none; }
+      .tl-item { grid-template-columns: 46px 20px 1fr; column-gap: 8px; }
+      .tl-year-col { font-size: 10px; }
+    }
   </style>
 </head>
 <body>
@@ -178,7 +208,7 @@
     <div class="hero-meta">
       <span class="meta-item"><span class="meta-dot"></span>No code</span>
       <span class="meta-item"><span class="meta-dot"></span>Lecture</span>
-      <span class="meta-item"><span class="meta-dot"></span>~10 min</span>
+      <span class="meta-item"><span class="meta-dot"></span>~15 min</span>
     </div>
   </div>
 </section>
@@ -224,26 +254,26 @@
         <table class="comparison-table">
           <thead>
             <tr>
-              <th class="feat-col"></th>
-              <th class="tool-col selenium-col">Selenium + BiDi</th>
-              <th class="tool-col playwright-col">Playwright</th>
-              <th class="tool-col cypress-col">Cypress</th>
-              <th class="tool-col vibium-col">Vibium</th>
+              <th class="feat-col" scope="col"></th>
+              <th class="tool-col selenium-col" scope="col">Selenium + BiDi</th>
+              <th class="tool-col playwright-col" scope="col">Playwright</th>
+              <th class="tool-col cypress-col" scope="col">Cypress</th>
+              <th class="tool-col vibium-col" scope="col">Vibium</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td class="feat">Protocol</td>
-              <td>WebDriver + BiDi</td>
+              <td>WebDriver + BiDi <span class="ct-badge">adopted in v4</span></td>
               <td class="ct-caveat">CDP <span class="ct-badge">Google-owned</span></td>
-              <td class="ct-caveat">Proprietary proxy</td>
-              <td>WebDriver BiDi</td>
+              <td class="ct-caveat">Proprietary proxy; CDP (Chrome); BiDi (Firefox, v14.1+)</td>
+              <td class="ct-yes">WebDriver BiDi <span class="ct-badge">built-in from start</span></td>
             </tr>
             <tr>
               <td class="feat">W3C standard</td>
               <td class="ct-yes">Yes</td>
               <td class="ct-no">No</td>
-              <td class="ct-no">No</td>
+              <td class="ct-caveat">Partial <span class="ct-badge">BiDi Firefox only</span></td>
               <td class="ct-yes">Yes</td>
             </tr>
             <tr>
@@ -272,7 +302,7 @@
               <td>All major browsers</td>
               <td class="ct-caveat">Chromium, Firefox*, WebKit*</td>
               <td>Chrome, Firefox, Edge</td>
-              <td>BiDi-capable browsers</td>
+              <td>BiDi-capable browsers†</td>
             </tr>
             <tr>
               <td class="feat">Architecture</td>
@@ -297,39 +327,186 @@
             </tr>
             <tr>
               <td class="feat">AI / agent interface</td>
-              <td class="ct-no">None</td>
-              <td class="ct-no">None</td>
-              <td class="ct-no">None</td>
+              <td class="ct-caveat">Community MCP <span class="ct-badge">not official SeleniumHQ</span></td>
+              <td class="ct-caveat">MCP server + CLI <span class="ct-badge">added post-launch</span></td>
+              <td class="ct-caveat">Cloud MCP <span class="ct-badge">results only, not browser</span></td>
               <td class="ct-yes">CLI + MCP server</td>
             </tr>
           </tbody>
         </table>
       </div>
-      <p class="table-note">* Playwright's Firefox and WebKit support relies on unofficial browser patches not included in standard browser releases.</p>
+      <p class="table-note">* Playwright's Firefox and WebKit support relies on unofficial browser patches not included in standard browser releases. &nbsp;† Chrome only at the time of writing; additional BiDi-capable browsers planned as the standard matures across engines.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-eyebrow">History</div>
+      <h2 class="section-heading">Twenty Years of <em>Browser Automation</em></h2>
+      <p>From Jason Huggins's original hack at ThoughtWorks to AI-native testing tools — the key moments that shaped the ecosystem you're learning today.</p>
+
+      <div class="tl-wrap">
+
+        <div class="tl-era">
+          <div class="tl-era-line"></div>
+          <span class="tl-era-label">Classic WebDriver · 2004 – 2018</span>
+          <div class="tl-era-line"></div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-year-col">2004</div>
+          <div class="tl-dot-col"><div class="tl-dot steel"></div></div>
+          <div class="tl-card steel">
+            <div class="tl-card-tool">Selenium RC</div>
+            <p class="tl-card-body">Jason Huggins at ThoughtWorks creates the first browser automation tool. A remote-control server installs a JavaScript engine inside the browser — complex architecture, but it proved the concept was possible.</p>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-year-col">2007</div>
+          <div class="tl-dot-col"><div class="tl-dot steel"></div></div>
+          <div class="tl-card steel">
+            <div class="tl-card-tool">WebDriver</div>
+            <p class="tl-card-body">Simon Stewart publishes WebDriver — an external process that talks to browsers via the JSON Wire Protocol. Cleaner API; no in-browser injection required. (First public commit: January 3, 2007.)</p>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-year-col">2011</div>
+          <div class="tl-dot-col"><div class="tl-dot steel"></div></div>
+          <div class="tl-card steel">
+            <div class="tl-card-tool">Selenium 2.0</div>
+            <p class="tl-card-body">Selenium RC and WebDriver officially merge in Selenium 2.0 (July 2011). The decision to merge was made at GTAC 2009; the shipped product arrived two years later. The combined tool becomes the enterprise standard, still synchronous and unidirectional.</p>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-year-col">2017</div>
+          <div class="tl-dot-col"><div class="tl-dot gold"></div></div>
+          <div class="tl-card gold">
+            <div class="tl-card-tool">Cypress 1.0</div>
+            <p class="tl-card-body">First stable release with a radically different architecture: tests run <em>inside</em> the browser via proxy injection. Tight developer feedback loop — JavaScript and TypeScript only.</p>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-year-col">2018</div>
+          <div class="tl-dot-col"><div class="tl-dot steel"></div></div>
+          <div class="tl-card steel">
+            <div class="tl-card-tool">W3C WebDriver Recommendation</div>
+            <p class="tl-card-body">WebDriver becomes an official W3C standard — genuine cross-browser portability, natively implemented by all major browsers. But the HTTP command/response model is synchronous and unidirectional; real-time observation remains impossible.</p>
+          </div>
+        </div>
+
+        <div class="tl-era">
+          <div class="tl-era-line"></div>
+          <span class="tl-era-label">CDP Tension &amp; BiDi · 2020 – 2025</span>
+          <div class="tl-era-line"></div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-year-col">2020</div>
+          <div class="tl-dot-col"><div class="tl-dot mint"></div></div>
+          <div class="tl-card mint">
+            <div class="tl-card-tool">Playwright</div>
+            <p class="tl-card-body">Microsoft announces Playwright in January 2020, built by engineers from Google's Puppeteer team. Built on CDP — Google-owned, non-W3C — with unofficial patches applied to Firefox and WebKit. Best-in-class auto-waiting; cross-browser achieved without a standard.</p>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-year-col">2020</div>
+          <div class="tl-dot-col"><div class="tl-dot violet"></div></div>
+          <div class="tl-card violet">
+            <div class="tl-card-tool">WebDriver BiDi Spec</div>
+            <p class="tl-card-body">The W3C Browser Testing and Tools Working Group begins work on WebDriver BiDi — merging WebDriver Classic's cross-browser W3C foundation with CDP's bidirectional WebSocket speed. Browser vendors (Chrome, Firefox, Edge, Safari) and automation projects collaborate on the standard.</p>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-year-col">2021</div>
+          <div class="tl-dot-col"><div class="tl-dot steel"></div></div>
+          <div class="tl-card steel">
+            <div class="tl-card-tool">Selenium 4</div>
+            <p class="tl-card-body">Selenium 4 (October 2021) adds WebDriver BiDi support — the first widely-used tool to adopt the new spec. BiDi is an optional layer on top of classic WebDriver; Chrome, Firefox, and Edge gain real-time event capabilities without abandoning the W3C standard.</p>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-year-col">2024</div>
+          <div class="tl-dot-col"><div class="tl-dot violet"></div></div>
+          <div class="tl-card violet">
+            <div class="tl-card-tool">BiDi Goes Production</div>
+            <p class="tl-card-body">Firefox 124 ships the first production BiDi network interception. Chrome and Edge reach full BiDi production readiness. Safari contributes to the spec but has no complete implementation yet.</p>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-year-col">Feb 2025</div>
+          <div class="tl-dot-col"><div class="tl-dot gold"></div></div>
+          <div class="tl-card gold">
+            <div class="tl-card-tool">Cypress 14.1 — Firefox → BiDi</div>
+            <p class="tl-card-body">Mozilla deprecates CDP in Firefox 129. Cypress 14.1 switches Firefox automation to WebDriver BiDi by default. Cypress 15 (August 2025) drops CDP for Firefox entirely — a split model: BiDi for Firefox, CDP for Chrome.</p>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-year-col">Dec 2025</div>
+          <div class="tl-dot-col"><div class="tl-dot coral"></div></div>
+          <div class="tl-card coral">
+            <div class="tl-card-tool">Vibium</div>
+            <p class="tl-card-body">First public release (December 2025) — the first tool to treat WebDriver BiDi as its foundation rather than a retrofit. Three interfaces built in from the start: CLI, MCP server, and client libraries. Designed to be driven by humans and AI agents equally.</p>
+          </div>
+        </div>
+
+        <div class="tl-era">
+          <div class="tl-era-line"></div>
+          <span class="tl-era-label">The Agentic Layer · 2026</span>
+          <div class="tl-era-line"></div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-year-col">2026</div>
+          <div class="tl-dot-col"><div class="tl-dot mint"></div></div>
+          <div class="tl-card mint">
+            <div class="tl-card-tool">Playwright Goes Agentic</div>
+            <p class="tl-card-body">Microsoft ships <code class="inline">@playwright/mcp</code> and <code class="inline">@playwright/cli</code> for AI coding agents. Playwright v1.56 adds built-in Test Agents — planner, generator, healer. Real capabilities, retrofitted onto a tool built for human-authored scripts.</p>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-year-col">May 2026</div>
+          <div class="tl-dot-col"><div class="tl-dot gold"></div></div>
+          <div class="tl-card gold">
+            <div class="tl-card-tool">Cypress Cloud MCP</div>
+            <p class="tl-card-body">Cypress ships an official MCP server — not for browser automation, but for querying test results: run statuses, failure details, flaky tests, Test Replay links. AI agents get observability, not browser control.</p>
+          </div>
+        </div>
+
+      </div>
     </div>
 
     <div class="section-block">
       <div class="section-eyebrow">1.2</div>
       <h2 class="section-heading">Selenium and <em>WebDriver BiDi</em></h2>
-      <p>Selenium is where browser automation started, and it's still the most widely deployed tool in enterprise environments. It drives the browser through the <strong>WebDriver Protocol</strong> — a real W3C standard that all major browsers implement natively. Because it's a standard and not a vendor-specific hack, tests written with Selenium are genuinely portable across Chrome, Firefox, Safari, and Edge without you doing anything special.</p>
+      <p>Selenium is where browser automation started — created in 2004 by Jason Huggins at ThoughtWorks, it's still the most widely deployed tool in enterprise environments. It drives the browser through the <strong>WebDriver Protocol</strong> — a real W3C standard that all major browsers implement natively. Because it's a standard and not a vendor-specific hack, tests written with Selenium are genuinely portable across Chrome, Firefox, Safari, and Edge without you doing anything special.</p>
       <p>Here's the limitation of classic WebDriver: the protocol is one-directional and synchronous. You send a command, the browser executes it, you send the next command. That works fine for click-and-check tests, but it makes real-time observation difficult. Want to listen for console errors as your test runs? Want to intercept a network request before it fires? With classic WebDriver, that's awkward at best.</p>
-      <p>That's the problem <strong>WebDriver BiDi</strong> was built to solve. BiDi stands for bidirectional. It's a newer W3C spec that adds a persistent, event-driven communication channel on top of classic WebDriver. Instead of sending commands and waiting for responses one at a time, your test code can subscribe to browser events as they happen in real time. Selenium 4 added BiDi support, and all major browsers are actively implementing it. So if you've heard that "Selenium is old and slow" — that was earned by earlier versions. Modern BiDi-enabled Selenium is genuinely capable.</p>
+      <p>That's the problem <strong>WebDriver BiDi</strong> was built to solve. BiDi stands for bidirectional. It's a newer W3C spec that adds a persistent, event-driven communication channel on top of classic WebDriver. Instead of sending commands and waiting for responses one at a time, your test code can subscribe to browser events as they happen in real time. Selenium 4 added BiDi support. Chrome, Firefox, and Edge have full production implementations; Safari/WebKit is actively implementing individual BiDi commands but has no complete implementation yet. So if you've heard that "Selenium is old and slow" — that was earned by earlier versions. Modern BiDi-enabled Selenium is genuinely capable.</p>
     </div>
 
     <div class="section-block">
       <div class="section-eyebrow">1.3</div>
       <h2 class="section-heading">Playwright</h2>
-      <p>Playwright was created by Microsoft, built by a team that includes engineers who previously worked on Google's Puppeteer. It uses the Chrome DevTools Protocol for Chromium-based browsers and applies equivalent patches to Firefox and WebKit, giving you cross-browser automation across all three major rendering engines.</p>
+      <p>Playwright was announced by Microsoft in January 2020, built by a team that includes engineers who previously worked on Google's Puppeteer. It uses the Chrome DevTools Protocol for Chromium-based browsers and applies equivalent patches to Firefox and WebKit, giving you cross-browser automation across all three major rendering engines.</p>
       <p>Playwright's most important design decision is its auto-waiting behavior. Before it interacts with an element, it automatically waits for that element to be visible, attached to the DOM, and ready to receive input. That alone makes tests dramatically less flaky compared to older tools. Playwright supports TypeScript, JavaScript, Python, Java, and .NET, comes with its own test runner, and supports parallel execution out of the box.</p>
       <p>The architectural caveat worth naming clearly: the <strong>Chrome DevTools Protocol (CDP)</strong> is owned and controlled by Google. It is not a W3C standard and has no formal standardization body behind it — Google decides what it does and when it changes. To support Firefox and WebKit, the Playwright team maintains custom patches to those browsers that are not part of their official releases. In practice this hasn't caused major problems — the Playwright team moves fast — but you are building on a proprietary Google protocol and on browser binaries that diverge from what users actually run.</p>
+      <p>Playwright has since expanded into agentic territory. The official <code class="inline">@playwright/mcp</code> package exposes Playwright as an MCP server that AI assistants can drive directly, and Playwright v1.56 introduced built-in Test Agents — planner, generator, and healer — layered on top of the existing runner. A dedicated <code class="inline">@playwright/cli</code> package for AI coding agents followed in early 2026. These capabilities are real and usable, but they were retrofitted onto a tool originally designed for human-authored scripts — not built from the ground up with agent use cases as the primary interface.</p>
     </div>
 
     <div class="section-block">
       <div class="section-eyebrow">1.4</div>
       <h2 class="section-heading">Cypress</h2>
-      <p>Cypress takes a fundamentally different approach from both Selenium and Playwright. Rather than controlling the browser from the outside, it runs <em class="inline">inside</em> the browser alongside your application. Your tests are injected as JavaScript directly into the page. This gives Cypress extraordinary visibility into application state and a very tight feedback loop during development.</p>
+      <p>Cypress — first stable release in 2017 — takes a fundamentally different approach from both Selenium and Playwright. Rather than controlling the browser from the outside, it runs <em class="inline">inside</em> the browser alongside your application. Your tests are injected as JavaScript directly into the page. This gives Cypress extraordinary visibility into application state and a very tight feedback loop during development.</p>
       <p>That architecture comes with hard constraints. Cypress only supports JavaScript and TypeScript. Since tests run in the same environment as the application, they can't easily test scenarios that cross multiple origins, use iframes, or involve browser extensions. For frontend developers building and testing their own application, Cypress often feels like the most natural tool. For QA engineers testing a wider range of applications, the constraints become more limiting.</p>
       <p>There are also proprietary factors to be aware of. Cypress's proxy-based injection mechanism is entirely Cypress-specific — it implements no open browser automation standard. And advanced CI capabilities — parallel test execution, test run recording, and flaky test detection — are gated behind <strong>Cypress Cloud</strong>, a commercial product. The open-source runner is genuinely capable for local development, but at scale you're almost certainly paying for the proprietary layer on top.</p>
+      <p>The browser communication layer has evolved. Cypress historically drove both Chrome and Firefox over CDP. When Mozilla deprecated CDP in Firefox 129, Cypress adapted: version 14.1 (February 2025) switched Firefox to WebDriver BiDi, and Cypress 15 (August 2025) removed CDP-for-Firefox entirely. Chrome still runs over CDP internally. The result is a split model — BiDi (W3C standard) for Firefox, CDP (Google-proprietary) for Chrome — all sitting underneath the same proxy-based test injection that defines Cypress's architecture.</p>
     </div>
 
     <div class="section-block">
@@ -337,7 +514,7 @@
       <h2 class="section-heading">Vibium</h2>
       <p>Vibium is the newest tool in this group, and it's the one that's genuinely designed for where the industry is going rather than where it's been. The first thing that makes Vibium unusual is that it exposes the same underlying browser engine through <strong>three distinct interfaces</strong>.</p>
       <p>The <strong>CLI</strong> is a standalone binary — you can drive a real browser from your terminal without writing any code. The <strong>MCP server</strong> implements the Model Context Protocol, an open standard for connecting AI assistants to tools — so any AI agent that speaks MCP can use Vibium to automate browsers. And the <strong>client libraries</strong> — for TypeScript, Python, and Java — give you a full programmatic API for writing tests.</p>
-      <p>All three interfaces share one underlying engine, and that engine is built on <strong>WebDriver BiDi</strong> — the same W3C standard we discussed in the Selenium section. Vibium contains a built-in BiDi proxy that speaks the standard bidirectional WebSocket protocol directly to the browser. This means Vibium inherits everything BiDi brings: event-driven real-time observation, network interception, console monitoring, and genuine cross-browser portability — without depending on a proprietary Google protocol or unofficial browser patches. Where Playwright reaches for CDP because it predates BiDi's maturity, Vibium was built after BiDi was viable and makes it the foundation.</p>
+      <p>All three interfaces share one underlying engine, and that engine is built on <strong>WebDriver BiDi</strong> — the same W3C standard we discussed in the Selenium section. Vibium contains a built-in BiDi proxy that speaks the standard bidirectional WebSocket protocol directly to the browser. This means Vibium inherits everything BiDi brings: event-driven real-time observation, network interception, and console monitoring — without depending on a proprietary Google protocol or unofficial browser patches. Chrome is fully supported today; additional browsers will follow as BiDi implementations mature across engines. Where Playwright reaches for CDP because it predates BiDi's maturity, and Selenium added BiDi as a retrofit in version 4, Vibium was designed after BiDi was viable and treats it as the foundation — not a later addition.</p>
       <p>In this course we're using the TypeScript client. TypeScript is the natural choice: the web is a JavaScript environment, and TypeScript's static typing makes working with browser automation APIs much safer and more productive. You get autocomplete, you catch mistakes at compile time, and your intent is much clearer on the page.</p>
     </div>
 
@@ -370,12 +547,12 @@
         <p class="block-title">5 Questions</p>
 
         <div class="quiz-q">
-          <p><strong>1.</strong> Which browser automation tool uses the W3C WebDriver standard?</p>
+          <p><strong>1.</strong> Which of the following correctly describes how Selenium and WebDriver BiDi relate?</p>
           <ul class="quiz-opts">
-            <li>A. Cypress</li>
-            <li>B. Playwright</li>
-            <li>C. Selenium</li>
-            <li>D. Vibium</li>
+            <li>A. Selenium was redesigned from the ground up to use BiDi as its core protocol</li>
+            <li>B. BiDi is a separate tool, maintained independently of Selenium</li>
+            <li>C. Selenium added BiDi support in version 4 — a new communication layer on top of the existing WebDriver protocol</li>
+            <li>D. Selenium dropped classic WebDriver in favour of BiDi starting with version 4</li>
           </ul>
         </div>
 
@@ -429,9 +606,11 @@
         <summary>Solution</summary>
         <div class="solution-body">
 <p>This exercise has no code to run — it's a research task. A strong response includes:</p>
-<ol style="padding-left:22px;margin:10px 0"><li>**Tools appearing most often:** Selenium and Playwright appear in the majority of senior QA and automation engineer postings. Playwright has been gaining ground in new job listings since 2023.</li></ol>
-<ol style="padding-left:22px;margin:10px 0"><li>**Tool not mentioned:** Vibium is unlikely to appear in job postings yet — it's a newer entrant. That's expected and not a problem: the patterns you learn with Vibium (async/await, role-based locators, network interception, CI integration) are directly transferable to Playwright and Selenium.</li></ol>
-<ol style="padding-left:22px;margin:10px 0"><li>**CI tool:** If the posting mentions GitHub Actions, GitLab CI, or Jenkins alongside Playwright or Selenium, the test suite almost certainly runs headlessly on push. Keywords like "flaky tests," "test parallelism," or "Allure reports" confirm a mature CI setup.</li></ol>
+<ol style="padding-left:22px;margin:10px 0 16px">
+  <li style="margin-bottom:10px"><strong>Tools appearing most often:</strong> Selenium and Playwright appear in the majority of senior QA and automation engineer postings. Playwright has been gaining ground in new job listings since 2023.</li>
+  <li style="margin-bottom:10px"><strong>Tool not mentioned:</strong> Vibium is unlikely to appear in job postings yet — it's a newer entrant. That's expected and not a problem: the patterns you learn with Vibium (async/await, role-based locators, network interception, CI integration) are directly transferable to Playwright and Selenium.</li>
+  <li><strong>CI tool:</strong> If the posting mentions GitHub Actions, GitLab CI, or Jenkins alongside Playwright or Selenium, the test suite almost certainly runs headlessly on push. Keywords like "flaky tests," "test parallelism," or "Allure reports" confirm a mature CI setup.</li>
+</ol>
 <p>Come back to your notes at the end of the course and see whether the landscape looks different from your perspective.</p>
         </div>
       </details>
@@ -462,5 +641,23 @@
   </div>
 </footer>
 
+<script>
+(function () {
+  var items = document.querySelectorAll('.tl-item');
+  if (!('IntersectionObserver' in window)) {
+    items.forEach(function (el) { el.classList.add('tl-visible'); });
+    return;
+  }
+  var obs = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('tl-visible');
+        obs.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  items.forEach(function (el) { obs.observe(el); });
+})();
+</script>
 </body>
 </html>

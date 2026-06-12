@@ -94,6 +94,13 @@
     .quiz-answers { font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
     .exercise-block ol, .exercise-block ul { padding-left: 22px; margin: 8px 0 12px; }
     .exercise-block li { font-size: 15px; color: var(--fg-2); line-height: 1.6; margin-bottom: 6px; }
+    .solution-block { background: rgba(184,134,42,0.04); border: 1px solid var(--border-mid); border-left: 3px solid var(--gold); border-radius: var(--r-xl); margin: 20px 0 0; overflow: hidden; }
+    .solution-block > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; padding: 18px 28px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-light); }
+    .solution-block > summary::-webkit-details-marker { display: none; }
+    .solution-block > summary::before { content: '▶'; font-size: 9px; }
+    .solution-block[open] > summary::before { content: '▼'; }
+    .solution-body { padding: 4px 28px 24px; }
+    .solution-body p { font-size: 15px; }
   </style>
 </head>
 <body>
@@ -342,6 +349,41 @@ afterAll(async () => {
 
         <div class="quiz-answers">Answers: 1-B &nbsp; 2-B &nbsp; 3-B &nbsp; 4-B &nbsp; 5-B</div>
       </div>
+
+      <details class="solution-block">
+        <summary>Solution</summary>
+        <div class="solution-body">
+<p><strong>Step 1 &amp; 2 — env-based headless flag and base URL</strong></p>
+<div class="code-panel" style="margin:12px 0 20px"><div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file"><em>src/</em>config.ts</span></div><div class="code-body"><pre><span class="k">export const</span> headless = process.env.CI === <span class="s">'true'</span>
+<span class="k">export const</span> AUT_BASE_URL = process.env.AUT_BASE_URL || <span class="s">'https://automation-exercise.daisyladybug.com'</span></pre></div></div>
+<p>Import <code class="inline">headless</code> and <code class="inline">AUT_BASE_URL</code> in every test file and remove the hardcoded values. Using <code class="inline">||</code> rather than <code class="inline">??</code> is intentional: GitHub Actions returns an empty string <code class="inline">""</code> for unset variables, and <code class="inline">||</code> catches empty strings where <code class="inline">??</code> does not.</p>
+<p><strong>Step 3 — package.json scripts</strong></p>
+<div class="code-panel" style="margin:12px 0 20px"><div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file">package.json (scripts section)</span></div><div class="code-body"><pre>{
+  <span class="s">"scripts"</span>: {
+    <span class="s">"test"</span>:    <span class="s">"vitest"</span>,
+    <span class="s">"test:ci"</span>: <span class="s">"vitest run --reporter=verbose"</span>
+  }
+}</pre></div></div>
+<p><strong>Step 4 — switch one file to <code class="inline">vibium.record()</code></strong></p>
+<div class="code-panel" style="margin:12px 0 20px"><div class="code-bar"><span class="cd r"></span><span class="cd y"></span><span class="cd g"></span><span class="code-file"><em>src/tests/</em>products.test.ts (excerpt)</span></div><div class="code-body"><pre><span class="k">import</span> { browser <span class="k">as</span> vibium } <span class="k">from</span> <span class="s">'vibium'</span>
+<span class="k">import</span> { headless, AUT_BASE_URL } <span class="k">from</span> <span class="s">'../config'</span>
+
+<span class="k">let</span> browser: <span class="k">Awaited</span>&lt;<span class="k">ReturnType</span>&lt;<span class="k">typeof</span> vibium.record&gt;&gt;
+
+<span class="fn">beforeAll</span>(<span class="k">async</span> () => {
+  browser = <span class="k">await</span> vibium.<span class="fn">record</span>({ headless })
+})
+
+<span class="fn">afterAll</span>(<span class="k">async</span> () => {
+  <span class="k">const</span> { stop, recordingUrl } = browser
+  <span class="k">await</span> <span class="fn">stop</span>()
+  <span class="k">const</span> url = <span class="k">await</span> <span class="fn">recordingUrl</span>()
+  console.<span class="fn">log</span>(<span class="s">'Recording:'</span>, url)
+})</pre></div></div>
+<p><strong>Step 5 — local CI simulation</strong></p>
+<p>Run <code class="inline">CI=true npm run test:ci</code>. All tests should pass in headless mode. Confirm the recording URL is printed in the output — that's the artifact you'd inspect if the same test failed in a real CI run.</p>
+        </div>
+      </details>
     </div>
 
   </div>
