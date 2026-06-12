@@ -36,6 +36,9 @@
     .nav-ch { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); padding: 5px 10px; border-radius: 999px; border: 1px solid transparent; transition: all 150ms; }
     .nav-ch:hover { color: var(--off-white); border-color: var(--border-mid); }
     .nav-ch.active { color: var(--coral-light); border-color: rgba(212,85,42,0.3); background: rgba(212,85,42,0.07); }
+    .nav-ch-bonus { opacity: 0.45; }
+    .nav-ch-bonus::after { content: "\2605"; font-size: 8px; vertical-align: super; margin-left: 1px; color: var(--violet-light); }
+    .bonus-banner { background: rgba(116,85,191,0.08); border-bottom: 1px solid rgba(116,85,191,0.22); padding: 9px 32px; text-align: center; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--violet-light); }
     .hero { padding: 72px 0 56px; background: radial-gradient(ellipse at 70% 20%, rgba(212,85,42,0.18) 0%, transparent 55%), radial-gradient(ellipse at 15% 80%, rgba(74,168,165,0.12) 0%, transparent 55%), var(--bg-dark); }
     .hero-inner { max-width: 760px; margin: 0 auto; padding: 0 32px; }
     .hero-eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.26em; text-transform: uppercase; color: var(--coral-light); margin-bottom: 20px; }
@@ -124,17 +127,18 @@
       <a class="nav-ch" href="07-captures.html">7</a>
       <a class="nav-ch" href="08-network.html">8</a>
       <a class="nav-ch" href="09-ci-local.html">9</a>
-      <a class="nav-ch" href="10-ci-actions.html">10</a>
+      <a class="nav-ch nav-ch-bonus" href="10-ci-actions.html">10</a>
       <a class="nav-ch active" href="11-ci-docker.html">11</a>
-      <a class="nav-ch" href="12-mcp.html">12</a>
+      <a class="nav-ch nav-ch-bonus" href="12-mcp.html">12</a>
       <a class="nav-ch" href="13-conclusion.html">13</a>
     </div>
   </div>
 </nav>
+<div class="bonus-banner">Bonus &mdash; Advanced CI &nbsp;&bull;&nbsp; Not required to complete the course</div>
 
 <section class="hero">
   <div class="hero-inner">
-    <div class="hero-eyebrow">Chapter 11</div>
+    <div class="hero-eyebrow">Bonus &middot; Chapter 11</div>
     <h1 class="hero-title">The <em>Docker</em> CI Image</h1>
     <p class="hero-desc">What the pre-baked CI image is, why it exists, how to build your own, and how to keep it synchronized with your workflow.</p>
     <div class="hero-meta">
