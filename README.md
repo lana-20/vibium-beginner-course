@@ -36,9 +36,9 @@ npm run ch03:complete   # run a single chapter example
 | 7 | Captures | [07-captures](chapters/07-captures.html) |
 | 8 | Network Interception | [08-network](chapters/08-network.html) |
 | 9 | CI Basics | [09-ci-local](chapters/09-ci-local.html) |
-| 10 | GitHub Actions | [10-ci-actions](chapters/10-ci-actions.html) |
-| 11 | Docker CI | [11-ci-docker](chapters/11-ci-docker.html) |
-| 12 | MCP Interface | [12-mcp](chapters/12-mcp.html) |
+| 10 ★ | GitHub Actions *(bonus)* | [10-ci-actions](chapters/10-ci-actions.html) |
+| 11 ★ | Docker CI *(bonus)* | [11-ci-docker](chapters/11-ci-docker.html) |
+| 12 ★ | MCP Interface *(bonus)* | [12-mcp](chapters/12-mcp.html) |
 | 13 | Conclusion | [13-conclusion](chapters/13-conclusion.html) |
 
 **Reference:** [Cheat Sheet](reference/cheat-sheet.html)
@@ -106,4 +106,4 @@ vitest.config.ts
 
 ## CI
 
-Tests run in the pre-baked Docker image `ghcr.io/lana-20/vibium-ci:latest` via GitHub Actions (`.github/workflows/tests.yml`). The image includes Vibium and all Node dependencies. See Chapter 10–11 for workflow details.
+Tests run in the pre-baked Docker image `ghcr.io/lana-20/vibium-ci:latest` via GitHub Actions (`.github/workflows/tests.yml`). The image includes Vibium and all Node dependencies. See the bonus chapters (10–11) for workflow details.

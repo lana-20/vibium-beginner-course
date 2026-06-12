@@ -153,13 +153,13 @@
       <h2 class="section-heading">Is This Course for You?</h2>
       <p>This course is for developers and QA engineers who want to write reliable browser automation tests in TypeScript. You don't need any prior test automation experience. You do need to be comfortable with JavaScript/TypeScript basics — variables, functions, async/await, modules.</p>
       <p>If you've struggled with flaky Selenium tests, been intimidated by Playwright's surface area, or never written any browser automation at all, this is a good place to start. Vibium's API is concise and the learning curve is shallow.</p>
-      <p>If you're an experienced tester who wants to understand Vibium specifically, you can skim the early chapters and focus on Chapters 7–11 where the more interesting patterns live.</p>
+      <p>If you're an experienced tester who wants to understand Vibium specifically, you can skim the early chapters and focus on Chapters 7–9, plus the bonus chapters (10–12) if you're heading into CI or MCP.</p>
     </div>
 
     <div class="section-block">
       <div class="section-eyebrow">What you'll build</div>
       <h2 class="section-heading">A <em>Complete</em> Test Suite</h2>
-      <p>Over 12 chapters, you'll build a complete test suite for a real e-commerce application: <strong>automation-exercise.daisyladybug.com</strong>. By the end of the course you'll have:</p>
+      <p>Over 9 core chapters (plus 3 bonus), you'll build a complete test suite for a real e-commerce application: <strong>automation-exercise.daisyladybug.com</strong>. By the end of the course you'll have:</p>
       <ul class="checklist">
         <li>A homepage and products-page smoke test</li>
         <li>A checkout flow integration test covering 12 form fields and validation</li>
@@ -167,8 +167,8 @@
         <li>A Vitest test suite with Page Objects, <code class="inline">beforeEach</code>/<code class="inline">afterEach</code> lifecycle, and proper isolation</li>
         <li>Tests for browser dialog interception, console capture, and file downloads</li>
         <li>Network interception tests that stub API responses for edge cases</li>
-        <li>A GitHub Actions workflow that runs the suite on every push, using a pre-baked Docker image</li>
-        <li>An understanding of how the Vibium MCP interface connects to AI agent workflows</li>
+        <li>A GitHub Actions workflow using a pre-baked Docker image <em style="font-size:12px; color:var(--violet-light); font-style:normal;">(bonus — ch. 10–11)</em></li>
+        <li>An introduction to the Vibium MCP interface for AI agent workflows <em style="font-size:12px; color:var(--violet-light); font-style:normal;">(bonus — ch. 12)</em></li>
       </ul>
       <p>All of it runs against a real application. Real DOM, real navigation, real forms.</p>
     </div>
@@ -182,7 +182,7 @@
         <li><strong>npm</strong> — ships with Node.js.</li>
         <li><strong>A code editor</strong> — VS Code is recommended for TypeScript autocomplete.</li>
         <li><strong>A terminal</strong> — any will do.</li>
-        <li><strong>A GitHub account</strong> — needed for Chapter 9 (CI) onward.</li>
+        <li><strong>A GitHub account</strong> — needed for the bonus CI chapters (10–11).</li>
       </ul>
       <p>You do not need to install Chrome or configure any WebDriver paths. Vibium manages its own browser binaries.</p>
     </div>
@@ -203,14 +203,14 @@
           <div class="arc-desc">Forms, assertions, dynamic waiting, Page Objects, captures, and network interception — 90% of real-world test code.</div>
         </div>
         <div class="arc-card">
-          <div class="arc-label">Chapters 9–11</div>
-          <div class="arc-title">Infrastructure</div>
-          <div class="arc-desc">Taking the test suite to CI with GitHub Actions and a Docker image. Daemon lifecycle, env vars, and CI failure debugging.</div>
+          <div class="arc-label">Chapter 9</div>
+          <div class="arc-title">CI Basics</div>
+          <div class="arc-desc">Running your suite headless, managing the Vibium daemon, capturing recordings, and configuring environment variables.</div>
         </div>
         <div class="arc-card">
-          <div class="arc-label">Chapter 12</div>
-          <div class="arc-title">Beyond</div>
-          <div class="arc-desc">The MCP interface — where AI agents drive the same browser engine your tests use.</div>
+          <div class="arc-label">Chapters 10–12 &nbsp;·&nbsp; <span style="color:var(--violet-light)">Bonus</span></div>
+          <div class="arc-title">Beyond the Basics</div>
+          <div class="arc-desc">GitHub Actions, Docker CI images, and the MCP interface for AI-driven automation. Not required to complete the course.</div>
         </div>
       </div>
       <p>Each chapter includes lecture content, runnable code examples, an exercise, a reference solution, and a 5-question quiz.</p>
