@@ -93,6 +93,28 @@
     .footer-links a { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); transition: color 150ms; }
     .footer-links a:hover { color: var(--fg-2); }
 
+    /* Comparison table */
+    .comparison-wrap { overflow-x: auto; margin: 36px 0 4px; border-radius: var(--r-lg); border: 1px solid var(--border-mid); }
+    .comparison-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .comparison-table th, .comparison-table td { padding: 11px 15px; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); text-align: left; vertical-align: top; }
+    .comparison-table th:last-child, .comparison-table td:last-child { border-right: none; }
+    .comparison-table thead th { background: var(--card-dark); font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; }
+    .comparison-table thead .feat-col { color: var(--fg-3); }
+    .comparison-table thead .selenium-col { color: var(--steel-light); border-top: 3px solid var(--steel); }
+    .comparison-table thead .playwright-col { color: var(--mint-light); border-top: 3px solid var(--mint); }
+    .comparison-table thead .cypress-col { color: var(--gold-light); border-top: 3px solid var(--gold); }
+    .comparison-table thead .vibium-col { color: var(--coral-light); border-top: 3px solid var(--coral); }
+    .comparison-table tbody tr { background: var(--card); }
+    .comparison-table tbody tr:nth-child(even) { background: var(--card-dark); }
+    .comparison-table tbody tr:last-child td { border-bottom: none; }
+    .comparison-table .feat { font-family: var(--font-mono); font-size: 11px; color: var(--fg-3); letter-spacing: 0.04em; white-space: nowrap; }
+    .comparison-table td { color: var(--fg-2); line-height: 1.5; }
+    .comparison-table td.ct-yes { color: var(--mint); font-weight: 500; }
+    .comparison-table td.ct-no { color: var(--fg-3); }
+    .comparison-table td.ct-caveat { color: var(--gold-light); }
+    .ct-badge { display: inline-block; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--gold); border: 1px solid rgba(184,134,42,0.35); border-radius: 3px; padding: 1px 5px; margin-left: 5px; vertical-align: middle; line-height: 1.4; }
+    .table-note { font-family: var(--font-mono); font-size: 11px; color: var(--fg-3); margin-top: 10px; line-height: 1.6; }
+
     /* Exercise & Quiz blocks */
     .exercise-block, .quiz-block { background: rgba(255,255,255,0.03); border: 1px solid var(--border-mid); border-radius: var(--r-xl); padding: 28px 32px; margin: 32px 0 0; }
     .exercise-block { border-left: 3px solid var(--mint); }
@@ -183,20 +205,107 @@
         </div>
         <div class="tool-card playwright">
           <div class="tool-name">Playwright</div>
-          <div class="tool-tag">Microsoft · TypeScript / Python / Java</div>
+          <div class="tool-tag">Microsoft · CDP (Google-proprietary, non-W3C)</div>
           <div class="tool-desc">Built on CDP. Excellent auto-waiting, parallel execution, and cross-browser support. The current default choice for many new projects.</div>
         </div>
         <div class="tool-card cypress">
           <div class="tool-name">Cypress</div>
-          <div class="tool-tag">JS/TS only · In-browser execution</div>
-          <div class="tool-desc">Runs inside the browser alongside your app. Great developer experience for frontend teams; limited outside that context.</div>
+          <div class="tool-tag">JS/TS only · Proprietary proxy · Cypress Cloud</div>
+          <div class="tool-desc">Runs inside the browser alongside your app. Great developer experience for frontend teams; CI scale features require the commercial Cypress Cloud.</div>
         </div>
         <div class="tool-card vibium">
           <div class="tool-name">Vibium</div>
-          <div class="tool-tag">CLI · MCP · TypeScript / Python / Java</div>
-          <div class="tool-desc">Built for agent-driven testing from the ground up. Three interfaces — CLI, MCP server, and client libraries — sharing one engine.</div>
+          <div class="tool-tag">CLI · MCP · TypeScript / Python / Java · WebDriver BiDi</div>
+          <div class="tool-desc">Built for agent-driven testing from the ground up. Three interfaces — CLI, MCP server, and client libraries — sharing one engine built on WebDriver BiDi.</div>
         </div>
       </div>
+
+      <div class="comparison-wrap">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th class="feat-col"></th>
+              <th class="tool-col selenium-col">Selenium + BiDi</th>
+              <th class="tool-col playwright-col">Playwright</th>
+              <th class="tool-col cypress-col">Cypress</th>
+              <th class="tool-col vibium-col">Vibium</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="feat">Protocol</td>
+              <td>WebDriver + BiDi</td>
+              <td class="ct-caveat">CDP <span class="ct-badge">Google-owned</span></td>
+              <td class="ct-caveat">Proprietary proxy</td>
+              <td>WebDriver BiDi</td>
+            </tr>
+            <tr>
+              <td class="feat">W3C standard</td>
+              <td class="ct-yes">Yes</td>
+              <td class="ct-no">No</td>
+              <td class="ct-no">No</td>
+              <td class="ct-yes">Yes</td>
+            </tr>
+            <tr>
+              <td class="feat">Open-source license</td>
+              <td>Apache 2.0</td>
+              <td>Apache 2.0</td>
+              <td class="ct-caveat">MIT <span class="ct-badge">runner only</span></td>
+              <td>Apache 2.0</td>
+            </tr>
+            <tr>
+              <td class="feat">Commercial layer</td>
+              <td class="ct-no">None</td>
+              <td class="ct-no">None</td>
+              <td class="ct-caveat">Cypress Cloud <span class="ct-badge">paid for scale</span></td>
+              <td class="ct-no">None</td>
+            </tr>
+            <tr>
+              <td class="feat">Language support</td>
+              <td>Java, Python, JS/TS, Ruby, C#</td>
+              <td>JS/TS, Python, Java, .NET</td>
+              <td class="ct-caveat">JS/TS only</td>
+              <td>JS/TS, Python, Java</td>
+            </tr>
+            <tr>
+              <td class="feat">Browser support</td>
+              <td>All major browsers</td>
+              <td class="ct-caveat">Chromium, Firefox*, WebKit*</td>
+              <td>Chrome, Firefox, Edge</td>
+              <td>BiDi-capable browsers</td>
+            </tr>
+            <tr>
+              <td class="feat">Architecture</td>
+              <td>External process</td>
+              <td>External process (CDP)</td>
+              <td class="ct-caveat">In-browser injection</td>
+              <td>External process (BiDi)</td>
+            </tr>
+            <tr>
+              <td class="feat">Multi-origin / iframes</td>
+              <td class="ct-yes">Yes</td>
+              <td class="ct-yes">Yes</td>
+              <td class="ct-no">Limited</td>
+              <td class="ct-yes">Yes</td>
+            </tr>
+            <tr>
+              <td class="feat">Real-time browser events</td>
+              <td class="ct-yes">Yes (BiDi)</td>
+              <td class="ct-yes">Yes (CDP)</td>
+              <td class="ct-no">Limited</td>
+              <td class="ct-yes">Yes (BiDi)</td>
+            </tr>
+            <tr>
+              <td class="feat">AI / agent interface</td>
+              <td class="ct-no">None</td>
+              <td class="ct-no">None</td>
+              <td class="ct-no">None</td>
+              <td class="ct-yes">CLI + MCP server</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="table-note">* Playwright's Firefox and WebKit support relies on unofficial browser patches not included in standard browser releases.</p>
     </div>
 
     <div class="section-block">
@@ -212,7 +321,7 @@
       <h2 class="section-heading">Playwright</h2>
       <p>Playwright was created by Microsoft, built by a team that includes engineers who previously worked on Google's Puppeteer. It uses the Chrome DevTools Protocol for Chromium-based browsers and applies equivalent patches to Firefox and WebKit, giving you cross-browser automation across all three major rendering engines.</p>
       <p>Playwright's most important design decision is its auto-waiting behavior. Before it interacts with an element, it automatically waits for that element to be visible, attached to the DOM, and ready to receive input. That alone makes tests dramatically less flaky compared to older tools. Playwright supports TypeScript, JavaScript, Python, Java, and .NET, comes with its own test runner, and supports parallel execution out of the box.</p>
-      <p>The architectural caveat: Playwright's cross-browser support relies on unofficial browser patches. The Chrome DevTools Protocol is not a W3C standard. In practice this hasn't caused problems — the Playwright team moves fast — but it's worth understanding.</p>
+      <p>The architectural caveat worth naming clearly: the <strong>Chrome DevTools Protocol (CDP)</strong> is owned and controlled by Google. It is not a W3C standard and has no formal standardization body behind it — Google decides what it does and when it changes. To support Firefox and WebKit, the Playwright team maintains custom patches to those browsers that are not part of their official releases. In practice this hasn't caused major problems — the Playwright team moves fast — but you are building on a proprietary Google protocol and on browser binaries that diverge from what users actually run.</p>
     </div>
 
     <div class="section-block">
@@ -220,6 +329,7 @@
       <h2 class="section-heading">Cypress</h2>
       <p>Cypress takes a fundamentally different approach from both Selenium and Playwright. Rather than controlling the browser from the outside, it runs <em class="inline">inside</em> the browser alongside your application. Your tests are injected as JavaScript directly into the page. This gives Cypress extraordinary visibility into application state and a very tight feedback loop during development.</p>
       <p>That architecture comes with hard constraints. Cypress only supports JavaScript and TypeScript. Since tests run in the same environment as the application, they can't easily test scenarios that cross multiple origins, use iframes, or involve browser extensions. For frontend developers building and testing their own application, Cypress often feels like the most natural tool. For QA engineers testing a wider range of applications, the constraints become more limiting.</p>
+      <p>There are also proprietary factors to be aware of. Cypress's proxy-based injection mechanism is entirely Cypress-specific — it implements no open browser automation standard. And advanced CI capabilities — parallel test execution, test run recording, and flaky test detection — are gated behind <strong>Cypress Cloud</strong>, a commercial product. The open-source runner is genuinely capable for local development, but at scale you're almost certainly paying for the proprietary layer on top.</p>
     </div>
 
     <div class="section-block">
@@ -227,6 +337,7 @@
       <h2 class="section-heading">Vibium</h2>
       <p>Vibium is the newest tool in this group, and it's the one that's genuinely designed for where the industry is going rather than where it's been. The first thing that makes Vibium unusual is that it exposes the same underlying browser engine through <strong>three distinct interfaces</strong>.</p>
       <p>The <strong>CLI</strong> is a standalone binary — you can drive a real browser from your terminal without writing any code. The <strong>MCP server</strong> implements the Model Context Protocol, an open standard for connecting AI assistants to tools — so any AI agent that speaks MCP can use Vibium to automate browsers. And the <strong>client libraries</strong> — for TypeScript, Python, and Java — give you a full programmatic API for writing tests.</p>
+      <p>All three interfaces share one underlying engine, and that engine is built on <strong>WebDriver BiDi</strong> — the same W3C standard we discussed in the Selenium section. Vibium contains a built-in BiDi proxy that speaks the standard bidirectional WebSocket protocol directly to the browser. This means Vibium inherits everything BiDi brings: event-driven real-time observation, network interception, console monitoring, and genuine cross-browser portability — without depending on a proprietary Google protocol or unofficial browser patches. Where Playwright reaches for CDP because it predates BiDi's maturity, Vibium was built after BiDi was viable and makes it the foundation.</p>
       <p>In this course we're using the TypeScript client. TypeScript is the natural choice: the web is a JavaScript environment, and TypeScript's static typing makes working with browser automation APIs much safer and more productive. You get autocomplete, you catch mistakes at compile time, and your intent is much clearer on the page.</p>
     </div>
 
